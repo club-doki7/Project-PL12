@@ -37,6 +37,10 @@ public final class UV<T> {
         this.e = e;
     }
 
+    public static <T> @NotNull UV<T> of(@NotNull T e) {
+        return new UV<>(e);
+    }
+
     @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object o) {

@@ -16,12 +16,28 @@ public sealed interface Term {
         return exprUV().e;
     }
 
-    sealed interface Checkable extends Term permits Lam, Inferable {}
-    sealed interface Inferable extends Checkable permits Ann, Univ, Pi, Bound, Free, App, Meta {}
+    sealed interface Checkable
+            extends Term
+            permits Lam, Inferable {
+    }
+
+    sealed interface Inferable
+            extends Checkable
+            permits LamInf, Ann, Univ, Pi, Bound, Free, App, Meta {
+    }
 
     record Lam(@NotNull Checkable body,
                @NotNull UV<String> paramName,
-               @NotNull UV<Expr.Lam> exprUV) implements Checkable {}
+               @NotNull UV<Expr.Lam> exprUV)
+            implements Checkable
+    {}
+
+    record LamInf(@NotNull Checkable paramType,
+                  @NotNull Inferable body,
+                  @NotNull UV<String> paramName,
+                  @NotNull UV<Expr.Lam> exprUV)
+            implements Inferable
+    {}
 
     record Ann(@NotNull Checkable term, @NotNull Checkable ann, @NotNull UV<Expr.Ann> exprUV)
         implements Inferable
