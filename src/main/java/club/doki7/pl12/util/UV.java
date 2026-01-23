@@ -2,12 +2,14 @@ package club.doki7.pl12.util;
 
 import org.jetbrains.annotations.NotNull;
 
-/// Universal Vertex: a type whose inhabitants are equal to anything, and all have the same hash
+/// ## UV: Universal Vertex
+///
+/// a type whose inhabitants are equal to anything, and all have the same hash
 /// code.
 ///
 /// When you want to exclude several certain fields from equality and hash code calculation, while
-/// not willing to completely write {@link Object::equals equals} and
-/// {@link Object::hashCode hashCode} methods from scratch, you can wrap those fields in {@code UV}.
+/// not willing to completely write {@link Object::equals} and {@link Object::hashCode} methods from
+/// scratch, you can wrap those fields in {@link UV}.
 ///
 /// {@snippet :
 /// record Example(String importantField, UV<Object> unimportantField) {}
@@ -23,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 ///
 /// // WRONG: uv1.equals(uv2)  // always true
 /// // WRONG: uv1 == uv2       // always false
+///
 /// // CORRECT:
 /// uv1.e.equals(uv2.e);
 /// }
