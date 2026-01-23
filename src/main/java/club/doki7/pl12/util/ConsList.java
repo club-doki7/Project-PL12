@@ -79,8 +79,7 @@ public sealed interface ConsList<T> {
         }
     }
 
-    static <T> @NotNull Cons<T> cons(@NotNull T head,
-                                     @NotNull ConsList<T> tail) {
+    static <T> @NotNull Cons<T> cons(@NotNull T head, @NotNull ConsList<T> tail) {
         return new Cons<>(head, tail);
     }
 
@@ -90,6 +89,7 @@ public sealed interface ConsList<T> {
         return instance;
     }
 
+    @SafeVarargs
     static <T> @NotNull ConsList<T> of(@NotNull T... elements) {
         return from(elements);
     }
