@@ -4,10 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("ClassCanBeRecord")
 public final class UV<T> {
-    public final @NotNull T v;
+    public final @NotNull T e;
 
-    public UV(@NotNull T v) {
-        this.v = v;
+    public UV(@NotNull T e) {
+        this.e = e;
     }
 
     @SuppressWarnings("EqualsDoesntCheckParameterClass")
@@ -23,6 +23,6 @@ public final class UV<T> {
 
     @Override
     public @NotNull String toString() {
-        return v.toString();
+        return e.toString();
     }
 }

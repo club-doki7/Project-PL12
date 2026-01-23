@@ -8,13 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 public sealed interface Term {
     @NotNull UV<? extends Expr> exprUV();
 
     default @NotNull Expr expr() {
-        return exprUV().v;
+        return exprUV().e;
     }
 
     sealed interface Checkable extends Term permits Lam, Inferable {}
@@ -49,14 +48,17 @@ public sealed interface Term {
     {}
 
     record Meta(int num,
-                @Nullable Expr.Hole hole,
-                @NotNull Expr intro,
-                @Nullable Meta introVar)
+                @Nullable UV<Expr.Hole> hole,
+                @NotNull UV<Expr> intro,
+                @Nullable UV<Meta> introVar)
             implements Inferable
     {
         @Override
         public @NotNull Expr expr() {
-            return Objects.requireNonNullElse(hole, intro);
+            if (hole != null) {
+                return hole.e;
+            }
+            return intro.e;
         }
 
         @Override
@@ -66,23 +68,11 @@ public sealed interface Term {
 
         @Override
         public @NotNull String toString() {
-            if (intro instanceof Expr.Var(Token name)) {
+            if (intro.e instanceof Expr.Var(Token name)) {
                 return CommonUtil.subscriptNum("?" + name.lexeme, num);
             }
 
             return CommonUtil.subscriptNum("?", num);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (!(obj instanceof Meta(int objNum, _, _, _))) return false;
-            return this.num == objNum;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(Meta.class, num);
         }
     }
 }

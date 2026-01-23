@@ -15,7 +15,7 @@ public sealed interface Name {
     record Local(int index, @NotNull UV<String> name) implements Name {
         @Override
         public @NotNull String toString() {
-            return CommonUtil.superscriptNum(name.v, index);
+            return CommonUtil.superscriptNum(name.e, index);
         }
     }
 
