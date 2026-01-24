@@ -22,7 +22,7 @@ public sealed interface Name {
     record Quote(int index) implements Name {
         @Override
         public @NotNull String toString() {
-            return CommonUtil.superscriptNum("\uD835\uDCAC", index);
+            return CommonUtil.superscriptNum("𝒬", index);
         }
     }
 }

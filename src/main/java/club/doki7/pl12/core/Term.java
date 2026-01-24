@@ -67,11 +67,7 @@ public sealed interface Term {
                 bodyIter = body1;
             }
 
-            boolean needParen = paramType instanceof Pi
-                                || paramType instanceof LamInf
-                                || paramType instanceof Lam
-                                || paramType instanceof Ann
-                                || paramNames.size() > 1;
+            boolean needParen = paramTypeNeedParen(paramType);
 
             StringBuilder sb = new StringBuilder();
             sb.append('λ');
@@ -142,11 +138,7 @@ public sealed interface Term {
 
             StringBuilder sb = new StringBuilder();
             if (paramName == null) {
-                boolean needParen = paramType instanceof Pi
-                                    || paramType instanceof LamInf
-                                    || paramType instanceof Lam
-                                    || paramType instanceof Ann;
-
+                boolean needParen = paramTypeNeedParen(paramType);
                 for (int i = 0; i < pies.size(); i++) {
                     if (implicit) {
                         sb.append('{');
@@ -218,7 +210,7 @@ public sealed interface Term {
         }
     }
 
-    record Meta(int num,
+    record Meta(int metaId,
                 @Nullable Expr.Hole hole,
                 @NotNull Expr introCtx,
                 @Nullable Expr introVar)
@@ -235,14 +227,21 @@ public sealed interface Term {
         @Override
         public @NotNull String toString() {
             if (hole != null) {
-                return CommonUtil.subscriptNum("?ẖ", num);
+                return CommonUtil.subscriptNum("?ẖ", metaId);
             }
 
             if (introVar instanceof Expr.Var(Token name)) {
-                return CommonUtil.subscriptNum("?" + name.lexeme, num);
+                return CommonUtil.subscriptNum("?" + name.lexeme, metaId);
             }
 
-            return CommonUtil.subscriptNum("?α", num);
+            return CommonUtil.subscriptNum("?α", metaId);
         }
+    }
+
+    static boolean paramTypeNeedParen(Term paramType) {
+        return paramType instanceof Pi
+               || paramType instanceof LamInf
+               || paramType instanceof Lam
+               || paramType instanceof Ann;
     }
 }
