@@ -4,7 +4,7 @@ import club.doki7.pl12.syntax.Token;
 
 public abstract class LocatedException extends Exception {
     public LocatedException(Token location, Class<?> clazz, String message) {
-        super("At " + location.file + ":" + location.line + ": "
+        super(location.file + ":" + location.line + ": "
               + clazz.getSimpleName()
               + ": " + message);
         this.location = location;
