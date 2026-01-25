@@ -63,15 +63,19 @@ public final class Token {
 
     public final Kind kind;
     public final String lexeme;
+
+    public final String file;
     public final int line;
     public final int col;
 
     public Token(@NotNull Kind kind,
                  @NotNull String lexeme,
+                 @NotNull String file,
                  int line,
                  int col) {
         this.kind = kind;
         this.lexeme = lexeme;
+        this.file = file;
         this.line = line;
         this.col = col;
     }
@@ -108,7 +112,7 @@ public final class Token {
 
     @TestOnly
     public static @NotNull Token ident(@NotNull String lexeme) {
-        return new Token(Kind.IDENT, lexeme, -1, -1);
+        return new Token(Kind.IDENT, lexeme, "<test>", -1, -1);
     }
 
     @TestOnly
@@ -129,11 +133,11 @@ public final class Token {
             case KW_AXIOM -> "axiom";
             case KW_DEFUN -> "defun";
             case KW_CHECK -> "check";
-        }, -1, -1);
+        }, "<test>", -1, -1);
     }
 
-    public static @NotNull ArrayList<Token> tokenize(@NotNull String input) {
-        TokenizeContext ctx = new TokenizeContext();
+    public static @NotNull ArrayList<Token> tokenize(@NotNull String file, @NotNull String input) {
+        TokenizeContext ctx = new TokenizeContext(file);
         ctx.tokenize(input);
         return ctx.tokens;
     }
@@ -141,8 +145,13 @@ public final class Token {
     private static class TokenizeContext {
         private final ArrayList<Token> tokens = new ArrayList<>();
         private final StringBuilder currentToken = new StringBuilder();
+        private final String file;
         private int line = 1;
         private int col = 1;
+
+        private TokenizeContext(String file) {
+            this.file = file;
+        }
 
         private void tokenize(String input) {
             char[] charArray = input.toCharArray();
@@ -160,24 +169,24 @@ public final class Token {
                     }
                     case '(' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.LPAREN, "(", line, col));
+                        tokens.add(new Token(Kind.LPAREN, "(", file, line, col));
                         col++;
                     }
                     case ')' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.RPAREN, ")", line, col));
+                        tokens.add(new Token(Kind.RPAREN, ")", file, line, col));
                         col++;
                     }
                     case 'λ', '\\' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.LAMBDA, String.valueOf(c), line, col));
+                        tokens.add(new Token(Kind.LAMBDA, String.valueOf(c), file, line, col));
                         col++;
                     }
                     case '-' -> {
                         if (i + 1 < charArray.length) {
                             if (charArray[i + 1] == '>') {
                                 concludeToken();
-                                tokens.add(new Token(Kind.ARROW, "->", line, col));
+                                tokens.add(new Token(Kind.ARROW, "->", file, line, col));
                                 i++;
                                 col += 2;
                                 continue;
@@ -205,44 +214,44 @@ public final class Token {
                     }
                     case '→' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.ARROW, String.valueOf(c), line, col));
+                        tokens.add(new Token(Kind.ARROW, String.valueOf(c), file, line, col));
                         col++;
                     }
                     case '.' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.DOT, ".", line, col));
+                        tokens.add(new Token(Kind.DOT, ".", file, line, col));
                         col++;
                     }
                     case ',' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.COMMA, ",", line, col));
+                        tokens.add(new Token(Kind.COMMA, ",", file, line, col));
                         col++;
                     }
                     case '=' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.EQ, "=", line, col));
+                        tokens.add(new Token(Kind.EQ, "=", file, line, col));
                         col++;
                     }
                     case ':' -> {
                         concludeToken();
                         if (i + 1 < charArray.length && charArray[i + 1] == ':') {
-                            tokens.add(new Token(Kind.COLON, "::", line, col));
+                            tokens.add(new Token(Kind.COLON, "::", file, line, col));
                             i++;
                             col += 2;
                         } else {
-                            tokens.add(new Token(Kind.COLON, ":", line, col));
+                            tokens.add(new Token(Kind.COLON, ":", file, line, col));
                             col++;
                         }
                     }
                     case '∈' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.COLON, String.valueOf(c), line, col));
+                        tokens.add(new Token(Kind.COLON, String.valueOf(c), file, line, col));
                         col++;
                     }
                     case '<' -> {
                         if (i + 1 < charArray.length && charArray[i + 1] == ':') {
                             concludeToken();
-                            tokens.add(new Token(Kind.COLON, "<:", line, col));
+                            tokens.add(new Token(Kind.COLON, "<:", file, line, col));
                             i++;
                             col += 2;
                         } else {
@@ -252,17 +261,17 @@ public final class Token {
                     }
                     case '*' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.ASTER, "*", line, col));
+                        tokens.add(new Token(Kind.ASTER, "*", file, line, col));
                         col++;
                     }
                     case 'Π', '∀' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.PI, String.valueOf(c), line, col));
+                        tokens.add(new Token(Kind.PI, String.valueOf(c), file, line, col));
                         col++;
                     }
                     case '?' -> {
                         concludeToken();
-                        tokens.add(new Token(Kind.QUES, "?", line, col));
+                        tokens.add(new Token(Kind.QUES, "?", file, line, col));
                         col++;
                     }
                     default -> {
@@ -280,12 +289,12 @@ public final class Token {
             }
             String lexeme = currentToken.toString();
             if (KEYWORDS.containsKey(lexeme)) {
-                tokens.add(new Token(KEYWORDS.get(lexeme), lexeme, line, col - lexeme.length()));
+                tokens.add(new Token(KEYWORDS.get(lexeme),lexeme, file, line, col - lexeme.length()));
                 currentToken.setLength(0);
                 return;
             }
 
-            tokens.add(new Token(Kind.IDENT, lexeme, line, col - lexeme.length()));
+            tokens.add(new Token(Kind.IDENT, lexeme, file, line, col - lexeme.length()));
             currentToken.setLength(0);
         }
 
