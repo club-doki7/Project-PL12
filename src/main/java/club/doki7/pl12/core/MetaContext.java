@@ -12,7 +12,7 @@ public final class MetaContext {
         while (true) {
             if (!(value instanceof Value.Flex(Term.Meta meta,
                                               ConsRevList<Value> spine,
-                                              _))) {
+                                              Term term))) {
                 return value;
             }
 
@@ -20,7 +20,7 @@ public final class MetaContext {
             if (solution == null) {
                 return value;
             }
-            value = Value.app(solution, spine);
+            value = Eval.app(solution, spine, term);
         }
     }
 

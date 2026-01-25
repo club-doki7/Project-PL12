@@ -167,7 +167,7 @@ public sealed interface Term {
         }
     }
 
-    record Bound(@NotNull Name name, @NotNull Expr.Var expr) implements Inferable {
+    record Bound(Name.Local name, @NotNull Expr.Var expr) implements Inferable {
         @Override
         public @NotNull String toString() {
             return name.toString();

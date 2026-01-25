@@ -18,7 +18,7 @@ public final class Env {
 
     public final @Nullable Env parent;
 
-    public @Nullable Entry getEntry(@NotNull String name) {
+    public @Nullable Entry lookup(@NotNull String name) {
         Env current = this;
         while (current != null) {
             Env.Entry entry = current.entries.get(name);
