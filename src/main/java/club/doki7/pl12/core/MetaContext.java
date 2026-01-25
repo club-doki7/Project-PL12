@@ -6,7 +6,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public final class MetaContext {
-    private record Pending(int metaId, Value value) {}
+    public void unify(Value value1, Value value2) {
+        unifyImpl(value1, value2);
+
+        // TODO: solve pendings
+    }
+
+    private record Pending(int metaId, Value unifyWith) {}
+
+    private void unifyImpl(Value value1, Value value2) {
+        value1 = force(value1);
+        value2 = force(value2);
+
+        // TODO
+    }
 
     private Value force(Value value) {
         while (true) {
