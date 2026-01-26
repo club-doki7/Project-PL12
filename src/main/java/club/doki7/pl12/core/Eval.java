@@ -44,21 +44,21 @@ public final class Eval {
     }
 
     public static Value app(Value head, Value arg, Term appTerm) {
-        switch (head) {
+        return switch (head) {
             case Value.Flex(Term.Meta meta, ConsRevList<Value> headSpine, _) -> {
                 ConsRevList<Value> newSpine = new ConsRevList.Cons<>(headSpine, arg);
-                return new Value.Flex(meta, newSpine, appTerm);
+                yield new Value.Flex(meta, newSpine, appTerm);
             }
             case Value.Rigid(Name name, ConsRevList<Value> headSpine, _) -> {
                 ConsRevList<Value> newSpine = new ConsRevList.Cons<>(headSpine, arg);
-                return new Value.Rigid(name, newSpine, appTerm);
+                yield new Value.Rigid(name, newSpine, appTerm);
             }
             case Value.Lam(Env env, ConsRevList<Value> localEnv, Term body, _) -> {
                 ConsRevList<Value> newLocalEnv = new ConsRevList.Cons<>(localEnv, arg);
-                return eval(body, env, newLocalEnv);
+                yield eval(body, env, newLocalEnv);
             }
             default -> throw new IllegalStateException("Cannot apply to head: " + head);
-        }
+        };
     }
 
     public static Value app(Value head, ConsRevList<Value> spine, Term appTerm) {
