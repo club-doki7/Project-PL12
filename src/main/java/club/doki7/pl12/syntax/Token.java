@@ -25,18 +25,20 @@ public final class Token {
         COMMA,
         /// `*`
         ASTER,
-        /// `∀`, `Π` 或者 `forall`
+        /// `∀` 或者 `forall`
         PI,
-        /// `:`, `::`, `<:`, `∈` 或者 `in`
+        /// `:`
         COLON,
         /// `=`
         EQ,
         /// `?`
         QUES,
 
-        /// 外围语言 (PNode 所定义) 所用的一些关键字
+        /// 外围语言所用的一些关键字
         KW_AXIOM,
         KW_DEFUN,
+        KW_DEFPROC,
+        KW_LET,
         KW_CHECK;
 
         @Override
@@ -56,6 +58,8 @@ public final class Token {
                 case QUES -> "?";
                 case KW_AXIOM -> "axiom";
                 case KW_DEFUN -> "defun";
+                case KW_DEFPROC -> "defproc";
+                case KW_LET -> "let";
                 case KW_CHECK -> "check";
             };
         }
@@ -132,6 +136,8 @@ public final class Token {
             case IDENT -> throw new IllegalArgumentException("IDENT token requires a lexeme");
             case KW_AXIOM -> "axiom";
             case KW_DEFUN -> "defun";
+            case KW_DEFPROC -> "defproc";
+            case KW_LET -> "let";
             case KW_CHECK -> "check";
         }, "<test>", -1, -1);
     }
@@ -234,37 +240,15 @@ public final class Token {
                     }
                     case ':' -> {
                         concludeToken();
-                        if (i + 1 < charArray.length && charArray[i + 1] == ':') {
-                            tokens.add(new Token(Kind.COLON, "::", file, line, col));
-                            i++;
-                            col += 2;
-                        } else {
-                            tokens.add(new Token(Kind.COLON, ":", file, line, col));
-                            col++;
-                        }
-                    }
-                    case '∈' -> {
-                        concludeToken();
-                        tokens.add(new Token(Kind.COLON, String.valueOf(c), file, line, col));
+                        tokens.add(new Token(Kind.COLON, ":", file, line, col));
                         col++;
-                    }
-                    case '<' -> {
-                        if (i + 1 < charArray.length && charArray[i + 1] == ':') {
-                            concludeToken();
-                            tokens.add(new Token(Kind.COLON, "<:", file, line, col));
-                            i++;
-                            col += 2;
-                        } else {
-                            currentToken.append(c);
-                            col++;
-                        }
                     }
                     case '*' -> {
                         concludeToken();
                         tokens.add(new Token(Kind.ASTER, "*", file, line, col));
                         col++;
                     }
-                    case 'Π', '∀' -> {
+                    case '∀' -> {
                         concludeToken();
                         tokens.add(new Token(Kind.PI, String.valueOf(c), file, line, col));
                         col++;
@@ -306,8 +290,8 @@ public final class Token {
             KEYWORDS.put("axiom", Kind.KW_AXIOM);
             KEYWORDS.put("postulate", Kind.KW_AXIOM);
             KEYWORDS.put("defun", Kind.KW_DEFUN);
-            KEYWORDS.put("define", Kind.KW_DEFUN);
-            KEYWORDS.put("let", Kind.KW_DEFUN);
+            KEYWORDS.put("defproc", Kind.KW_DEFPROC);
+            KEYWORDS.put("let", Kind.KW_LET);
             KEYWORDS.put("check", Kind.KW_CHECK);
         }
     }

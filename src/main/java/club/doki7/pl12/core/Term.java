@@ -14,17 +14,17 @@ public sealed interface Term {
 
     sealed interface Checkable
             extends Term
-            permits Lam, Inferable
+            permits Defun, Inferable
     {}
 
     sealed interface Inferable
             extends Checkable
-            permits LamInf, Ann, Univ, Pi, Bound, Free, App, Meta
+            permits Lam, Ann, Univ, Pi, Bound, Free, App, Meta
     {}
 
-    record Lam(@NotNull Checkable body,
-               @NotNull String paramName,
-               @NotNull Expr.Lam expr)
+    record Defun(@NotNull Checkable body,
+                 @NotNull String paramName,
+                 @NotNull Expr.Lam expr)
             implements Checkable
     {
         @Override
@@ -33,9 +33,9 @@ public sealed interface Term {
             sb.append("λ").append(paramName);
 
             Checkable bodyIter = body;
-            while (bodyIter instanceof Lam lam) {
-                sb.append(" ").append(lam.paramName);
-                bodyIter = lam.body;
+            while (bodyIter instanceof Defun defun) {
+                sb.append(" ").append(defun.paramName);
+                bodyIter = defun.body;
             }
 
             sb.append(". ").append(bodyIter);
@@ -43,10 +43,10 @@ public sealed interface Term {
         }
     }
 
-    record LamInf(@NotNull Checkable paramType,
-                  @NotNull Inferable body,
-                  @NotNull String paramName,
-                  @NotNull Expr.Lam expr)
+    record Lam(@NotNull Checkable paramType,
+               @NotNull Inferable body,
+               @NotNull String paramName,
+               @NotNull Expr.Lam expr)
             implements Inferable
     {
         @Override
@@ -55,10 +55,10 @@ public sealed interface Term {
             paramNames.add(paramName);
 
             Inferable bodyIter = body;
-            while (bodyIter instanceof LamInf(Checkable paramType1,
-                                              Inferable body1,
-                                              String paramName1,
-                                              _)) {
+            while (bodyIter instanceof Lam(Checkable paramType1,
+                                           Inferable body1,
+                                           String paramName1,
+                                           _)) {
                 if (!paramType1.equals(paramType)) {
                     break;
                 }
@@ -198,7 +198,7 @@ public sealed interface Term {
             sb.append(' ');
 
             if (arg instanceof App
-                || arg instanceof Lam
+                || arg instanceof Defun
                 || arg instanceof Pi
                 || arg instanceof Ann) {
                 sb.append('(').append(arg).append(')');
@@ -240,8 +240,8 @@ public sealed interface Term {
 
     static boolean paramTypeNeedParen(Term paramType) {
         return paramType instanceof Pi
-               || paramType instanceof LamInf
                || paramType instanceof Lam
+               || paramType instanceof Defun
                || paramType instanceof Ann;
     }
 }
