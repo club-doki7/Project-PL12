@@ -3,7 +3,6 @@ package club.doki7.pl12.core;
 import club.doki7.pl12.util.ConsRevList;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class Eval {
@@ -28,9 +27,8 @@ public final class Eval {
                     if (entry != null) {
                         yield entry.value();
                     } else {
-                        throw new IllegalStateException(
-                                "Unbound global name should have been rejected by the type checker."
-                        );
+                        throw new IllegalStateException("Unbound global name should have been"
+                                                        + "rejected by the type checker.");
                     }
                 } else {
                     yield new Value.Rigid(name, term);
@@ -64,15 +62,11 @@ public final class Eval {
     }
 
     public static Value app(Value head, ConsRevList<Value> spine, Term appTerm) {
-        List<Value> values = new ArrayList<>();
-        while (spine instanceof ConsRevList.Cons<Value>(ConsRevList<Value> init, Value last)) {
-            values.add(last);
-            spine = init;
-        }
+        List<Value> spineList = spine.toList();
 
         Value result = head;
-        for (int i = values.size() - 1; i >= 0; i--) {
-            result = app(result, values.get(i), appTerm);
+        for (Value value : spineList) {
+            result = app(result, value, appTerm);
         }
         return result;
     }

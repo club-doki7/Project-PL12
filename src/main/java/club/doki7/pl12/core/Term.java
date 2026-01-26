@@ -123,10 +123,10 @@ public sealed interface Term {
 
             Checkable bodyTypeIter = bodyType;
             while (bodyTypeIter instanceof Pi(boolean implicit1,
-                                      Checkable paramType1,
-                                      Checkable bodyType1,
-                                      String paramName1,
-                                      _)) {
+                                              Checkable paramType1,
+                                              Checkable bodyType1,
+                                              String paramName1,
+                                              _)) {
                 if (implicit1 != implicit
                     || !paramType1.equals(paramType)
                     || (paramName1 == null) != (paramName == null)) {

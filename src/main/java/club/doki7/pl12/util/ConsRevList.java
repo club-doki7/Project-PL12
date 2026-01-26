@@ -11,6 +11,8 @@ public sealed interface ConsRevList<T> {
 
     int length();
 
+    List<T> toList();
+
     record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last) implements ConsRevList<T> {
         @Override
         public @NotNull T revGet(int index) {
@@ -40,6 +42,21 @@ public sealed interface ConsRevList<T> {
                 current = init1;
             }
             return len;
+        }
+
+        @Override
+        public @NotNull List<T> toList() {
+            List<T> elements = new ArrayList<>();
+            ConsRevList<T> current = this;
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+                elements.add(last1);
+                current = init1;
+            }
+            List<T> result = new ArrayList<>();
+            for (int i = elements.size() - 1; i >= 0; i--) {
+                result.add(elements.get(i));
+            }
+            return result.reversed();
         }
 
         @Override
@@ -75,6 +92,11 @@ public sealed interface ConsRevList<T> {
         @Override
         public int length() {
             return 0;
+        }
+
+        @Override
+        public @NotNull List<T> toList() {
+            return List.of();
         }
 
         @Override
