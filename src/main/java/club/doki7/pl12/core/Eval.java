@@ -8,9 +8,9 @@ import java.util.List;
 public final class Eval {
     public static Value eval(Term term, Env env, ConsRevList<Value> localEnv) {
         return switch (term) {
-            case Term.Defun(Term.Checkable body, _, _) ->
+            case Term.LamChk(Term.Checkable body, _, _) ->
                     new Value.Lam(env, localEnv, body, term);
-            case Term.Lam(_, Term.Checkable body, _, _) ->
+            case Term.LamInf(_, Term.Checkable body, _, _) ->
                     new Value.Lam(env, localEnv, body, term);
             case Term.Ann(Term.Checkable annotated, _, _) -> eval(annotated, env, localEnv);
             case Term.Univ univ -> new Value.Univ(univ);

@@ -14,7 +14,8 @@ import java.util.List;
 ///           | Πx : ρ . ρ'  (3) 依值函数类型 // @link substring=(3) target=Pi
 ///           | x            (4) 变量 // @link substring=(4) target=Var
 ///           | e e'         (5) 应用 // @link substring=(5) target=App
-///           | λx . e       (6) Lambda 抽象 // @link substring=(6) target=Lam
+///           | λx . e
+///           | λx : τ . e   (6) Lambda 抽象 // @link substring=(6) target=Lam
 ///           | ?            (7) 洞 // @link substring=(7) target=Hole
 /// }
 ///

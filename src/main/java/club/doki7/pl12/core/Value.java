@@ -33,7 +33,7 @@ public sealed interface Value {
             implements Value
     {
         public Lam {
-            assert term instanceof Term.Defun || term instanceof Term.Lam;
+            assert term instanceof Term.LamChk || term instanceof Term.LamInf;
         }
     }
 
