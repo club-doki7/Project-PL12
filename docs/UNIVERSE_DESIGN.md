@@ -28,7 +28,7 @@ Type-in-type (also known as the McBride universe or `* : *`) is the simplest app
 - **Logical inconsistency**: Type-in-type leads to Girard's paradox, meaning every type is inhabited and the system cannot be used as a consistent logic.
 - **No termination guarantee**: Without consistency, you lose strong normalization guarantees.
 - **Cannot serve as a proof assistant**: If you intend to use the type system for theorem proving, inconsistency is a fatal flaw.
-- **Potential for non-terminating type checking**: In pathological cases, type checking may not terminate.
+- **Potential for non-terminating type checking**: Encodings of Girard's/Hurkens' paradox can cause the type checker to loop indefinitely, as the paradox constructs a term whose normalization (required for type checking) diverges.
 
 ### When to Use
 
