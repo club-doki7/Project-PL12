@@ -52,11 +52,7 @@ public sealed interface ConsRevList<T> {
                 elements.add(last1);
                 current = init1;
             }
-            List<T> result = new ArrayList<>();
-            for (int i = elements.size() - 1; i >= 0; i--) {
-                result.add(elements.get(i));
-            }
-            return result.reversed();
+            return elements.reversed();
         }
 
         @Override
