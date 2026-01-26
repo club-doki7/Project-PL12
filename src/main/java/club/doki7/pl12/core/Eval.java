@@ -8,7 +8,7 @@ import java.util.List;
 public final class Eval {
     public static Value eval(Term term, Env env, ConsRevList<Value> localEnv) {
         return switch (term) {
-            case Term.LamChk(Term.Checkable body, _, _) ->
+            case Term.LamChk(_, Term.Checkable body, _, _) ->
                     new Value.Lam(env, localEnv, body, term);
             case Term.LamInf(_, Term.Checkable body, _, _) ->
                     new Value.Lam(env, localEnv, body, term);
