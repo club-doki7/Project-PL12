@@ -72,11 +72,11 @@ public sealed interface Expr {
                   List<String> params,
                   @NotNull Expr paramType,
                   @NotNull Expr body) {
-            Token lamToken = Token.symbol(Token.Kind.PI);
+            Token piToken = Token.symbol(Token.Kind.PI);
             List<Token> paramTokens = params.stream()
                     .map(Token::ident)
                     .toList();
-            this(lamToken, implicit, paramTokens, paramType, body);
+            this(piToken, implicit, paramTokens, paramType, body);
         }
 
         @Override
@@ -200,9 +200,9 @@ public sealed interface Expr {
             String paramsStr = sb.toString();
 
             if (body instanceof Ann || body instanceof Pi) {
-                return "λ" + paramsStr + ". (" + body + ")";
+                return paramsStr + ". (" + body + ")";
             } else {
-                return "λ" + paramsStr + ". " + body;
+                return paramsStr + ". " + body;
             }
         }
     }
