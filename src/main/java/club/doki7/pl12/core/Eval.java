@@ -53,21 +53,22 @@ public final class Eval {
                 ConsRevList<Value> newSpine = new ConsRevList.Cons<>(headSpine, arg);
                 yield new Value.Rigid(name, newSpine, appTerm);
             }
-            case Value.Lam(Env env, ConsRevList<Value> localEnv, Term body, _) -> {
-                ConsRevList<Value> newLocalEnv = new ConsRevList.Cons<>(localEnv, arg);
-                yield eval(body, env, newLocalEnv);
-            }
+            case Value.Lam lam -> closureApp(lam, arg);
             default -> throw new IllegalStateException("Cannot apply to head: " + head);
         };
     }
 
     public static Value app(Value head, ConsRevList<Value> spine, Term appTerm) {
         List<Value> spineList = spine.toList();
-
         Value result = head;
         for (Value value : spineList) {
             result = app(result, value, appTerm);
         }
         return result;
+    }
+
+    public static Value closureApp(Value.Closure c, Value arg) {
+        ConsRevList<Value> newLocalEnv = new ConsRevList.Cons<>(c.localEnv(), arg);
+        return eval(c.body(), c.env(), newLocalEnv);
     }
 }
