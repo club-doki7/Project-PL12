@@ -16,7 +16,7 @@ public final class Eval {
             case Term.Univ univ -> new Value.Univ(univ);
             case Term.Pi(_, Term.Checkable paramType, Term.Checkable bodyType, _, _) ->
                     new Value.Pi(env,
-                                 Type.ofVal(eval(paramType, env, localEnv), Type.Totality.TOTAL),
+                                 Type.ofVal(eval(paramType, env, localEnv)),
                                  localEnv,
                                  bodyType,
                                  (Term.Pi) term);

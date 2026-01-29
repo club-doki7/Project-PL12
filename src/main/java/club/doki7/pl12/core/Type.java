@@ -2,7 +2,7 @@ package club.doki7.pl12.core;
 
 import org.jetbrains.annotations.NotNull;
 
-public record Type(Value value, Totality totality) {
+public record Type(Value value) {
     public enum Totality {
         TOTAL,
         PARTIAL;
@@ -24,8 +24,12 @@ public record Type(Value value, Totality totality) {
         }
     }
 
-    public static Type ofVal(Value value, Totality totality) {
-        return new Type(value, totality);
+//    public static Type ofVal(Value value, Totality totality) {
+//        return new Type(value, totality);
+//    }
+
+    public static Type ofVal(Value value) {
+        return new Type(value);
     }
 
     @Override
