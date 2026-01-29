@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public sealed interface ConsRevList<T> {
     @NotNull
@@ -12,6 +13,8 @@ public sealed interface ConsRevList<T> {
     int length();
 
     List<T> toList();
+
+    boolean anyOf(Predicate<T> predicate);
 
     record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last) implements ConsRevList<T> {
         @Override
@@ -56,6 +59,18 @@ public sealed interface ConsRevList<T> {
         }
 
         @Override
+        public boolean anyOf(Predicate<T> predicate) {
+            ConsRevList<T> current = this;
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+                if (predicate.test(last1)) {
+                    return true;
+                }
+                current = init1;
+            }
+            return false;
+        }
+
+        @Override
         public @NotNull String toString() {
             List<String> elements = new ArrayList<>();
             ConsRevList<T> current = this;
@@ -93,6 +108,11 @@ public sealed interface ConsRevList<T> {
         @Override
         public @NotNull List<T> toList() {
             return List.of();
+        }
+
+        @Override
+        public boolean anyOf(Predicate<T> predicate) {
+            return false;
         }
 
         @Override

@@ -26,11 +26,17 @@ public sealed interface Value {
         }
     }
 
+    interface Closure {
+        @NotNull Env env();
+        @NotNull ConsRevList<@NotNull Value> localEnv();
+        @NotNull Term body();
+    }
+
     record Lam(@NotNull Env env,
                @NotNull ConsRevList<@NotNull Value> localEnv,
                @NotNull Term body,
                @NotNull Term term)
-            implements Value
+            implements Value, Closure
     {
         public Lam {
             assert term instanceof Term.LamChk || term instanceof Term.LamInf;
@@ -40,9 +46,9 @@ public sealed interface Value {
     record Pi(@NotNull Env env,
               @NotNull Type paramType,
               @NotNull ConsRevList<@NotNull Value> localEnv,
-              @NotNull Term returnType,
+              @NotNull Term body,
               @NotNull Term.Pi term)
-            implements Value
+            implements Value, Closure
     {}
 
     record Univ(@NotNull Term.Univ term) implements Value {}
