@@ -30,4 +30,8 @@ public record ParseContext(char[] buf,
     public Pair<Token, ParseContext> nextToken() throws LexicalException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
+
+    public ParseContext skipToNextLine() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
