@@ -1,0 +1,17 @@
+注释：
+
+    (* comment *)
+    (* only block comments supported. nested comments not supported. *)
+
+中缀运算符
+
+    infixl 50 + := add
+    infixl 60 * := multiply
+
+混缀运算符
+
+    mixfix rewrite_as_by_ := \x. \y. \eq. eq_ind (* implementation *)
+
+前缀运算符
+
+    mixfix -_ := \x. negate x

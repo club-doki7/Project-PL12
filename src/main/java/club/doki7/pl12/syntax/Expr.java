@@ -16,7 +16,7 @@ import java.util.List;
 ///           | e e'         (5) 应用 // @link substring=(5) target=App
 ///           | λx . e
 ///           | λx : τ . e   (6) Lambda 抽象 // @link substring=(6) target=Lam
-///           | ?            (7) 洞 // @link substring=(7) target=Hole
+///           | ??           (7) 洞 // @link substring=(7) target=Hole
 /// }
 ///
 /// 简单函数类型 `ρ → ρ'` 可以被看作是依值函数类型 `Π_ : ρ . ρ'` 的语法糖
@@ -215,7 +215,7 @@ public sealed interface Expr {
 
         @TestOnly
         public Hole() {
-            this(Token.symbol(Token.Kind.DQUES));
+            this(Token.symbol(Token.Kind.D_QUES));
         }
 
         @Override

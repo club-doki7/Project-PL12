@@ -1,3 +1,9 @@
 package club.doki7.pl12.exc;
 
-public record SourceLocation(String file, int pos, int line, int col) {}
+import org.jetbrains.annotations.NotNull;
+
+public record SourceLocation(@NotNull String file, int pos, int line, int col) {
+    public boolean invalid() {
+        return line <= 0 || col <= 0;
+    }
+}

@@ -7,24 +7,22 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.util.Objects;
 
-public record Token(@NotNull Kind kind,
-                    @NotNull String lexeme,
-                    @NotNull String file,
-                    int pos,
-                    int line,
-                    int col)
-{
-    public enum Kind {
+public sealed interface Token {
+    enum Kind {
         /// 标识符
         IDENT,
-        /// 二元运算符
-        BINARY,
+        /// 中缀运算符
+        INFIX,
+        /// 字符串
+        STRING,
+        /// 自然数
+        LIT_NAT,
         /// 混缀运算符片段
         MIXFIX_FRAG,
         /// 左括号
-        LPAREN,
+        L_PAREN,
         /// 右括号
-        RPAREN,
+        R_PAREN,
         /// `λ` 或者 `\`
         LAMBDA,
         /// `->` 和 `→`
@@ -42,7 +40,7 @@ public record Token(@NotNull Kind kind,
         /// `=`
         EQ,
         /// `??`
-        DQUES,
+        D_QUES,
 
         /// 外围语言所用的一些关键字
         KW_AXIOM,
@@ -50,109 +48,191 @@ public record Token(@NotNull Kind kind,
         KW_DEFPROC,
         KW_LET,
         KW_CHECK,
+        KW_INFIX_L,
+        KW_INFIX_R,
+        KW_MIXFIX,
 
         /// End Of Input
         EOI;
-
-        @Override
-        public @NotNull String toString() {
-            return switch (this) {
-                case IDENT -> "identifier";
-                case BINARY -> "binary-operator";
-                case MIXFIX_FRAG -> "mixfix-fragment";
-                case LPAREN -> "(";
-                case RPAREN -> ")";
-                case LAMBDA -> "λ";
-                case ARROW -> "→";
-                case DOT -> ".";
-                case COMMA -> ",";
-                case ASTER -> "*";
-                case PI -> "∀";
-                case COLON -> ":";
-                case EQ -> "=";
-                case DQUES -> "??";
-                case KW_AXIOM -> "axiom";
-                case KW_DEFUN -> "defun";
-                case KW_DEFPROC -> "defproc";
-                case KW_LET -> "let";
-                case KW_CHECK -> "check";
-                case EOI -> "<EOI>";
-            };
-        }
     }
 
-    public @NotNull SourceLocation location() {
-        return new SourceLocation(file, pos, line, col);
+    @NotNull Kind kind();
+
+    @NotNull String lexeme();
+
+    @NotNull String file();
+
+    int pos();
+
+    int line();
+
+    int col();
+
+    default @NotNull SourceLocation location() {
+        return new SourceLocation(file(), pos(), line(), col());
     }
 
-    public @NotNull SourceLocation locationEnd() {
-        return new SourceLocation(file, pos + lexeme.length(), line, col + lexeme.length());
+    default @NotNull SourceLocation locationEnd() {
+        int len = lexeme().length();
+        return new SourceLocation(file(), pos() + len, line(), col() + len);
     }
 
-    public @NotNull SourceRange range() {
+    default @NotNull SourceRange range() {
         return new SourceRange(location(), locationEnd());
     }
 
     @Override
-    public @NotNull String toString() {
-        return lexeme;
-    }
+    @NotNull String toString();
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Token other = (Token) obj;
-        if (this.kind != other.kind) return false;
-        if (this.kind == Kind.IDENT) {
-            return this.lexeme.equals(other.lexeme);
-        } else {
-            return true;
+    record Simple(@NotNull Kind kind,
+                  @NotNull String lexeme,
+                  @NotNull String file,
+                  int pos,
+                  int line,
+                  int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String toString() {
+            return lexeme();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Simple(Kind kind1, String lexeme1, _, _, _, _))) return false;
+            if (kind == Kind.IDENT) {
+                return kind == kind1 && lexeme.equals(lexeme1);
+            } else {
+                return kind == kind1;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            if (kind == Kind.IDENT) {
+                return Objects.hash(Simple.class, kind, lexeme);
+            } else {
+                return Objects.hash(Simple.class, kind);
+            }
         }
     }
 
-    @Override
-    public int hashCode() {
-        if (this.kind == Kind.IDENT) {
-            return Objects.hash(kind, lexeme);
-        } else {
-            // Token(PI, "Π") == Token(PI, "forall") 但 Token(PI, "Π") != "Π"
-            // 所以用第二个空字符串来区分 Token 和 String
-            // 虽然按理说不会有人把 Token 和 String 装进同一个 HashMap
-            return Objects.hash(kind, "");
+    record Infix(@NotNull Kind kind,
+                 @NotNull Operator.Infix infixOp,
+                 @NotNull String file,
+                 int pos,
+                 int line,
+                 int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String lexeme() {
+            return infixOp().lexeme();
+        }
+
+        @Override
+        public @NotNull String toString() {
+            return lexeme();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Infix(Kind kind1, Operator.Infix infixOp1, _, _, _, _))) {
+                return false;
+            }
+            return kind == kind1 && infixOp.equals(infixOp1);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Infix.class, kind, infixOp);
         }
     }
 
-    @TestOnly
-    public static @NotNull Token ident(@NotNull String lexeme) {
-        return new Token(Kind.IDENT, lexeme, "<test>", 0, -1, -1);
+    record MixfixFrag(@NotNull Kind kind,
+                      @NotNull Operator.Mixfix mixfixOp,
+                      int frag,
+                      @NotNull String file,
+                      int pos,
+                      int line,
+                      int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String lexeme() {
+            return mixfixOp.parts().get(frag);
+        }
+
+        @Override
+        public @NotNull String toString() {
+            return lexeme();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof MixfixFrag(Kind kind1,
+                                            Operator.Mixfix mixfixOp1,
+                                            int frag1,
+                                            _, _, _, _))) {
+                return false;
+            }
+            return kind == kind1 && mixfixOp.equals(mixfixOp1) && frag == frag1;
+        }
+    }
+
+    static Token ident(@NotNull String lexeme, @NotNull String file, int pos, int line, int col) {
+        return new Simple(Kind.IDENT, lexeme, file, pos, line, col);
+    }
+
+    static Token symbol(@NotNull Kind kind,
+                        @NotNull String lexeme,
+                        @NotNull String file,
+                        int pos,
+                        int line,
+                        int col)
+    {
+        return new Simple(kind, lexeme, file, pos, line, col);
+    }
+
+    static Token infixOp(@NotNull Operator.Infix infixOp,
+                         @NotNull String file,
+                         int pos,
+                         int line,
+                         int col)
+    {
+        return new Infix(Kind.INFIX, infixOp, file, pos, line, col);
+    }
+
+    static Token mixfixFrag(@NotNull Operator.Mixfix mixfixOp,
+                            @NotNull String file,
+                            int frag,
+                            int pos,
+                            int line,
+                            int col)
+    {
+        return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, file, pos, line, col);
     }
 
     @TestOnly
-    public static @NotNull Token symbol(@NotNull Kind kind) {
-        return new Token(kind, switch (kind) {
-            case LPAREN -> "(";
-            case RPAREN -> ")";
-            case LAMBDA -> "λ";
-            case ARROW -> "→";
-            case DOT -> ".";
-            case COMMA -> ",";
-            case ASTER -> "*";
-            case PI -> "∀";
-            case COLON -> ":";
-            case EQ -> "=";
-            case DQUES -> "??";
-            case KW_AXIOM -> "axiom";
-            case KW_DEFUN -> "defun";
-            case KW_DEFPROC -> "defproc";
-            case KW_LET -> "let";
-            case KW_CHECK -> "check";
-            case EOI -> "";
+    static Token ident(@NotNull String lexeme) {
+        return new Simple(Kind.IDENT, lexeme, "<test>", 0, 0, 0);
+    }
 
-            case IDENT -> throw new IllegalArgumentException("IDENT token requires a lexeme");
-            case BINARY -> throw new IllegalArgumentException("BINARY token requires a lexeme");
-            case MIXFIX_FRAG -> throw new IllegalArgumentException("MIXFIX_FRAG token"
-                                                                   + " requires a lexeme");
-        }, "<test>", 0, -1, -1);
+    @TestOnly
+    static Token symbol(@NotNull Kind kind) {
+        return new Simple(kind, kind.toString(), "<test>", 0, 0, 0);
+    }
+
+    @TestOnly
+    static Token infixOp(@NotNull Operator.Infix infixOp) {
+        return new Infix(Kind.INFIX, infixOp,"<test>", 0, 0, 0);
+    }
+
+    @TestOnly
+    static Token mixfixFrag(@NotNull Operator.Mixfix mixfixOp, int frag) {
+        return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, "<test>", 0, 0, 0);
     }
 }
