@@ -228,7 +228,7 @@ public sealed interface Term {
         @Override
         public @NotNull String toString() {
             if (hole != null) {
-                return CommonUtil.subscriptNum("?ẖ", metaId);
+                return CommonUtil.subscriptNum("??", metaId);
             }
 
             if (introVar instanceof Expr.Var(Token name)) {

@@ -215,7 +215,7 @@ public sealed interface Expr {
 
         @TestOnly
         public Hole() {
-            this(Token.symbol(Token.Kind.QUES));
+            this(Token.symbol(Token.Kind.DQUES));
         }
 
         @Override

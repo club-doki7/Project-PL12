@@ -27,18 +27,18 @@ import org.jetbrains.annotations.NotNull;
 /// // WRONG: uv1 == uv2       // always false
 ///
 /// // CORRECT:
-/// uv1.e.equals(uv2.e);
+/// uv1.value.equals(uv2.value);
 /// }
 @SuppressWarnings("ClassCanBeRecord")
 public final class UV<T> {
-    public final @NotNull T e;
+    public final @NotNull T value;
 
-    public UV(@NotNull T e) {
-        this.e = e;
+    public UV(@NotNull T value) {
+        this.value = value;
     }
 
-    public static <T> @NotNull UV<T> of(@NotNull T e) {
-        return new UV<>(e);
+    public static <T> @NotNull UV<T> of(@NotNull T value) {
+        return new UV<>(value);
     }
 
     @SuppressWarnings("EqualsDoesntCheckParameterClass")
@@ -54,6 +54,6 @@ public final class UV<T> {
 
     @Override
     public @NotNull String toString() {
-        return e.toString();
+        return value.toString();
     }
 }
