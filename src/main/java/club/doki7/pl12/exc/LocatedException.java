@@ -1,20 +1,20 @@
 package club.doki7.pl12.exc;
 
-import club.doki7.pl12.syntax.Token;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LocatedException extends Exception {
-    public record LocatedMessage(String message, Token location) {}
+    public record LocatedMessage(SourceRange location, String message) {}
 
-    public final Token location;
+    public final SourceRange location;
     public final String message;
     public final List<LocatedMessage> trace = new ArrayList<>();
 
-    public LocatedException(Token location, Class<?> clazz, String message) {
-        super(location.file + ":" + location.line + ":" + location.col + ": "
-              + clazz.getSimpleName()
+    public LocatedException(SourceRange location, Class<?> clazz, String message) {
+        super(location.start().file()
+              + ":" + location.start().line()
+              + ":" + location.start().col()
+              + ": " + clazz.getSimpleName()
               + ": " + message);
         this.location = location;
         this.message = message;
