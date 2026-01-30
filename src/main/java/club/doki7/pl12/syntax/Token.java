@@ -40,6 +40,8 @@ public sealed interface Token {
         COLON,
         /// `=`
         EQ,
+        /// `:=`
+        COLON_EQ,
         /// `??`
         D_QUES,
 
