@@ -1,13 +1,19 @@
 package club.doki7.pl12.syntax;
 
+import club.doki7.pl12.exc.SourceLocation;
+import club.doki7.pl12.exc.SourceRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
-public final class Token {
+public record Token(@NotNull Kind kind,
+                    @NotNull String lexeme,
+                    @NotNull String file,
+                    int pos,
+                    int line,
+                    int col)
+{
     public enum Kind {
         /// 标识符
         IDENT,
@@ -75,23 +81,21 @@ public final class Token {
         }
     }
 
-    public final Kind kind;
-    public final String lexeme;
+    public @NotNull SourceLocation location() {
+        return new SourceLocation(file, pos, line, col);
+    }
 
-    public final String file;
-    public final int line;
-    public final int col;
+    public @NotNull SourceLocation locationEnd() {
+        return new SourceLocation(file, pos + lexeme.length(), line, col + lexeme.length());
+    }
 
-    public Token(@NotNull Kind kind,
-                 @NotNull String lexeme,
-                 @NotNull String file,
-                 int line,
-                 int col) {
-        this.kind = kind;
-        this.lexeme = lexeme;
-        this.file = file;
-        this.line = line;
-        this.col = col;
+    public @NotNull SourceRange range() {
+        return new SourceRange(location(), locationEnd());
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return lexeme;
     }
 
     @Override
@@ -108,11 +112,6 @@ public final class Token {
     }
 
     @Override
-    public @NotNull String toString() {
-        return lexeme;
-    }
-
-    @Override
     public int hashCode() {
         if (this.kind == Kind.IDENT) {
             return Objects.hash(kind, lexeme);
@@ -126,7 +125,7 @@ public final class Token {
 
     @TestOnly
     public static @NotNull Token ident(@NotNull String lexeme) {
-        return new Token(Kind.IDENT, lexeme, "<test>", -1, -1);
+        return new Token(Kind.IDENT, lexeme, "<test>", 0, -1, -1);
     }
 
     @TestOnly
@@ -154,6 +153,6 @@ public final class Token {
             case BINARY -> throw new IllegalArgumentException("BINARY token requires a lexeme");
             case MIXFIX_FRAG -> throw new IllegalArgumentException("MIXFIX_FRAG token"
                                                                    + " requires a lexeme");
-        }, "<test>", -1, -1);
+        }, "<test>", 0, -1, -1);
     }
 }

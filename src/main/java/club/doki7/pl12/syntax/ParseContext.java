@@ -31,7 +31,7 @@ public record ParseContext(char[] buf,
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    public ParseContext skipToNextLine() {
+    public ParseContext skipToSafePosition() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

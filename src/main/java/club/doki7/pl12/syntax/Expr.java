@@ -91,7 +91,7 @@ public sealed interface Expr {
             if (param != null) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < param.size(); i++) {
-                    sb.append(param.get(i).lexeme);
+                    sb.append(param.get(i).lexeme());
                     if (i != param.size() - 1) {
                         sb.append(", ");
                     }
@@ -123,7 +123,7 @@ public sealed interface Expr {
 
         @Override
         public @NotNull String toString() {
-            return name.lexeme;
+            return name.lexeme();
         }
     }
 
@@ -192,7 +192,7 @@ public sealed interface Expr {
         public @NotNull String toString() {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < param.size(); i++) {
-                sb.append("λ").append(param.get(i).lexeme);
+                sb.append("λ").append(param.get(i).lexeme());
                 if (i != param.size() - 1) {
                     sb.append(" ");
                 }

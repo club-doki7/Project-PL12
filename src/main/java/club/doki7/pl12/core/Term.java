@@ -232,7 +232,7 @@ public sealed interface Term {
             }
 
             if (introVar instanceof Expr.Var(Token name)) {
-                return CommonUtil.subscriptNum("?" + name.lexeme, metaId);
+                return CommonUtil.subscriptNum("?" + name.lexeme(), metaId);
             }
 
             return CommonUtil.subscriptNum("?α", metaId);
