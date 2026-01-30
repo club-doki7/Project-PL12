@@ -5,6 +5,7 @@ import club.doki7.pl12.exc.SourceRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 public sealed interface Token {
@@ -14,7 +15,7 @@ public sealed interface Token {
         /// 中缀运算符
         INFIX,
         /// 字符串
-        STRING,
+        LIT_STRING,
         /// 自然数
         LIT_NAT,
         /// 混缀运算符片段
@@ -118,6 +119,64 @@ public sealed interface Token {
         }
     }
 
+    record LitString(@NotNull Kind kind,
+                     @NotNull String string,
+                     @NotNull String lexeme,
+                     @NotNull String file,
+                     int pos,
+                     int line,
+                     int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String toString() {
+            return lexeme;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof LitString(Kind kind1, String string1, _, _, _, _, _))) {
+                return false;
+            }
+            return kind == kind1 && string.equals(string1);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(LitString.class, kind, string);
+        }
+    }
+
+    record LitNat(@NotNull Kind kind,
+                  @NotNull BigInteger value,
+                  @NotNull String lexeme,
+                  @NotNull String file,
+                  int pos,
+                  int line,
+                  int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String toString() {
+            return lexeme;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof LitNat(Kind kind1, BigInteger value1, _, _, _, _, _))) {
+                return false;
+            }
+            return kind == kind1 && value.equals(value1);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(LitNat.class, kind, value);
+        }
+    }
+
     record Infix(@NotNull Kind kind,
                  @NotNull Operator.Infix infixOp,
                  @NotNull String file,
@@ -187,6 +246,26 @@ public sealed interface Token {
         return new Simple(Kind.IDENT, lexeme, file, pos, line, col);
     }
 
+    static Token string(@NotNull String string,
+                        @NotNull String lexeme,
+                        @NotNull String file,
+                        int pos,
+                        int line,
+                        int col)
+    {
+        return new LitString(Kind.LIT_STRING, string, lexeme, file, pos, line, col);
+    }
+
+    static Token nat(@NotNull BigInteger value,
+                     @NotNull String lexeme,
+                     @NotNull String file,
+                     int pos,
+                     int line,
+                     int col)
+    {
+        return new LitNat(Kind.LIT_NAT, value, lexeme, file, pos, line, col);
+    }
+
     static Token symbol(@NotNull Kind kind,
                         @NotNull String lexeme,
                         @NotNull String file,
@@ -224,6 +303,16 @@ public sealed interface Token {
     @TestOnly
     static Token symbol(@NotNull Kind kind) {
         return new Simple(kind, kind.toString(), "<test>", 0, 0, 0);
+    }
+
+    @TestOnly
+    static Token string(@NotNull String string) {
+        return new LitString(Kind.LIT_STRING, string, "\"" + string + "\"", "<test>", 0, 0, 0);
+    }
+
+    @TestOnly
+    static Token nat(@NotNull BigInteger value) {
+        return new LitNat(Kind.LIT_NAT, value, value.toString(), "<test>", 0, 0, 0);
     }
 
     @TestOnly
