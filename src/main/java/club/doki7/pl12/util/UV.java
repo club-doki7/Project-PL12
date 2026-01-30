@@ -20,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 /// elements, compare them directly instead of comparing their {@code UV} wrappers.
 ///
 /// {@snippet :
-///UV<String> uv1 = new UV<>("hello");
-/// UV<String> uv2 = new UV<>("world");
+///UV<String> uv1 = UV.of("hello");
+/// UV<String> uv2 = UV.of("world");
 ///
 /// // WRONG: uv1.equals(uv2)  // always true
 /// // WRONG: uv1 == uv2       // always false

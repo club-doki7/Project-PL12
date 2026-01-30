@@ -23,8 +23,8 @@ public record ParseContext(char[] buf,
                                 file,
                                 1,
                                 1,
-                                new UV<>(new HashMap<>()),
-                                new UV<>(new HashSet<>()));
+                                UV.of(new HashMap<>()),
+                                UV.of(new HashSet<>()));
     }
 
     public Pair<Token, ParseContext> nextToken() throws LexicalException {
