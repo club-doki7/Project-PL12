@@ -41,6 +41,27 @@ Procedures
             end
         end.
 
+Axiom
+
+    (* if you believe that your imperative code is referentially transparent and will terminate, you
+       can use [trust] to extract the value from [partial] without any checks *)
+    Definition fact_imp_trusted (n : nat) : nat := trust (fact_imp n).
+
+    (* and if you believe that your imperative code is correct, you may introduce axioms to
+       postulate its properties *)
+    Axiom fact_imp_behaves_same_as_fact : forall {n : nat}, fact_imp_trusted n = fact n.
+
+    (* widely accepted axiom of function extensionality *)
+    Axiom funext : forall {A B : Type},
+                   forall (f g : A -> B),
+                   (forall x : A, f x = g x) ->
+                   f = g.
+
+    Definition fact_imp_is_fact : fact_imp_trusted = fact :=
+        funext fact_imp_trusted fact fact_imp_behaves_same_as_fact.
+
+A somewhat less trivial example
+
     (* factorials from 0 to 10 *)
     Procedure main : unit :=
         print "Hello, world!";
@@ -48,6 +69,7 @@ Procedures
             if negb (i `leb` 10) then
                 print "fact " i " = " (fact (read i)) "\n";
                 print "fact_imp " i " = " (fact_imp (read i)) "\n";
+                print "fact_imp_trust " i " = " (fact_imp_trust (read i)) "\n";
                 write i ((read i) + 1)
             else
                 return
@@ -61,13 +83,6 @@ Lambda
 
     Procedure for_each_list (l : list nat) (action : nat -> partial unit) : partial unit :=
         foreach (proc x : nat => action x) l.
-
-Axiom
-
-    Axiom funext : forall {A B : Type},
-                   forall (f g : A -> B),
-                   (forall x : A, f x = g x) ->
-                   f = g.
 
 Proofs (now via term construction)
 
