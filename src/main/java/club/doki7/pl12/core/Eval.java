@@ -9,17 +9,17 @@ public final class Eval {
     public static Value eval(Term term, Env env, ConsRevList<Value> localEnv) {
         return switch (term) {
             case Term.LamChk(_, Term.Checkable body, _, _) ->
-                    new Value.Lam(env, localEnv, body, term);
+                new Value.Lam(env, localEnv, body, term);
             case Term.LamInf(_, Term.Checkable body, _, _) ->
-                    new Value.Lam(env, localEnv, body, term);
+                new Value.Lam(env, localEnv, body, term);
             case Term.Ann(Term.Checkable annotated, _, _) -> eval(annotated, env, localEnv);
             case Term.Univ univ -> new Value.Univ(univ);
             case Term.Pi(_, Term.Checkable paramType, Term.Checkable bodyType, _, _) ->
-                    new Value.Pi(env,
-                                 Type.ofVal(eval(paramType, env, localEnv)),
-                                 localEnv,
-                                 bodyType,
-                                 (Term.Pi) term);
+                new Value.Pi(env,
+                             Type.ofVal(eval(paramType, env, localEnv)),
+                             localEnv,
+                             bodyType,
+                             (Term.Pi) term);
             case Term.Bound(Name.Local name, _) -> localEnv.revGet(name.index());
             case Term.Free(Name name, _) -> {
                 if (name instanceof Name.Global(String strName)) {
