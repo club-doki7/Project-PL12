@@ -34,26 +34,23 @@ public record ParseContext(char[] buf,
             return Pair.of(Token.eoi(file, pos, line, col), this);
         }
 
-        int position = this.pos;
-        int line = this.line;
-        int col = this.col;
-
-        while (Character.isWhitespace(buf[position])) {
-            if (buf[position] == '\n') {
-                line++;
-                col = 1;
-            } else {
-                col++;
-            }
-            position++;
-        }
-
-        return nextTokenImpl(this, position, line, col);
+        return nextTokenImpl(this, pos, line, col);
     }
 
     private static Pair<Token, ParseContext>
     nextTokenImpl(ParseContext ctx, int pos, int line, int col) throws LexicalException {
         char[] buf = ctx.buf;
+
+        while (pos < buf.length && Character.isWhitespace(buf[pos])) {
+            if (buf[pos] == '\n') {
+                line++;
+                col = 1;
+            } else {
+                col++;
+            }
+            pos++;
+        }
+
         if (pos >= buf.length) {
             return Pair.of(Token.eoi(ctx.file, pos, line, col),
                            ParseContext.clone(ctx, pos, line, col));
@@ -65,7 +62,7 @@ public record ParseContext(char[] buf,
             case '"' -> nextString(ctx, pos, line, col);
             case ')', '[', ']', '{', '}',
                  '→', '.', ',', '∀', 'Π',
-                 'λ', '\\', '=', '*' -> nextSingleChar(ctx, pos, line, col);
+                 'λ', '\\', '*' -> nextSingleChar(ctx, pos, line, col);
             case ':' -> {
                 if (pos + 1 < buf.length && buf[pos + 1] == '=') {
                     yield Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
@@ -124,6 +121,12 @@ public record ParseContext(char[] buf,
                                        "Unexpected character: '" + buf[startPos] + "'");
         }
 
+        @Nullable Token.Kind kwKind = Token.Kind.KEYWORDS_MAP.get(lexeme);
+        if (kwKind != null) {
+            return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
+                           ParseContext.clone(ctx, pos, line, col));
+        }
+
         @Nullable Operator.Infix infix = ctx.infixOps.value.get(lexeme);
         if (infix != null) {
             return Pair.of(Token.infixOp(infix, ctx.file, startPos, line, startCol),
@@ -132,6 +135,84 @@ public record ParseContext(char[] buf,
 
         return Pair.of(Token.ident(lexeme, ctx.file, startPos, line, startCol),
                        ParseContext.clone(ctx, pos, line, col));
+    }
+
+    public static Pair<Token, ParseContext>
+    nextNat(ParseContext ctx, int pos, int line, int col) {
+        char[] buf = ctx.buf;
+        int startPos = pos;
+        int startCol = col;
+
+        StringBuilder sb = new StringBuilder();
+        while (pos < buf.length && Character.isDigit(buf[pos])) {
+            sb.append(buf[pos]);
+            pos++;
+            col++;
+        }
+
+        String lexeme = sb.toString();
+        return Pair.of(Token.nat(new java.math.BigInteger(lexeme),
+                                 lexeme,
+                                 ctx.file,
+                                 startPos,
+                                 line,
+                                 startCol),
+                       ParseContext.clone(ctx, pos, line, col));
+    }
+
+    public static Pair<Token, ParseContext>
+    nextString(ParseContext ctx, int pos, int line, int col) throws LexicalException {
+        throw new UnsupportedOperationException();
+    }
+
+    public static Pair<Token, ParseContext>
+    nextSingleChar(ParseContext ctx, int pos, int line, int col) {
+        char c = ctx.buf[pos];
+        Token.Kind kind = switch (c) {
+            case ')' -> Token.Kind.R_PAREN;
+            case '(' -> Token.Kind.L_PAREN;
+            case '[' -> Token.Kind.L_BRACKET;
+            case ']' -> Token.Kind.R_BRACKET;
+            case '{' -> Token.Kind.L_BRACE;
+            case '}' -> Token.Kind.R_BRACE;
+            case '→' -> Token.Kind.ARROW;
+            case '.' -> Token.Kind.DOT;
+            case ',' -> Token.Kind.COMMA;
+            case '∀', 'Π' -> Token.Kind.PI;
+            case 'λ', '\\' -> Token.Kind.LAMBDA;
+            case '*' -> Token.Kind.ASTER;
+            default -> throw new IllegalStateException("Unexpected character: " + c);
+        };
+
+        return Pair.of(Token.sym(kind, Character.toString(c), ctx.file, pos, line, col),
+                       ParseContext.clone(ctx, pos + 1, line, col + 1));
+    }
+
+    public static Pair<Token, ParseContext>
+    skipComment(ParseContext ctx, int pos, int line, int col) throws LexicalException {
+        char[] buf = ctx.buf;
+        int startPos = pos;
+        int startCol = col;
+        pos += 2; // skip '(*'
+
+        while (pos + 1 < buf.length) {
+            if (buf[pos] == '*' && buf[pos + 1] == ')') {
+                pos += 2;
+                col += 2;
+                return nextTokenImpl(ctx, pos, line, col);
+            } else {
+                if (buf[pos] == '\n') {
+                    line++;
+                    col = 1;
+                } else {
+                    col++;
+                }
+                pos++;
+            }
+        }
+
+        throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
+                                   "Unterminated comment, premature EOF.");
     }
 
     public static boolean isIdentChar(char c) {

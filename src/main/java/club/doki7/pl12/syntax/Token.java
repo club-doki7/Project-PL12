@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.Objects;
 
 public sealed interface Token {
@@ -54,6 +55,7 @@ public sealed interface Token {
         KW_DEFUN,
         KW_DEFPROC,
         KW_LET,
+        KW_IN,
         KW_CHECK,
         KW_INFIX_L,
         KW_INFIX_R,
@@ -61,6 +63,19 @@ public sealed interface Token {
 
         /// End Of Input
         EOI;
+
+        public static Map<String, Kind> KEYWORDS_MAP = Map.ofEntries(
+            Map.entry("forall", PI),
+            Map.entry("axiom", KW_AXIOM),
+            Map.entry("defun", KW_DEFUN),
+            Map.entry("defproc", KW_DEFPROC),
+            Map.entry("let", KW_LET),
+            Map.entry("in", KW_IN),
+            Map.entry("check", KW_CHECK),
+            Map.entry("infixl", KW_INFIX_L),
+            Map.entry("infixr", KW_INFIX_R),
+            Map.entry("mixfix", KW_MIXFIX)
+        );
     }
 
     @NotNull Kind kind();

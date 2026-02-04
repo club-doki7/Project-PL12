@@ -32,18 +32,18 @@ class LexerTest {
 
     @Test
     void testEmptyInput() throws LexicalException {
-        assertEquals(List.of(sym(Kind.EOI)), tokenize(""));
+        assertEquals(List.of(eoi()), tokenize(""));
     }
 
     @Test
     void testWhitespaceOnly() throws LexicalException {
-        assertEquals(List.of(sym(Kind.EOI)), tokenize("   \n\t  "));
+        assertEquals(List.of(eoi()), tokenize("   \n\t  "));
     }
 
     @Test
     void testIdentifier() throws LexicalException {
         assertEquals(
-            List.of(ident("foo"), ident("bar_baz"), ident("x'"), sym(Kind.EOI)),
+            List.of(ident("foo"), ident("bar_baz"), ident("x'"), eoi()),
             tokenize("foo bar_baz x'")
         );
     }
@@ -106,7 +106,7 @@ class LexerTest {
     @Test
     void testStringLiterals() throws LexicalException {
         assertEquals(
-            List.of(string("hello"), string("world"), sym(Kind.EOI)),
+            List.of(string("hello"), string("world"), eoi()),
             tokenize("\"hello\" \"world\"")
         );
     }
@@ -128,7 +128,7 @@ class LexerTest {
     @Test
     void testBlockComment() throws LexicalException {
         assertEquals(
-            List.of(ident("foo"), ident("bar"), sym(Kind.EOI)),
+            List.of(ident("foo"), ident("bar"), eoi()),
             tokenize("foo (* this is a comment *) bar")
         );
     }
@@ -136,7 +136,7 @@ class LexerTest {
     @Test
     void testMultipleComments() throws LexicalException {
         assertEquals(
-            List.of(ident("foo"), ident("bar"), sym(Kind.EOI)),
+            List.of(ident("foo"), ident("bar"), eoi()),
             tokenize("(* first *) foo (* second *) (* third *) bar")
         );
     }
@@ -214,7 +214,7 @@ class LexerTest {
     void testOperatorChars() throws LexicalException {
         // 运算符字符在没有注册中缀运算符时作为标识符处理
         assertEquals(
-            List.of(ident("+"), ident("-"), ident("++"), ident("--"), sym(Kind.EOI)),
+            List.of(ident("+"), ident("-"), ident("++"), ident("--"), eoi()),
             tokenize("+ - ++ --")
         );
     }
@@ -237,7 +237,7 @@ class LexerTest {
     @Test
     void testHoleToken() throws LexicalException {
         assertEquals(
-            List.of(sym(Kind.D_QUES), sym(Kind.EOI)),
+            List.of(sym(Kind.D_QUES), eoi()),
             tokenize("??")
         );
     }
