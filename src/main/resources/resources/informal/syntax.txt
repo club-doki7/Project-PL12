@@ -15,18 +15,28 @@
 函数
 
     Definition fact (n : nat) : nat :=
-        (* implementation *)
-        .
+        match n with
+        | 0 => 1
+        | S k => n * fact(k)
+        end.
 
 过程
 
-    Procedure main : () :=
+    Procedure main : unit :=
         print "Hello, world!";
-        print "The factorial of 5 is " + stringify(fact(5))
-        .
+        local i := ref 0 in
+            loop
+                if negb (i `leb` 10) then
+                    print (fact (read i));
+                    i := (read i) + 1
+                else
+                    break
+                end
+            end.
 
 公理
 
-    Axiom fun_ext : forall {A B : *},
-                    forall (f g : A -> B),
-                    (forall x : A, f(x) = g(x)) -> f = g.
+    Axiom funext : forall {A B : *},
+                   forall (f g : A -> B),
+                   (forall x : A, f(x) = g(x)) ->
+                   f = g.
