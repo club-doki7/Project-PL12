@@ -1,6 +1,6 @@
 You appear to be advocating a new:
 - Paradigm
-  [✓] functional  [½] imperative  [ ] object-oriented  [½] procedural
+  [✓] functional  [½] imperative  [ ] object-oriented  [ ] procedural
   [ ] stack-based  [ ] logical  [ ] multi-paradigm
 - Decision
   [✓] statically-typed  [ ] dynamically typed
@@ -72,9 +72,9 @@ The following philosophical objections apply:
     [ ] The implementation is closed-source
     [ ] The implementation is covered by patents
     [ ] The implementation is not owned by you
-[½] Your type system is unsound
-    [✓] A proof of same is attached
-    [✓] Invoking this proof crashes the compiler
+[ ] Your type system is unsound
+    [ ] A proof of same is attached
+    [ ] Invoking this proof crashes the compiler
 [ ] Your language cannot be unambiguously parsed
 [ ] Your language encourages insecure and fragile programs
     [ ] and even your examples fail in common edge cases

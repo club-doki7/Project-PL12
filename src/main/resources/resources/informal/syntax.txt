@@ -28,12 +28,26 @@ Procedures
        thus type of [main] is [partial unit] *)
     Procedure main : unit := print "Hello world!".
 
+    (* a completely imperative version of factorial calculation *)
+    Procedure fact_imp (n : nat) : nat :=
+        local result := ref 1 in
+        local i := ref 1 in
+        loop
+            if (read i) `leb` n then
+                write result ((read result) * (read i));
+                write i ((read i) + 1)
+            else
+                return (read result)
+            end
+        end.
+
     (* factorials from 0 to 10 *)
     Procedure main : unit :=
         print "Hello, world!";
         local i := ref 0 in loop
             if negb (i `leb` 10) then
-                print (fact (read i));
+                print "fact " i " = " (fact (read i)) "\n";
+                print "fact_imp " i " = " (fact_imp (read i)) "\n";
                 write i ((read i) + 1)
             else
                 return
@@ -50,16 +64,15 @@ Lambda
 
 Axiom
 
-    (* currently using type-in-type, which is known vulnerable to Girard's paradox
-       we'll switch to universe hierarchies later *)
-    Axiom funext : forall {A B : *},
+    Axiom funext : forall {A B : Type},
                    forall (f g : A -> B),
                    (forall x : A, f x = g x) ->
                    f = g.
 
-    (* future *)
-    Axiom funext : forall {l : Level},
-                   forall {A B : Type l},
-                   forall (f g : A -> B),
-                   (forall x : A, f x = g x) ->
-                   f = g.
+Proofs (now via term construction)
+
+    Definition add_assoc (a b c : nat) : a + b + c = a + (b + c) :=
+        case a of
+        | 0 => eq_refl
+        | S a' => cong S (add_assoc a' b c)
+        end.
