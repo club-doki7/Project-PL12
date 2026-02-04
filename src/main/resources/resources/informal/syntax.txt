@@ -5,13 +5,28 @@
 
 中缀运算符
 
-    infixl 50 + := add
-    infixl 60 * := multiply
-
-混缀运算符
-
-    mixfix rewrite_as_by_ := \x. \y. \eq. eq_ind (* implementation *)
+    Notation left 50 + := plus.
+    Notation left 40 * := multiply.
 
 前缀运算符
 
-    mixfix -_ := \x. negate x
+    Notation prefix ~ := negate.
+
+函数
+
+    Definition fact (n : nat) : nat :=
+        (* implementation *)
+        .
+
+过程
+
+    Procedure main : () :=
+        print "Hello, world!";
+        print "The factorial of 5 is " + stringify(fact(5))
+        .
+
+公理
+
+    Axiom fun_ext : forall {A B : *},
+                    forall (f g : A -> B),
+                    (forall x : A, f(x) = g(x)) -> f = g.

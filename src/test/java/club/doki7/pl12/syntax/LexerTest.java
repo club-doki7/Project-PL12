@@ -54,16 +54,13 @@ class LexerTest {
             List.of(
                     sym(Kind.PI),
                     sym(Kind.KW_AXIOM),
-                    sym(Kind.KW_DEFUN),
-                    sym(Kind.KW_DEFPROC),
-                    sym(Kind.KW_LET),
+                    sym(Kind.KW_DEFINITION),
+                    sym(Kind.KW_PROCEDURE),
                     sym(Kind.KW_CHECK),
-                    sym(Kind.KW_INFIX_L),
-                    sym(Kind.KW_INFIX_R),
-                    sym(Kind.KW_MIXFIX),
+                    sym(Kind.KW_NOTATION),
                     eoi()
             ),
-            tokenize("forall axiom defun defproc let check infixl infixr mixfix")
+            tokenize("forall Axiom Definition Procedure Check Notation")
         );
     }
 
@@ -223,14 +220,16 @@ class LexerTest {
     void testInfixDeclaration() throws LexicalException {
         assertEquals(
             List.of(
-                    sym(Kind.KW_INFIX_L),
+                    sym(Kind.KW_NOTATION),
+                    ident("left"),
                     nat(BigInteger.valueOf(50)),
                     ident("+"),
                     sym(Kind.COLON_EQ),
                     ident("add"),
+                    sym(Kind.DOT),
                     eoi()
             ),
-            tokenize("infixl 50 + := add")
+            tokenize("Notation left 50 + := add.")
         );
     }
 

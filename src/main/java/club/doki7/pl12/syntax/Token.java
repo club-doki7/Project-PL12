@@ -13,6 +13,8 @@ public sealed interface Token {
     enum Kind {
         /// 标识符
         IDENT,
+        /// 前缀运算符
+        PREFIX,
         /// 中缀运算符
         INFIX,
         /// 字符串
@@ -52,29 +54,22 @@ public sealed interface Token {
 
         /// 外围语言所用的一些关键字
         KW_AXIOM,
-        KW_DEFUN,
-        KW_DEFPROC,
-        KW_LET,
-        KW_IN,
+        KW_DEFINITION,
+        KW_PROCEDURE,
         KW_CHECK,
-        KW_INFIX_L,
-        KW_INFIX_R,
-        KW_MIXFIX,
+        KW_NOTATION,
 
         /// End Of Input
         EOI;
 
-        public static Map<String, Kind> KEYWORDS_MAP = Map.ofEntries(
+        public static final Map<String, Kind> KEYWORDS_MAP = Map.ofEntries(
             Map.entry("forall", PI),
-            Map.entry("axiom", KW_AXIOM),
-            Map.entry("defun", KW_DEFUN),
-            Map.entry("defproc", KW_DEFPROC),
-            Map.entry("let", KW_LET),
-            Map.entry("in", KW_IN),
-            Map.entry("check", KW_CHECK),
-            Map.entry("infixl", KW_INFIX_L),
-            Map.entry("infixr", KW_INFIX_R),
-            Map.entry("mixfix", KW_MIXFIX)
+
+            Map.entry("Axiom", KW_AXIOM),
+            Map.entry("Definition", KW_DEFINITION),
+            Map.entry("Procedure", KW_PROCEDURE),
+            Map.entry("Check", KW_CHECK),
+            Map.entry("Notation", KW_NOTATION)
         );
     }
 
@@ -342,7 +337,7 @@ public sealed interface Token {
 
     @TestOnly
     static Token prefixOp(@NotNull Operator.Prefix prefixOp) {
-        return new Prefix(Kind.INFIX, prefixOp, "<test>", 0, 0, 0);
+        return new Prefix(Kind.PREFIX, prefixOp, "<test>", 0, 0, 0);
     }
 
     @TestOnly
