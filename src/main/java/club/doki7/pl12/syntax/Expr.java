@@ -175,7 +175,7 @@ public sealed interface Expr extends Node {
 
         @TestOnly
         public Lam(@NotNull String param, @NotNull Expr body) {
-            this(Token.sym(Token.Kind.LAMBDA), List.of(Token.ident(param)), body);
+            this(Token.sym(Token.Kind.FUN), List.of(Token.ident(param)), body);
         }
 
         @TestOnly
@@ -183,7 +183,7 @@ public sealed interface Expr extends Node {
             List<Token> paramTokens = params.stream()
                     .map(Token::ident)
                     .toList();
-            this(Token.sym(Token.Kind.LAMBDA), paramTokens, body);
+            this(Token.sym(Token.Kind.FUN), paramTokens, body);
         }
 
         @Override

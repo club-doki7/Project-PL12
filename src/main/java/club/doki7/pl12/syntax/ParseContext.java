@@ -3,7 +3,6 @@ package club.doki7.pl12.syntax;
 import club.doki7.pl12.exc.LexicalException;
 import club.doki7.pl12.exc.SourceRange;
 import club.doki7.pl12.util.Pair;
-import club.doki7.pl12.util.UV;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -14,17 +13,21 @@ public record ParseContext(char[] buf,
                            String file,
                            int line,
                            int col,
-                           UV<Map<String, Operator.Prefix>> prefixOps,
-                           UV<Map<String, Operator.Infix>> infixOps)
+                           Mode mode,
+                           Map<String, Operator.Prefix> prefixOps,
+                           Map<String, Operator.Infix> infixOps)
 {
+    public enum Mode { IDLE, BVR, DOGFIGHT }
+
     public static ParseContext of(String content, String file) {
         return new ParseContext(content.toCharArray(),
                                 0,
                                 file,
                                 1,
                                 1,
-                                UV.of(new HashMap<>()),
-                                UV.of(new HashMap<>()));
+                                Mode.IDLE,
+                                new HashMap<>(),
+                                new HashMap<>());
     }
 
     public static ParseContext clone(ParseContext ctx, int position, int line, int col) {
@@ -33,6 +36,7 @@ public record ParseContext(char[] buf,
                                 ctx.file,
                                 line,
                                 col,
+                                ctx.mode,
                                 ctx.prefixOps,
                                 ctx.infixOps);
     }
@@ -79,8 +83,8 @@ public record ParseContext(char[] buf,
                  '5', '6', '7', '8', '9' -> nextNat(ctx, pos, line, col);
             case '"' -> nextString(ctx, pos, line, col);
             case ')', '[', ']', '{', '}',
-                 '→', '.', ',', '∀', 'Π',
-                 'λ', '\\', '*' -> nextSingleChar(ctx, pos, line, col);
+                 '→', '⇒', '.', ',', '*',
+                 '∀', 'Π', 'λ' -> nextSingleChar(ctx, pos, line, col);
             case ':' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '=')
                     ? Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
@@ -92,10 +96,16 @@ public record ParseContext(char[] buf,
                     ? Pair.of(Token.sym(Token.Kind.ARROW, "->", ctx.file, pos, line, col),
                               ParseContext.clone(ctx, pos + 2, line, col + 2))
                     : nextIdent(ctx, pos, line, col);
-            case '(' -> (pos + 1 < buf.length && buf[pos + 1] == '*')
-                ? skipComment(ctx, pos, line, col)
-                : Pair.of(Token.sym(Token.Kind.L_PAREN, "(", ctx.file, pos, line, col),
+            case '(' ->
+                (pos + 1 < buf.length && buf[pos + 1] == '*')
+                    ? skipComment(ctx, pos, line, col)
+                    : Pair.of(Token.sym(Token.Kind.L_PAREN, "(", ctx.file, pos, line, col),
                           ParseContext.clone(ctx, pos + 1, line, col + 1));
+            case '=' ->
+                (pos + 1 < buf.length && buf[pos + 1] == '>')
+                    ? Pair.of(Token.sym(Token.Kind.D_ARROW, "=>", ctx.file, pos, line, col),
+                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                    : nextIdent(ctx, pos, line, col);
             case '?' -> {
                 if (pos + 1 < buf.length && buf[pos + 1] == '?') {
                     yield Pair.of(Token.sym(Token.Kind.D_QUES, "??", ctx.file, pos, line, col),
@@ -135,13 +145,21 @@ public record ParseContext(char[] buf,
                            ParseContext.clone(ctx, pos, line, col));
         }
 
-        @Nullable Operator.Prefix prefix = ctx.prefixOps.value.get(lexeme);
+        if (ctx.mode == Mode.DOGFIGHT) {
+            kwKind = Token.Kind.DF_KEYWORDS_MAP.get(lexeme);
+            if (kwKind != null) {
+                return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
+                               ParseContext.clone(ctx, pos, line, col));
+            }
+        }
+
+        @Nullable Operator.Prefix prefix = ctx.prefixOps.get(lexeme);
         if (prefix != null) {
             return Pair.of(Token.prefixOp(prefix, ctx.file, startPos, line, startCol),
                            ParseContext.clone(ctx, pos, line, col));
         }
 
-        @Nullable Operator.Infix infix = ctx.infixOps.value.get(lexeme);
+        @Nullable Operator.Infix infix = ctx.infixOps.get(lexeme);
         if (infix != null) {
             return Pair.of(Token.infixOp(infix, ctx.file, startPos, line, startCol),
                            ParseContext.clone(ctx, pos, line, col));
@@ -235,10 +253,11 @@ public record ParseContext(char[] buf,
             case '{' -> Token.Kind.L_BRACE;
             case '}' -> Token.Kind.R_BRACE;
             case '→' -> Token.Kind.ARROW;
+            case '⇒' -> Token.Kind.D_ARROW;
             case '.' -> Token.Kind.DOT;
             case ',' -> Token.Kind.COMMA;
             case '∀', 'Π' -> Token.Kind.PI;
-            case 'λ', '\\' -> Token.Kind.LAMBDA;
+            case 'λ' -> Token.Kind.FUN;
             case '*' -> Token.Kind.ASTER;
             default -> throw new IllegalStateException("Unexpected character: " + c);
         };

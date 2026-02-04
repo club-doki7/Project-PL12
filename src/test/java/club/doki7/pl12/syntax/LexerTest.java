@@ -73,17 +73,19 @@ class LexerTest {
                     sym(Kind.DOT),
                     sym(Kind.COMMA),
                     sym(Kind.COLON),
-                    sym(Kind.LAMBDA),
-                    sym(Kind.LAMBDA),
+                    sym(Kind.FUN),
+                    sym(Kind.FUN),
                     sym(Kind.PI),
                     sym(Kind.PI),
                     sym(Kind.ARROW),
                     sym(Kind.ARROW),
+                    sym(Kind.D_ARROW),
+                    sym(Kind.D_ARROW),
                     sym(Kind.D_QUES),
                     sym(Kind.ASTER),
                     eoi()
             ),
-            tokenize("( ) . , : \\ λ ∀ Π → -> ?? *")
+            tokenize("( ) . , : fun λ ∀ Π → -> ⇒ => ?? *")
         );
     }
 
@@ -162,7 +164,7 @@ class LexerTest {
     void testComplexExpression() throws LexicalException {
         assertEquals(
             List.of(
-                    sym(Kind.LAMBDA),
+                    sym(Kind.FUN),
                     ident("x"),
                     sym(Kind.COLON),
                     sym(Kind.ASTER),

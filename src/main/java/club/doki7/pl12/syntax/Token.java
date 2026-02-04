@@ -33,10 +33,12 @@ public sealed interface Token {
         L_BRACE,
         /// 右大括号
         R_BRACE,
-        /// `λ` 和 `\`
-        LAMBDA,
+        /// `λ` 和 `fun`
+        FUN,
         /// `->` 和 `→`
         ARROW,
+        /// `=>`，`⇒`，`↦` 和 `|->`
+        D_ARROW,
         /// `.`
         DOT,
         /// `,`
@@ -52,24 +54,57 @@ public sealed interface Token {
         /// `??`
         D_QUES,
 
-        /// 外围语言所用的一些关键字
+        // IDLE 状态的关键字
         KW_AXIOM,
         KW_DEFINITION,
         KW_PROCEDURE,
         KW_CHECK,
         KW_NOTATION,
 
+        // BVR 状态的关键字，暂无
+        KW_BVR_NONE,
+
+        // DOGFIGHT 状态的关键字
+        KW_DF_LOCAL,
+        KW_DF_IN,
+        KW_DF_IF,
+        KW_DF_THEN,
+        KW_DF_ELSE,
+        KW_DF_CASE,
+        KW_DF_OF,
+        KW_DF_LOOP,
+        KW_DF_BREAK,
+        KW_DF_CONTINUE,
+        KW_DF_RETURN,
+        KW_DF_END,
+
         /// End Of Input
         EOI;
 
         public static final Map<String, Kind> KEYWORDS_MAP = Map.ofEntries(
             Map.entry("forall", PI),
+            Map.entry("fun", FUN),
 
             Map.entry("Axiom", KW_AXIOM),
             Map.entry("Definition", KW_DEFINITION),
             Map.entry("Procedure", KW_PROCEDURE),
             Map.entry("Check", KW_CHECK),
             Map.entry("Notation", KW_NOTATION)
+        );
+
+        public static final Map<String, Kind> DF_KEYWORDS_MAP = Map.ofEntries(
+            Map.entry("local", KW_DF_LOCAL),
+            Map.entry("in", KW_DF_IN),
+            Map.entry("if", KW_DF_IF),
+            Map.entry("then", KW_DF_THEN),
+            Map.entry("else", KW_DF_ELSE),
+            Map.entry("case", KW_DF_CASE),
+            Map.entry("of", KW_DF_OF),
+            Map.entry("loop", KW_DF_LOOP),
+            Map.entry("break", KW_DF_BREAK),
+            Map.entry("continue", KW_DF_CONTINUE),
+            Map.entry("return", KW_DF_RETURN),
+            Map.entry("end", KW_DF_END)
         );
     }
 

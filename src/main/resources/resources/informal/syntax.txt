@@ -5,17 +5,18 @@
 
 中缀运算符
 
-    Notation left 50 + := plus.
-    Notation left 40 * := multiply.
+    Notation left 50 (+) := plus.
+    Notation left 40 (*) := multiply.
+    Notation right 30 (^) := power.
 
 前缀运算符
 
-    Notation prefix ~ := negate.
+    Notation prefix (~) := negate.
 
 函数
 
     Definition fact (n : nat) : nat :=
-        match n with
+        case n of
         | 0 => 1
         | S k => n * fact(k)
         end.
@@ -25,14 +26,19 @@
     Procedure main : unit :=
         print "Hello, world!";
         local i := ref 0 in
-            loop
-                if negb (i `leb` 10) then
-                    print (fact (read i));
-                    i := (read i) + 1
-                else
-                    break
-                end
-            end.
+        loop
+            if negb (i `leb` 10) then
+                print (fact (read i));
+                write i ((read i) + 1)
+            else
+                return
+            end
+        end.
+
+Lambda
+
+    Definition double_list (l : list nat) : list nat :=
+        map (fun x : nat => x + x) l.
 
 公理
 
