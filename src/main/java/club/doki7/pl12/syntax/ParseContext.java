@@ -14,6 +14,7 @@ public record ParseContext(char[] buf,
                            String file,
                            int line,
                            int col,
+                           UV<Map<String, Operator.Prefix>> prefixOps,
                            UV<Map<String, Operator.Infix>> infixOps)
 {
     public static ParseContext of(String content, String file) {
@@ -22,11 +23,18 @@ public record ParseContext(char[] buf,
                                 file,
                                 1,
                                 1,
+                                UV.of(new HashMap<>()),
                                 UV.of(new HashMap<>()));
     }
 
     public static ParseContext clone(ParseContext ctx, int position, int line, int col) {
-        return new ParseContext(ctx.buf, position, ctx.file, line, col, ctx.infixOps);
+        return new ParseContext(ctx.buf,
+                                position,
+                                ctx.file,
+                                line,
+                                col,
+                                ctx.prefixOps,
+                                ctx.infixOps);
     }
 
     public Pair<Token, ParseContext> nextToken() throws LexicalException {
@@ -124,6 +132,12 @@ public record ParseContext(char[] buf,
         @Nullable Token.Kind kwKind = Token.Kind.KEYWORDS_MAP.get(lexeme);
         if (kwKind != null) {
             return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
+                           ParseContext.clone(ctx, pos, line, col));
+        }
+
+        @Nullable Operator.Prefix prefix = ctx.prefixOps.value.get(lexeme);
+        if (prefix != null) {
+            return Pair.of(Token.prefixOp(prefix, ctx.file, startPos, line, startCol),
                            ParseContext.clone(ctx, pos, line, col));
         }
 

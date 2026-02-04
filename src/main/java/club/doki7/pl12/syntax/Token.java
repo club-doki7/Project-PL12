@@ -198,6 +198,39 @@ public sealed interface Token {
         }
     }
 
+    record Prefix(@NotNull Kind kind,
+                  @NotNull Operator.Prefix prefixOp,
+                  @NotNull String file,
+                  int pos,
+                  int line,
+                  int col)
+        implements Token
+    {
+        @Override
+        public @NotNull String lexeme() {
+            return prefixOp.lexeme();
+        }
+
+        @Override
+        public @NotNull String toString() {
+            return lexeme();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Prefix(Kind kind1, Operator.Prefix prefixOp1, _, _, _, _))) {
+                return false;
+            }
+            return kind == kind1 && prefixOp.equals(prefixOp1);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Prefix.class, kind, prefixOp);
+        }
+    }
+
     record Infix(@NotNull Kind kind,
                  @NotNull Operator.Infix infixOp,
                  @NotNull String file,
@@ -208,7 +241,7 @@ public sealed interface Token {
     {
         @Override
         public @NotNull String lexeme() {
-            return infixOp().lexeme();
+            return infixOp.lexeme();
         }
 
         @Override
@@ -265,6 +298,15 @@ public sealed interface Token {
         return new Simple(kind, lexeme, file, pos, line, col);
     }
 
+    static Token prefixOp(@NotNull Operator.Prefix prefixOp,
+                          @NotNull String file,
+                          int pos,
+                          int line,
+                          int col)
+    {
+        return new Prefix(Kind.INFIX, prefixOp, file, pos, line, col);
+    }
+
     static Token infixOp(@NotNull Operator.Infix infixOp,
                          @NotNull String file,
                          int pos,
@@ -299,8 +341,13 @@ public sealed interface Token {
     }
 
     @TestOnly
+    static Token prefixOp(@NotNull Operator.Prefix prefixOp) {
+        return new Prefix(Kind.INFIX, prefixOp, "<test>", 0, 0, 0);
+    }
+
+    @TestOnly
     static Token infixOp(@NotNull Operator.Infix infixOp) {
-        return new Infix(Kind.INFIX, infixOp,"<test>", 0, 0, 0);
+        return new Infix(Kind.INFIX, infixOp, "<test>", 0, 0, 0);
     }
 
     @TestOnly
