@@ -107,7 +107,7 @@ Your implementation has the following flaws:
 [ ] Dangerous behavior is not even a warning
 [ ] The compiler crashes if you look at it funny
 [ ] The VM crashes if you look at it funny
-[ ] The LLM it uses can be jailbroken
+[ ] The LLM it uses can be jail-broken
 [ ] You don't seem to understand basic optimization techniques
 [ ] You don't seem to understand basic systems programming
 [ ] You don't seem to understand pointers
@@ -136,8 +136,8 @@ Additionally, your marketing has the following problems:
     [ ] in handwritten assembly
     [ ] by libraries in other languages, that you call through your FFI
 [ ] You're exclusively benchmarking toy functions for:
-   [ ] addition  [ ] Fibonacci  [ ] FizzBuzz  [ ] JSON parsing  [ ] serving HTTP
-[ ] Noone really believes that your language is faster than:
+    [ ] addition  [ ] Fibonacci  [ ] FizzBuzz  [ ] JSON parsing  [ ] serving HTTP
+[ ] No one really believes that your language is faster than:
     [ ] assembly  [ ] C  [ ] Rust  [ ] Go  [ ] Javascript  [ ] Python
 [ ] Rejection of orthodox programming-language theory without justification
 [ ] Rejection of orthodox systems programming without justification
@@ -147,7 +147,7 @@ Additionally, your marketing has the following problems:
 
 Our security officers point out that:
 [ ] Your builds are:
-    [ ] not reproducible  [ ] unsigned  [ ] triggering our anti-virus
+    [ ] not reproducible  [ ] unsigned  [ ] triggering our antivirus
     [ ] hosted on a forum  [ ] in a sanctioned country
 [ ] It relies on external servers  [ ] and runs code from them  [ ] at runtime
 [ ] Your deserialization feature is indistinguishable from a reverse shell
