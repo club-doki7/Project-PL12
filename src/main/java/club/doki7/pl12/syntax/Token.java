@@ -18,13 +18,19 @@ public sealed interface Token {
         LIT_STRING,
         /// 自然数
         LIT_NAT,
-        /// 混缀运算符片段
-        MIXFIX_FRAG,
         /// 左括号
         L_PAREN,
         /// 右括号
         R_PAREN,
-        /// `λ` 或者 `\`
+        /// 左中括号
+        L_BRACKET,
+        /// 右中括号
+        R_BRACKET,
+        /// 左大括号
+        L_BRACE,
+        /// 右大括号
+        R_BRACE,
+        /// `λ` 和 `\`
         LAMBDA,
         /// `->` 和 `→`
         ARROW,
@@ -38,8 +44,6 @@ public sealed interface Token {
         PI,
         /// `:`
         COLON,
-        /// `=`
-        EQ,
         /// `:=`
         COLON_EQ,
         /// `??`
@@ -212,38 +216,6 @@ public sealed interface Token {
         }
     }
 
-    record MixfixFrag(@NotNull Kind kind,
-                      @NotNull Operator.Mixfix mixfixOp,
-                      int frag,
-                      @NotNull String file,
-                      int pos,
-                      int line,
-                      int col)
-        implements Token
-    {
-        @Override
-        public @NotNull String lexeme() {
-            return mixfixOp.parts().get(frag);
-        }
-
-        @Override
-        public @NotNull String toString() {
-            return lexeme();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (!(obj instanceof MixfixFrag(Kind kind1,
-                                            Operator.Mixfix mixfixOp1,
-                                            int frag1,
-                                            _, _, _, _))) {
-                return false;
-            }
-            return kind == kind1 && mixfixOp.equals(mixfixOp1) && frag == frag1;
-        }
-    }
-
     static Token ident(@NotNull String lexeme, @NotNull String file, int pos, int line, int col) {
         return new Simple(Kind.IDENT, lexeme, file, pos, line, col);
     }
@@ -268,12 +240,12 @@ public sealed interface Token {
         return new LitNat(Kind.LIT_NAT, value, lexeme, file, pos, line, col);
     }
 
-    static Token symbol(@NotNull Kind kind,
-                        @NotNull String lexeme,
-                        @NotNull String file,
-                        int pos,
-                        int line,
-                        int col)
+    static Token sym(@NotNull Kind kind,
+                     @NotNull String lexeme,
+                     @NotNull String file,
+                     int pos,
+                     int line,
+                     int col)
     {
         return new Simple(kind, lexeme, file, pos, line, col);
     }
@@ -287,16 +259,6 @@ public sealed interface Token {
         return new Infix(Kind.INFIX, infixOp, file, pos, line, col);
     }
 
-    static Token mixfixFrag(@NotNull Operator.Mixfix mixfixOp,
-                            @NotNull String file,
-                            int frag,
-                            int pos,
-                            int line,
-                            int col)
-    {
-        return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, file, pos, line, col);
-    }
-
     static Token eoi(@NotNull String file, int pos, int line, int col) {
         return new Simple(Kind.EOI, "<EOI>", file, pos, line, col);
     }
@@ -307,7 +269,7 @@ public sealed interface Token {
     }
 
     @TestOnly
-    static Token symbol(@NotNull Kind kind) {
+    static Token sym(@NotNull Kind kind) {
         return new Simple(kind, kind.toString(), "<test>", 0, 0, 0);
     }
 
@@ -324,11 +286,6 @@ public sealed interface Token {
     @TestOnly
     static Token infixOp(@NotNull Operator.Infix infixOp) {
         return new Infix(Kind.INFIX, infixOp,"<test>", 0, 0, 0);
-    }
-
-    @TestOnly
-    static Token mixfixFrag(@NotNull Operator.Mixfix mixfixOp, int frag) {
-        return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, "<test>", 0, 0, 0);
     }
 
     @TestOnly

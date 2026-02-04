@@ -47,7 +47,7 @@ public sealed interface Expr {
 
         @TestOnly
         public Aster() {
-            this(Token.symbol(Token.Kind.ASTER));
+            this(Token.sym(Token.Kind.ASTER));
         }
 
         @Override
@@ -72,7 +72,7 @@ public sealed interface Expr {
                   List<String> params,
                   @NotNull Expr paramType,
                   @NotNull Expr body) {
-            Token piToken = Token.symbol(Token.Kind.PI);
+            Token piToken = Token.sym(Token.Kind.PI);
             List<Token> paramTokens = params.stream()
                     .map(Token::ident)
                     .toList();
@@ -177,7 +177,7 @@ public sealed interface Expr {
 
         @TestOnly
         public Lam(@NotNull String param, @NotNull Expr body) {
-            this(Token.symbol(Token.Kind.LAMBDA), List.of(Token.ident(param)), body);
+            this(Token.sym(Token.Kind.LAMBDA), List.of(Token.ident(param)), body);
         }
 
         @TestOnly
@@ -185,7 +185,7 @@ public sealed interface Expr {
             List<Token> paramTokens = params.stream()
                     .map(Token::ident)
                     .toList();
-            this(Token.symbol(Token.Kind.LAMBDA), paramTokens, body);
+            this(Token.sym(Token.Kind.LAMBDA), paramTokens, body);
         }
 
         @Override
@@ -215,7 +215,7 @@ public sealed interface Expr {
 
         @TestOnly
         public Hole() {
-            this(Token.symbol(Token.Kind.D_QUES));
+            this(Token.sym(Token.Kind.D_QUES));
         }
 
         @Override
