@@ -1,0 +1,180 @@
+You appear to be advocating a new:
+- Paradigm
+  [ ] functional  [ ] imperative  [ ] object-oriented  [ ] procedural
+  [ ] stack-based  [ ] logical  [ ] multi-paradigm
+- Decision
+  [ ] statically-typed  [ ] dynamically typed
+  [ ] pure  [ ] impure
+  [ ] lazy  [ ] eager
+  [ ] sharable  [ ] provable  [ ] turing-incomplete
+  [ ] memory safe  [ ] memory unsafe
+- 实现
+  [ ] interpreted  [ ] compiled  [ ] JIT
+- 意图
+  [ ] concurrent  [ ] AI  [ ] cloud
+  [ ] academic-friendly  [ ] visual  [ ] beginner-friendly  [ ] non-programmer friendly
+  [ ] esoteric  [ ] completely incomprehensible
+programming language. Your language will not work, and here's why:
+
+You appear to believe that:
+[ ] Syntax is what makes programming difficult
+[ ] Performance is:
+    [ ] not relevant anymore  [ ] worth any and all sacrifices
+    [ ] independent of language design
+[ ] Garbage collection is free
+[ ] Computer have infinite memory
+[ ] AI-generated code is generally correct  [ ] and won't create legal issues
+[ ] A Turing-complete type system is a benefit
+[ ] Developers don't make mistakes and guessing intent is a good strategy
+[ ] Nobody really needs:
+    [ ] concurrency  [ ] a REPL  [ ] debugger support  [ ] IDE support  [ ] I/O
+    [ ] determinism  [ ] compile-time analysis  [ ] joy in their lives
+    [ ] to interact with code not written in your language
+[ ] The entire world speaks 7-bit ASCII
+[ ] Scaling up to large software projects will be easy
+[ ] Convincing programmers to adopt a new language will be easy
+[ ] Convincing programmers to adopt a language-specific IDE will be easy
+[ ] Programmers love writing lots of boilerplate
+[ ] Specifying behaviors as "undefined" means that programmers won't rely on them
+[ ] "Spooky action at a distance" makes programming more fun
+[ ] The primary objective of a programming language is writing compilers
+
+Unfortunately, your language (has/lacks):
+- Surface syntax
+  [ ] comprehensible syntax  [ ] significant whitespace  [ ] semicolon  [ ] assignment expressions
+  [ ] infix operators  [ ] operator overloading  [ ] nested comments  [ ] multi-line strings  [ ] regexes
+  [ ] string templates  [ ] pipe  [ ] variable shadowing  [ ] emoji names [ ] pattern matching/destructuring
+  [ ] ergonomic error values
+- Semantics
+  [ ] closures  [ ] objects
+  [ ] call by value  [ ] call by name  [ ] call by reference
+  [ ] memory safety  [ ] borrow checking
+- Control flow
+  [ ] goto  [ ] comefrom, but unironically  [ ] asynchronous  [ ] coroutines  [ ] exceptions
+  [ ] type and effect system  [ ] monads  [ ] algebraic effects
+  [ ] tail recursion  [ ] call/cc
+- Type system
+  [ ] implicit type conversion  [ ] explicit casting  [ ] type inference
+  [ ] immutable data structures [ ] algebraic data types  [ ] recursive types  [ ] polymorphic types
+  [ ] subtyping  [ ] classes  [ ] multiple inheritance  [ ] covariant array typing
+  [ ] dependent types  [ ] refinement types  [ ] gradual typing  [ ] substructural typing
+- Metaprogramming
+  [ ] hygiene macros  [ ] non-hygiene macros  [ ] DSL  [ ] reflection  [ ] multi-staging
+
+The following philosophical objections apply:
+[ ] Programmers should not need to understand category theory to write "Hello, World!"
+[ ] Programmers should not develop RSI from writing "Hello, World!"
+[ ] The most significant program written in your language is its own compiler
+[ ] The most significant program written in your language isn't even its own compiler
+[ ] No language specification
+[ ] No formal verification
+[ ] "The implementation is the specification"
+    [ ] The implementation is closed-source
+    [ ] The implementation is covered by patents
+    [ ] The implementation is not owned by you
+[ ] Your type system is unsound
+    [ ] A proof of same is attached
+    [ ] Invoking this proof crashes the compiler
+[ ] Your language cannot be unambiguously parsed
+[ ] Your language encourages insecure and fragile programs
+    [ ] and even your examples fail in common edge cases
+[ ] The name of your language is
+    [ ] impossible to find on Google
+    [ ] impossible to pronounce
+    [ ] a curse word in _________
+[ ] Interpreted languages will never be as fast as C
+[ ] Compiled languages will never be "extensible"
+[ ] Backwards compatibility and versioning is more important than you think
+[ ] Your language assumes the existence of a sufficiently smart compiler
+[ ] There are less than 100 programmers on the Earth smart enough to use your language
+[ ] Unit tests / fuzzing are enough for language development
+[ ] ____________________________ takes exponential time
+[ ] ____________________________ is known to be undecidable
+
+Your implementation has the following flaws:
+[ ] CPUs do not work that way
+[ ] RAM does not work that way
+[ ] VMs do not work that way
+[ ] Compilers do notwork that way
+[ ] Compilers cannot work that way
+[ ] Shift-reduce conflicts in parsing seems to be resolved using rand()
+[ ] You require the compiler to be present at runtime
+[ ] You require the language runtime to be present at compile time
+[ ] Your compiler errors are completely inscrutable
+[ ] Basic features have been "on the roadmap" for a year
+[ ] Your README looks AI-generated
+[ ] Dangerous behavior is only a warning
+[ ] Dangerous behavior is not even a warning
+[ ] The compiler crashes if you look at it funny
+[ ] The VM crashes if you look at it funny
+[ ] The LLM it uses can be jailbroken
+[ ] You don't seem to understand basic optimization techniques
+[ ] You don't seem to understand basic systems programming
+[ ] You don't seem to understand pointers
+[ ] You don't seem to understand functions
+[ ] You don't seem to like your fellow programmers very much
+
+You seem to be targeting the market for:
+[ ] systems programming  [ ] scripting  [ ] shells  [ ] web  [ ] games
+[ ] batch jobs  [ ] app making  [ ] teaching programming
+[ ] appeasing ops/security officers  [ ] freaking out ops/security officers
+[ ] code golfing  [ ] parody languages  [ ] writing type-theory papers
+[ ] creating AI  [ ] *mumble* blockchain *mumble*  [ ] other forms of raising VC money
+but I'm afraid the market is:
+[ ] already saturated with frankly better options
+[ ] unwilling to adopt solutions from small companies
+[ ] unwilling to adopt solutions from individual part-time developers
+[ ] busy with more important problems
+[ ] too smart to fall for your ploy
+
+Additionally, your marketing has the following problems:
+[ ] Complete lack of code examples
+[ ] Unsupported claims of increased productivity
+[ ] Unsupported claims of greater "ease of use"
+[ ] Safe guarantees without any proof
+[ ] Obviously rigged benchmarks where the bulk of work is done:
+    [ ] in handwritten assembly
+    [ ] by libraries in other languages, that you call through your FFI
+[ ] You're exclusively benchmarking toy functions for:
+   [ ] addition  [ ] Fibonacci  [ ] FizzBuzz  [ ] JSON parsing  [ ] serving HTTP
+[ ] Noone really believes that your language is faster than:
+    [ ] assembly  [ ] C  [ ] Rust  [ ] Go  [ ] Javascript  [ ] Python
+[ ] Rejection of orthodox programming-language theory without justification
+[ ] Rejection of orthodox systems programming without justification
+[ ] Rejection of orthodox algorithmic theory without justification
+[ ] Rejection of basic computer science without justification
+[ ] Rejection of engineering ethics without justification
+
+Our security officers point out that:
+[ ] Your builds are:
+    [ ] not reproducible  [ ] unsigned  [ ] triggering our anti-virus
+    [ ] hosted on a forum  [ ] in a sanctioned country
+[ ] It relies on external servers  [ ] and runs code from them  [ ] at runtime
+[ ] Your deserialization feature is indistinguishable from a reverse shell
+[ ] Your package manager:
+    [ ] has trivial security holes
+    [ ] lacks decent user authentication
+    [ ] hasn't learned the lessons from left-pad et.,al
+
+Compared to similar efforts, I would like to note that:
+[ ] Your complex sample code would be one line in: _______________________
+[ ] We already have many "better C" languages
+[ ] We already have many safe system languages
+[ ] We already have many easy-to-learn languages
+[ ] We already have many safe statically-typed eager functional languages
+[ ] We already have many web languages, for frontend, backend, and both-ends.
+[ ] We already have many "look at this cool type system!" languages
+[ ] You have reinvented Lisp but worse
+[ ] You have reinvented Haxe but worse
+[ ] You have reinvented Crystal but worse
+[ ] You have reinvented Zig but worse
+[ ] You have reinvented Javascript but worse
+[ ] You have reinvented Javascript better, but that's still no justification
+[ ] You have reinvented IntercalScript but non-ironically
+
+
+In conclusion, this is what I think of you:
+[ ] You have some interesting ideas, but this won't fly.
+[ ] This is a bad language, and you should feel bad for inventing it.
+[ ] Programming in this language is an adequate punishment for inventing it.
+[ ] I don't want to be in your shoes when the cloud bill comes.

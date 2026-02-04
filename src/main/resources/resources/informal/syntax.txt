@@ -1,19 +1,19 @@
-注释：
+Comments
 
     (* comment *)
     (* only block comments supported. nested comments not supported. *)
 
-中缀运算符
+Infix operators
 
     Notation left 50 (+) := plus.
     Notation left 40 (*) := multiply.
     Notation right 30 (^) := power.
 
-前缀运算符
+Prefix operators
 
     Notation prefix (~) := negate.
 
-函数
+Functions
 
     Definition fact (n : nat) : nat :=
         case n of
@@ -21,7 +21,7 @@
         | S k => n * fact(k)
         end.
 
-过程
+Procedures
 
     Procedure main : unit :=
         print "Hello, world!";
@@ -40,7 +40,10 @@ Lambda
     Definition double_list (l : list nat) : list nat :=
         map (fun x : nat => x + x) l.
 
-公理
+    Procedure for_each_list (l : list nat) (action : nat -> partial unit) : partial unit :=
+        foreach (proc x : nat => action x) l.
+
+Axiom
 
     Axiom funext : forall {A B : *},
                    forall (f g : A -> B),
