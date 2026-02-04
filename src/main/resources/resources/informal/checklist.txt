@@ -59,7 +59,7 @@ Unfortunately, your language (has/lacks):
   [½] subtyping  [×] classes  [×] multiple inheritance  [×] covariant array typing
   [✓] dependent types  [×] refinement types  [×] gradual typing  [×] substructural typing
 - Metaprogramming
-  [×] hygiene macros  [×] non-hygiene macros  [×] DSL  [×] reflection  [×] multi-staging
+  [×] hygiene macros  [×] non-hygiene macros  [½] DSL  [×] reflection  [×] multi-staging
 
 The following philosophical objections apply:
 [ ] Programmers should not need to understand category theory to write "Hello, World!"
@@ -162,7 +162,7 @@ Compared to similar efforts, I would like to note that:
 [ ] We already have many safe system languages
 [ ] We already have many easy-to-learn languages
 [½] We already have many safe statically-typed eager functional languages
-[ ] We already have many web languages, for frontend, backend, and both-ends.
+[ ] We already have many web languages, for frontend, backend, and both-ends
 [ ] We already have many "look at this cool type system!" languages
 [ ] You have reinvented Lisp but worse
 [ ] You have reinvented Haxe but worse

@@ -51,6 +51,12 @@ Axiom
        postulate its properties *)
     Axiom fact_imp_behaves_same_as_fact : forall {n : nat}, fact_imp_trusted n = fact n.
 
+    (* directly asserting equivalence of a partial function and a total function is not allowed,
+       since a partial function returns [partial T], not [T] *)
+    Fail Axiom fact_imp_untrusted_behaves_same_as_fact : forall {n : nat}, fact_imp n = fact n.
+    (* type error: cannot unify [nat] (inferred from [fact_imp n])
+                          with  [partial nat] (inferred from [fact n]) *)
+
     (* widely accepted axiom of function extensionality *)
     Axiom funext : forall {A B : Type},
                    forall (f g : A -> B),

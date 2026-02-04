@@ -162,7 +162,7 @@ Compared to similar efforts, I would like to note that:
 [ ] We already have many safe system languages
 [ ] We already have many easy-to-learn languages
 [ ] We already have many safe statically-typed eager functional languages
-[ ] We already have many web languages, for frontend, backend, and both-ends.
+[ ] We already have many web languages, for frontend, backend, and both-ends
 [ ] We already have many "look at this cool type system!" languages
 [ ] You have reinvented Lisp but worse
 [ ] You have reinvented Haxe but worse
