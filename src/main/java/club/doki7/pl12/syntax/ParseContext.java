@@ -37,6 +37,16 @@ public record ParseContext(char[] buf,
         return nextTokenImpl(this, pos, line, col);
     }
 
+    public static boolean isIdentChar(char c) {
+        return switch (c) {
+            case '-', '+', '*', '%', '<',
+                 '>', '!', '?', '_', '\'',
+                 '#', '@', '$', ';', '^',
+                 '/', '\\', '|', '~', '=' -> true;
+            default -> Character.isLetterOrDigit(c);
+        };
+    }
+
     private static Pair<Token, ParseContext>
     nextTokenImpl(ParseContext ctx, int pos, int line, int col) throws LexicalException {
         char[] buf = ctx.buf;
@@ -63,23 +73,21 @@ public record ParseContext(char[] buf,
             case ')', '[', ']', '{', '}',
                  '→', '.', ',', '∀', 'Π',
                  'λ', '\\', '*' -> nextSingleChar(ctx, pos, line, col);
-            case ':' -> {
-                if (pos + 1 < buf.length && buf[pos + 1] == '=') {
-                    yield Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
-                                  ParseContext.clone(ctx, pos + 2, line, col + 2));
-                } else {
-                    yield Pair.of(Token.sym(Token.Kind.COLON, ":", ctx.file, pos, line, col),
-                                  ParseContext.clone(ctx, pos + 1, line, col + 1));
-                }
-            }
-            case '-' -> {
-                if (pos + 1 < buf.length && buf[pos + 1] == '>') {
-                    yield Pair.of(Token.sym(Token.Kind.ARROW, "->", ctx.file, pos, line, col),
-                                  ParseContext.clone(ctx, pos + 2, line, col + 2));
-                } else {
-                    yield nextIdent(ctx, pos, line, col);
-                }
-            }
+            case ':' ->
+                (pos + 1 < buf.length && buf[pos + 1] == '=')
+                    ? Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
+                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                    : Pair.of(Token.sym(Token.Kind.COLON, ":", ctx.file, pos, line, col),
+                              ParseContext.clone(ctx, pos + 1, line, col + 1));
+            case '-' ->
+                (pos + 1 < buf.length && buf[pos + 1] == '>')
+                    ? Pair.of(Token.sym(Token.Kind.ARROW, "->", ctx.file, pos, line, col),
+                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                    : nextIdent(ctx, pos, line, col);
+            case '(' -> (pos + 1 < buf.length && buf[pos + 1] == '*')
+                ? skipComment(ctx, pos, line, col)
+                : Pair.of(Token.sym(Token.Kind.L_PAREN, "(", ctx.file, pos, line, col),
+                          ParseContext.clone(ctx, pos + 1, line, col + 1));
             case '?' -> {
                 if (pos + 1 < buf.length && buf[pos + 1] == '?') {
                     yield Pair.of(Token.sym(Token.Kind.D_QUES, "??", ctx.file, pos, line, col),
@@ -90,19 +98,11 @@ public record ParseContext(char[] buf,
                                                + " Meanwhile, to input a hole, use '??'.");
                 }
             }
-            case '(' -> {
-                if (pos + 1 < buf.length && buf[pos + 1] == '*') {
-                    yield skipComment(ctx, pos, line, col);
-                } else {
-                    yield Pair.of(Token.sym(Token.Kind.L_PAREN, "(", ctx.file, pos, line, col),
-                                  ParseContext.clone(ctx, pos + 1, line, col + 1));
-                }
-            }
             default -> nextIdent(ctx, pos, line, col);
         };
     }
 
-    public static Pair<Token, ParseContext>
+    private static Pair<Token, ParseContext>
     nextIdent(ParseContext ctx, int pos, int line, int col) throws LexicalException {
         char[] buf = ctx.buf;
         int startPos = pos;
@@ -137,7 +137,7 @@ public record ParseContext(char[] buf,
                        ParseContext.clone(ctx, pos, line, col));
     }
 
-    public static Pair<Token, ParseContext>
+    private static Pair<Token, ParseContext>
     nextNat(ParseContext ctx, int pos, int line, int col) {
         char[] buf = ctx.buf;
         int startPos = pos;
@@ -160,12 +160,57 @@ public record ParseContext(char[] buf,
                        ParseContext.clone(ctx, pos, line, col));
     }
 
-    public static Pair<Token, ParseContext>
+    private static Pair<Token, ParseContext>
     nextString(ParseContext ctx, int pos, int line, int col) throws LexicalException {
-        throw new UnsupportedOperationException();
+        char[] buf = ctx.buf;
+        int startPos = pos;
+        int startCol = col;
+        pos++;
+        col++;
+
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbLexeme = new StringBuilder();
+        while (pos < buf.length && buf[pos] != '"' && buf[pos] != '\n') {
+            if (buf[pos] == '\\') {
+                pos++;
+                col++;
+                if (pos >= buf.length) {
+                    throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
+                                               "Unterminated string literal, premature EOF.");
+                }
+                switch (buf[pos]) {
+                    case 'n' -> sb.append('\n');
+                    case 't' -> sb.append('\t');
+                    case '"' -> sb.append('"');
+                    case '\\' -> sb.append('\\');
+                    default -> throw new LexicalException(SourceRange.of(ctx.file, pos, line, col),
+                                                         "Invalid escape sequence: \\" + buf[pos]);
+                }
+
+                sbLexeme.append('\\').append(buf[pos]);
+            } else {
+                sb.append(buf[pos]);
+                sbLexeme.append(buf[pos]);
+            }
+            pos++;
+            col++;
+        }
+
+        if (pos >= buf.length || buf[pos] != '"') {
+            throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
+                                       "Unterminated string literal, premature EOF.");
+        }
+
+        String str = sb.toString();
+        String lexeme = sbLexeme.toString();
+        pos++;
+        col++;
+
+        return Pair.of(Token.string(str, lexeme, ctx.file, startPos, line, startCol),
+                       ParseContext.clone(ctx, pos, line, col));
     }
 
-    public static Pair<Token, ParseContext>
+    private static Pair<Token, ParseContext>
     nextSingleChar(ParseContext ctx, int pos, int line, int col) {
         char c = ctx.buf[pos];
         Token.Kind kind = switch (c) {
@@ -188,12 +233,12 @@ public record ParseContext(char[] buf,
                        ParseContext.clone(ctx, pos + 1, line, col + 1));
     }
 
-    public static Pair<Token, ParseContext>
+    private static Pair<Token, ParseContext>
     skipComment(ParseContext ctx, int pos, int line, int col) throws LexicalException {
         char[] buf = ctx.buf;
         int startPos = pos;
         int startCol = col;
-        pos += 2; // skip '(*'
+        pos += 2;
 
         while (pos + 1 < buf.length) {
             if (buf[pos] == '*' && buf[pos + 1] == ')') {
@@ -213,15 +258,5 @@ public record ParseContext(char[] buf,
 
         throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
                                    "Unterminated comment, premature EOF.");
-    }
-
-    public static boolean isIdentChar(char c) {
-        return switch (c) {
-            case '-', '+', '*', '%', '<',
-                 '>', '!', '?', '_', '\'',
-                 '#', '@', '$', ';', '^',
-                 '/', '\\', '|', '~', '=' -> true;
-            default -> Character.isLetterOrDigit(c);
-        };
     }
 }
