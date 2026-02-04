@@ -20,9 +20,7 @@ import java.util.List;
 /// }
 ///
 /// 简单函数类型 `ρ → ρ'` 可以被看作是依值函数类型 `Π_ : ρ . ρ'` 的语法糖
-public sealed interface Expr {
-    @NotNull Token location();
-
+public sealed interface Expr extends Node {
     record Ann(@NotNull Expr term, @NotNull Expr annotation) implements Expr {
         @Override
         public @NotNull Token location() {
