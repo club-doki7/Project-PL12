@@ -23,6 +23,12 @@ Functions
 
 Procedures
 
+    (* simple hello world program
+       [Procedure] is basically a shorthand for [Definition] that returns [partial]
+       thus type of [main] is [partial unit] *)
+    Procedure main : unit := print "Hello world!".
+
+    (* factorials from 0 to 10 *)
     Procedure main : unit :=
         print "Hello, world!";
         local i := ref 0 in loop
@@ -44,7 +50,16 @@ Lambda
 
 Axiom
 
+    (* currently using type-in-type, which is known vulnerable to Girard's paradox
+       we'll switch to universe hierarchies later *)
     Axiom funext : forall {A B : *},
                    forall (f g : A -> B),
-                   (forall x : A, f(x) = g(x)) ->
+                   (forall x : A, f x = g x) ->
+                   f = g.
+
+    (* future *)
+    Axiom funext : forall {l : Level},
+                   forall {A B : Type l},
+                   forall (f g : A -> B),
+                   (forall x : A, f x = g x) ->
                    f = g.
