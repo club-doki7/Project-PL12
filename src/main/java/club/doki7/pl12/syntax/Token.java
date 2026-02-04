@@ -297,6 +297,10 @@ public sealed interface Token {
         return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, file, pos, line, col);
     }
 
+    static Token eoi(@NotNull String file, int pos, int line, int col) {
+        return new Simple(Kind.EOI, "<EOI>", file, pos, line, col);
+    }
+
     @TestOnly
     static Token ident(@NotNull String lexeme) {
         return new Simple(Kind.IDENT, lexeme, "<test>", 0, 0, 0);
@@ -325,5 +329,10 @@ public sealed interface Token {
     @TestOnly
     static Token mixfixFrag(@NotNull Operator.Mixfix mixfixOp, int frag) {
         return new MixfixFrag(Kind.MIXFIX_FRAG, mixfixOp, frag, "<test>", 0, 0, 0);
+    }
+
+    @TestOnly
+    static Token eoi() {
+        return new Simple(Kind.EOI, "<EOI>", "<test>", 0, 0, 0);
     }
 }
