@@ -8,9 +8,9 @@ You appear to be advocating a new:
   [ ] lazy  [ ] eager
   [ ] sharable  [✓] provable  [ ] turing-incomplete
   [✓] memory safe  [ ] memory unsafe
-- 实现
+- Implementation
   [✓] interpreted  [½] compiled  [✓] JIT
-- 意图
+- Intention
   [ ] concurrent  [ ] AI  [ ] cloud
   [ ] academic-friendly  [ ] visual  [ ] beginner-friendly  [ ] non-programmer friendly
   [ ] esoteric  [ ] completely incomprehensible
@@ -138,7 +138,7 @@ Additionally, your marketing has the following problems:
 [ ] You're exclusively benchmarking toy functions for:
     [ ] addition  [ ] Fibonacci  [ ] FizzBuzz  [ ] JSON parsing  [ ] serving HTTP
 [ ] No one really believes that your language is faster than:
-    [✓] assembly  [✓] C  [✓] Rust  [½] Go  [ ] Javascript  [ ] Python
+    [✓] assembly  [✓] C  [✓] Rust  [½] Go  [ ] JavaScript  [ ] Python
 [ ] Rejection of orthodox programming-language theory without justification
 [ ] Rejection of orthodox systems programming without justification
 [ ] Rejection of orthodox algorithmic theory without justification
@@ -168,8 +168,8 @@ Compared to similar efforts, I would like to note that:
 [ ] You have reinvented Haxe but worse
 [ ] You have reinvented Crystal but worse
 [ ] You have reinvented Zig but worse
-[ ] You have reinvented Javascript but worse
-[ ] You have reinvented Javascript better, but that's still no justification
+[ ] You have reinvented JavaScript but worse
+[ ] You have reinvented JavaScript better, but that's still no justification
 [ ] You have reinvented IntercalScript but non-ironically
 
 

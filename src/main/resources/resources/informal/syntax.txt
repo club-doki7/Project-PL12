@@ -1,7 +1,7 @@
 Comments
 
     (* comment *)
-    (* only block comments supported. nested comments not supported. *)
+    (* (*nested*) comment *)
 
 Infix operators
 
@@ -25,8 +25,7 @@ Procedures
 
     Procedure main : unit :=
         print "Hello, world!";
-        local i := ref 0 in
-        loop
+        local i := ref 0 in loop
             if negb (i `leb` 10) then
                 print (fact (read i));
                 write i ((read i) + 1)
