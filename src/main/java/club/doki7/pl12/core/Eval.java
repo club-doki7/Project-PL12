@@ -59,9 +59,9 @@ public final class Eval {
     }
 
     public static Value app(Value head, ConsRevList<Value> spine, Term appTerm) {
-        List<Value> spineList = spine.toList();
+        Value[] spineArray = spine.toArray();
         Value result = head;
-        for (Value value : spineList) {
+        for (Value value : spineArray) {
             result = app(result, value, appTerm);
         }
         return result;

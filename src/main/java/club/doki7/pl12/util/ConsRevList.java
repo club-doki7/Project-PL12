@@ -14,11 +14,13 @@ public sealed interface ConsRevList<T> {
 
     List<T> toList();
 
+    T[] toArray();
+
     boolean anyOf(Predicate<T> predicate);
 
-    record Cons<T>(@NotNull ConsRevList<T> init,
-                   @NotNull T last,
-                   int len) implements ConsRevList<T> {
+    record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last, int len)
+        implements ConsRevList<T>
+    {
         @Override
         public @NotNull T revGet(int index) {
             if (index == 0) {
@@ -52,6 +54,17 @@ public sealed interface ConsRevList<T> {
                 current = init1;
             }
             return elements.reversed();
+        }
+
+        @Override
+        public @NotNull T[] toArray() {
+            @SuppressWarnings("unchecked") T[] array = (T[]) new Object[len];
+            ConsRevList<T> current = this;
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, int len1)) {
+                array[len1 - 1] = last1;
+                current = init1;
+            }
+            return array;
         }
 
         @Override
@@ -104,6 +117,12 @@ public sealed interface ConsRevList<T> {
         @Override
         public @NotNull List<T> toList() {
             return List.of();
+        }
+
+        @Override
+        public @NotNull T[] toArray() {
+            @SuppressWarnings("unchecked") T[] array = (T[]) new Object[0];
+            return array;
         }
 
         @Override
