@@ -16,7 +16,9 @@ public sealed interface ConsRevList<T> {
 
     boolean anyOf(Predicate<T> predicate);
 
-    record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last, int len) implements ConsRevList<T> {
+    record Cons<T>(@NotNull ConsRevList<T> init,
+                   @NotNull T last,
+                   int len) implements ConsRevList<T> {
         @Override
         public @NotNull T revGet(int index) {
             if (index == 0) {
