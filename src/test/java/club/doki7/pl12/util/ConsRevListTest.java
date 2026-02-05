@@ -104,14 +104,14 @@ class ConsRevListTest {
         @DisplayName("init should return all elements except the last")
         void initShouldReturnAllExceptLast() {
             ConsRevList<Integer> init = ConsRevList.rcons(ConsRevList.rcons(ConsRevList.nil(), 1), 2);
-            ConsRevList.Cons<Integer> list = new ConsRevList.Cons<>(init, 3);
+            ConsRevList.Cons<Integer> list = ConsRevList.rcons(init, 3);
             assertSame(init, list.init());
         }
 
         @Test
         @DisplayName("last should return the last element")
         void lastShouldReturnLastElement() {
-            ConsRevList.Cons<Integer> list = new ConsRevList.Cons<>(ConsRevList.nil(), 42);
+            ConsRevList.Cons<Integer> list = ConsRevList.rcons(ConsRevList.nil(), 42);
             assertEquals(42, list.last());
         }
     }

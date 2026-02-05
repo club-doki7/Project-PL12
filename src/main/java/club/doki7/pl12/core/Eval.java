@@ -45,12 +45,12 @@ public final class Eval {
 
     public static Value app(Value head, Value arg, Term appTerm) {
         return switch (head) {
-            case Value.Flex(Term.Meta meta, ConsRevList<Value> headSpine, _) -> {
-                ConsRevList<Value> newSpine = new ConsRevList.Cons<>(headSpine, arg);
+            case Value.Flex(Term.Meta meta, ConsRevList<Value> spine, _) -> {
+                ConsRevList<Value> newSpine = ConsRevList.rcons(spine, arg);
                 yield new Value.Flex(meta, newSpine, appTerm);
             }
-            case Value.Rigid(Name name, ConsRevList<Value> headSpine, _) -> {
-                ConsRevList<Value> newSpine = new ConsRevList.Cons<>(headSpine, arg);
+            case Value.Rigid(Name name, ConsRevList<Value> spine, _) -> {
+                ConsRevList<Value> newSpine = ConsRevList.rcons(spine, arg);
                 yield new Value.Rigid(name, newSpine, appTerm);
             }
             case Value.Lam lam -> closureApp(lam, arg);
@@ -68,7 +68,6 @@ public final class Eval {
     }
 
     public static Value closureApp(Value.Closure c, Value arg) {
-        ConsRevList<Value> newLocalEnv = new ConsRevList.Cons<>(c.localEnv(), arg);
-        return eval(c.body(), c.env(), newLocalEnv);
+        return eval(c.body(), c.env(), ConsRevList.rcons(c.localEnv(), arg));
     }
 }

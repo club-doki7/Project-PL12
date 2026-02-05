@@ -16,7 +16,7 @@ public sealed interface ConsRevList<T> {
 
     boolean anyOf(Predicate<T> predicate);
 
-    record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last) implements ConsRevList<T> {
+    record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last, int len) implements ConsRevList<T> {
         @Override
         public @NotNull T revGet(int index) {
             if (index == 0) {
@@ -25,7 +25,7 @@ public sealed interface ConsRevList<T> {
 
             ConsRevList<T> current = init;
             int currentIndex = index - 1;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
                 if (currentIndex == 0) {
                     return last1;
                 }
@@ -38,20 +38,14 @@ public sealed interface ConsRevList<T> {
 
         @Override
         public int length() {
-            int len = 0;
-            ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, _)) {
-                len++;
-                current = init1;
-            }
             return len;
         }
 
         @Override
         public @NotNull List<T> toList() {
-            List<T> elements = new ArrayList<>();
+            List<T> elements = new ArrayList<>(len);
             ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
                 elements.add(last1);
                 current = init1;
             }
@@ -61,7 +55,7 @@ public sealed interface ConsRevList<T> {
         @Override
         public boolean anyOf(Predicate<T> predicate) {
             ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
                 if (predicate.test(last1)) {
                     return true;
                 }
@@ -72,9 +66,9 @@ public sealed interface ConsRevList<T> {
 
         @Override
         public @NotNull String toString() {
-            List<String> elements = new ArrayList<>();
+            List<String> elements = new ArrayList<>(len);
             ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1)) {
+            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
                 elements.add(last1.toString());
                 current = init1;
             }
@@ -121,11 +115,11 @@ public sealed interface ConsRevList<T> {
         }
     }
 
-    static <T> @NotNull ConsRevList<T> rcons(@NotNull ConsRevList<T> head, @NotNull T tail) {
-        return new Cons<>(head, tail);
+    static <T> ConsRevList.@NotNull Cons<T> rcons(@NotNull ConsRevList<T> head, @NotNull T tail) {
+        return new Cons<>(head, tail, head.length() + 1);
     }
 
-    static <T> @NotNull ConsRevList<T> nil() {
+    static <T> ConsRevList.@NotNull Nil<T> nil() {
         @SuppressWarnings("unchecked")
         Nil<T> instance = (Nil<T>) Nil.INSTANCE;
         return instance;
