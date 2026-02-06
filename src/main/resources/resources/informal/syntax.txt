@@ -9,10 +9,6 @@ Infix operators
     Notation left 40 (*) := multiply.
     Notation right 30 (^) := power.
 
-Prefix operators
-
-    Notation prefix (~) := negate.
-
 Functions
 
     Definition fact (n : nat) : nat :=

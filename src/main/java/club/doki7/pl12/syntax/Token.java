@@ -228,41 +228,8 @@ public sealed interface Token {
         }
     }
 
-    record Prefix(@NotNull Kind kind,
-                  @NotNull Operator.Prefix prefixOp,
-                  @NotNull String file,
-                  int pos,
-                  int line,
-                  int col)
-        implements Token
-    {
-        @Override
-        public @NotNull String lexeme() {
-            return prefixOp.lexeme();
-        }
-
-        @Override
-        public @NotNull String toString() {
-            return lexeme();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (!(obj instanceof Prefix(Kind kind1, Operator.Prefix prefixOp1, _, _, _, _))) {
-                return false;
-            }
-            return kind == kind1 && prefixOp.equals(prefixOp1);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(Prefix.class, kind, prefixOp);
-        }
-    }
-
     record Infix(@NotNull Kind kind,
-                 @NotNull Operator.Infix infixOp,
+                 @NotNull Operator infixOp,
                  @NotNull String file,
                  int pos,
                  int line,
@@ -282,7 +249,7 @@ public sealed interface Token {
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
-            if (!(obj instanceof Infix(Kind kind1, Operator.Infix infixOp1, _, _, _, _))) {
+            if (!(obj instanceof Infix(Kind kind1, Operator infixOp1, _, _, _, _))) {
                 return false;
             }
             return kind == kind1 && infixOp.equals(infixOp1);
@@ -328,16 +295,7 @@ public sealed interface Token {
         return new Simple(kind, lexeme, file, pos, line, col);
     }
 
-    static Token prefixOp(@NotNull Operator.Prefix prefixOp,
-                          @NotNull String file,
-                          int pos,
-                          int line,
-                          int col)
-    {
-        return new Prefix(Kind.INFIX, prefixOp, file, pos, line, col);
-    }
-
-    static Token infixOp(@NotNull Operator.Infix infixOp,
+    static Token infixOp(@NotNull Operator infixOp,
                          @NotNull String file,
                          int pos,
                          int line,
@@ -371,12 +329,7 @@ public sealed interface Token {
     }
 
     @TestOnly
-    static Token prefixOp(@NotNull Operator.Prefix prefixOp) {
-        return new Prefix(Kind.PREFIX, prefixOp, "<test>", 0, 0, 0);
-    }
-
-    @TestOnly
-    static Token infixOp(@NotNull Operator.Infix infixOp) {
+    static Token infixOp(@NotNull Operator infixOp) {
         return new Infix(Kind.INFIX, infixOp, "<test>", 0, 0, 0);
     }
 

@@ -25,7 +25,7 @@ public sealed interface Term {
     record LamChk(boolean implicit,
                   @NotNull Checkable body,
                   @NotNull String paramName,
-                  @NotNull Expr.Lam expr)
+                  @NotNull Expr.Fun expr)
             implements Checkable
     {
         @Override
@@ -47,7 +47,7 @@ public sealed interface Term {
     record LamInf(@NotNull Checkable paramType,
                   @NotNull Inferable body,
                   @NotNull String paramName,
-                  @NotNull Expr.Lam expr)
+                  @NotNull Expr.Fun expr)
             implements Inferable
     {
         @Override
