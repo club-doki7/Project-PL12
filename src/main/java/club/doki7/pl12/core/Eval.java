@@ -3,8 +3,6 @@ package club.doki7.pl12.core;
 import club.doki7.pl12.util.ConsRevList;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public final class Eval {
     public static Value eval(Term term, Env env, ConsRevList<Value> localEnv) {
         return switch (term) {
@@ -28,7 +26,7 @@ public final class Eval {
                         yield entry.value();
                     } else {
                         throw new IllegalStateException("Unbound global name should have been"
-                                                        + "rejected by the type checker.");
+                                                        + " rejected by the type checker.");
                     }
                 } else {
                     yield new Value.Rigid(name, term);

@@ -72,7 +72,7 @@ A somewhat less trivial example
     Procedure main : unit :=
         print "Hello, world!";
         local i := ref 0 in loop
-            if negb (i `leb` 10) then
+            if i `leb` 10 then
                 print "fact " i " = " (fact (read i)) "\n";
                 print "fact_imp " i " = " (fact_imp (read i)) "\n";
                 print "fact_imp_trust " i " = " (fact_imp_trust (read i)) "\n";
@@ -80,20 +80,4 @@ A somewhat less trivial example
             else
                 return
             end
-        end.
-
-Lambda
-
-    Definition double_list (l : list nat) : list nat :=
-        map (fun x : nat => x + x) l.
-
-    Procedure for_each_list (l : list nat) (action : nat -> partial unit) : partial unit :=
-        foreach (proc x : nat => action x) l.
-
-Proofs (now via term construction)
-
-    Definition add_assoc (a b c : nat) : a + b + c = a + (b + c) :=
-        case a of
-        | 0 => eq_refl
-        | S a' => cong S (add_assoc a' b c)
         end.
