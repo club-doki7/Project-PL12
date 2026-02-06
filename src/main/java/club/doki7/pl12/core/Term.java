@@ -103,7 +103,7 @@ public sealed interface Term {
         }
     }
 
-    record Univ(@NotNull Expr.Aster expr) implements Inferable {
+    record Univ(@NotNull Expr.Univ expr) implements Inferable {
         @Override
         public @NotNull String toString() {
             return "*";

@@ -9,7 +9,7 @@ public sealed interface Expr extends Node {
     record Ann(@NotNull Expr term, @NotNull Expr ann, @NotNull Token colon) implements Expr {
         @Override
         public @NotNull String toString() {
-            if (term instanceof Var || term instanceof Aster) {
+            if (term instanceof Var || term instanceof Univ) {
                 return term + " : " + ann;
             } else {
                 return "(" + term + ") : " + ann;
@@ -17,15 +17,15 @@ public sealed interface Expr extends Node {
         }
     }
 
-    record Aster(@NotNull Token aster) implements Expr {
+    record Univ(@NotNull Token aster) implements Expr {
         @TestOnly
-        public Aster() {
-            this(Token.sym(Token.Kind.ASTER));
+        public Univ() {
+            this(Token.sym(Token.Kind.UNIV));
         }
 
         @Override
         public @NotNull String toString() {
-            return "*";
+            return "𝒰";
         }
     }
 

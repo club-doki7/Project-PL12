@@ -249,7 +249,7 @@ public record ParseContext(char[] buf,
             case ',' -> Token.Kind.COMMA;
             case '∀', 'Π' -> Token.Kind.PI;
             case 'λ' -> Token.Kind.FUN;
-            case '*' -> Token.Kind.ASTER;
+            case '*' -> Token.Kind.UNIV;
             default -> throw new IllegalStateException("Unexpected character: " + c);
         };
 

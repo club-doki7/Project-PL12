@@ -43,8 +43,8 @@ public sealed interface Token {
         DOT,
         /// `,`
         COMMA,
-        /// `*`
-        ASTER,
+        /// `𝒰` 或者 `*`
+        UNIV,
         /// `∀`, `Π` 或者 `forall`
         PI,
         /// `:`
@@ -84,6 +84,7 @@ public sealed interface Token {
         public static final Map<String, Kind> KEYWORDS_MAP = Map.ofEntries(
             Map.entry("forall", PI),
             Map.entry("fun", FUN),
+            Map.entry("𝒰", UNIV),
 
             Map.entry("Axiom", KW_AXIOM),
             Map.entry("Definition", KW_DEFINITION),
