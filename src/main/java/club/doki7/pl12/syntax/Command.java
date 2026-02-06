@@ -65,8 +65,8 @@ public sealed interface Command extends Node {
                     @NotNull Expr expr,
                     @NotNull Token notation,
                     @NotNull Token assocToken,
-                    @NotNull Token leftParen,
-                    @NotNull Token rightParen,
+                    @NotNull Token lparen,
+                    @NotNull Token rparen,
                     @NotNull Token assign,
                     @NotNull Token dot)
         implements Command

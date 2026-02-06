@@ -54,12 +54,12 @@ public sealed interface Expr extends Node {
     }
 
     record App(@NotNull Expr func,
-               @NotNull List<@NotNull Expr> args,
+               @NotNull List<@NotNull Argument> args,
                boolean infix)
         implements Expr
     {
         @TestOnly
-        public App(@NotNull Expr func, @NotNull Expr arg, boolean infix) {
+        public App(@NotNull Expr func, @NotNull Argument arg, boolean infix) {
             this(func, List.of(arg), infix);
         }
 
@@ -75,13 +75,17 @@ public sealed interface Expr extends Node {
             sb.append(" ");
 
             for (int i = 0; i < args.size(); i++) {
-                Expr arg = args.get(i);
+                Argument arg = args.get(i);
 
-                if (arg instanceof App
-                    || arg instanceof Fun
-                    || arg instanceof Pi
-                    || arg instanceof Ann) {
-                    sb.append("(").append(arg).append(")");
+                if (arg instanceof Argument.Explicit(Expr expr)) {
+                    if (expr instanceof App
+                        || expr instanceof Fun
+                        || expr instanceof Pi
+                        || expr instanceof Ann) {
+                        sb.append("(").append(expr).append(")");
+                    } else {
+                        sb.append(expr);
+                    }
                 } else {
                     sb.append(arg);
                 }
