@@ -82,7 +82,7 @@ class LexerTest {
                     sym(Kind.D_ARROW),
                     sym(Kind.D_ARROW),
                     sym(Kind.D_QUES),
-                    sym(Kind.ASTER),
+                    sym(Kind.UNIV),
                     eoi()
             ),
             tokenize("( ) . , : fun λ ∀ Π → -> ⇒ => ?? *")
@@ -167,7 +167,7 @@ class LexerTest {
                     sym(Kind.FUN),
                     ident("x"),
                     sym(Kind.COLON),
-                    sym(Kind.ASTER),
+                    sym(Kind.UNIV),
                     sym(Kind.DOT),
                     ident("x"),
                     eoi()

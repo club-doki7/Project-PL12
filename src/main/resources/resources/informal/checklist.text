@@ -44,13 +44,13 @@ Unfortunately, your language (has/lacks):
   [✓] comprehensible syntax  [×] significant whitespace  [✓] semicolon  [×] assignment expressions
   [✓] infix operators  [½] operator overloading  [✓] nested comments  [×] multi-line strings  [×] regexes
   [×] string templates  [×] pipe  [✓]] variable shadowing  [✓]] emoji names [✓] pattern matching/destructuring
-  [½] ergonomic error values
+  [½] ergonomic error values  [×] currying
 - Semantics
   [✓] closures  [×] objects
   [✓] call by value  [×] call by name  [✓] call by reference
   [✓] memory safety  [×] borrow checking
 - Control flow
-  [×] goto  [×] comefrom, but unironically  [✓] asynchronous  [×] coroutines  [½] exceptions
+  [×] goto  [×] comefrom, but unironically  [✓] asynchronous  [×] coroutines  [×] exceptions
   [✓] type and effect system  [×] monads  [×] algebraic effects
   [✓] tail recursion  [×] call/cc
 - Type system
@@ -116,7 +116,7 @@ Your implementation has the following flaws:
 
 You seem to be targeting the market for:
 [ ] systems programming  [ ] scripting  [ ] shells  [ ] web  [ ] games
-[ ] batch jobs  [ ] app making  [✓] teaching programming
+[ ] batch jobs  [ ] app making  [½] teaching programming
 [ ] appeasing ops/security officers  [ ] freaking out ops/security officers
 [ ] code golfing  [ ] parody languages  [ ] writing type-theory papers
 [ ] creating AI  [ ] *mumble* blockchain *mumble*  [ ] other forms of raising VC money

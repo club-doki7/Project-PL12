@@ -14,8 +14,7 @@ public record ParseContext(char[] buf,
                            int line,
                            int col,
                            Mode mode,
-                           Map<String, Operator.Prefix> prefixOps,
-                           Map<String, Operator.Infix> infixOps)
+                           Map<String, Operator> infixOps)
 {
     public enum Mode { IDLE, BVR, DOGFIGHT }
 
@@ -26,7 +25,6 @@ public record ParseContext(char[] buf,
                                 1,
                                 1,
                                 Mode.IDLE,
-                                new HashMap<>(),
                                 new HashMap<>());
     }
 
@@ -37,7 +35,6 @@ public record ParseContext(char[] buf,
                                 line,
                                 col,
                                 ctx.mode,
-                                ctx.prefixOps,
                                 ctx.infixOps);
     }
 
@@ -153,13 +150,7 @@ public record ParseContext(char[] buf,
             }
         }
 
-        @Nullable Operator.Prefix prefix = ctx.prefixOps.get(lexeme);
-        if (prefix != null) {
-            return Pair.of(Token.prefixOp(prefix, ctx.file, startPos, line, startCol),
-                           ParseContext.clone(ctx, pos, line, col));
-        }
-
-        @Nullable Operator.Infix infix = ctx.infixOps.get(lexeme);
+        @Nullable Operator infix = ctx.infixOps.get(lexeme);
         if (infix != null) {
             return Pair.of(Token.infixOp(infix, ctx.file, startPos, line, startCol),
                            ParseContext.clone(ctx, pos, line, col));
@@ -258,7 +249,7 @@ public record ParseContext(char[] buf,
             case ',' -> Token.Kind.COMMA;
             case '∀', 'Π' -> Token.Kind.PI;
             case 'λ' -> Token.Kind.FUN;
-            case '*' -> Token.Kind.ASTER;
+            case '*' -> Token.Kind.UNIV;
             default -> throw new IllegalStateException("Unexpected character: " + c);
         };
 

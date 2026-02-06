@@ -8,12 +8,6 @@ Infix operators
     Notation left 50 (+) := plus.
     Notation left 40 (*) := multiply.
     Notation right 30 (^) := power.
-    Notation noassoc (<-) := write.
-
-Prefix operators
-
-    Notation prefix (~) := not.
-    Notation prefix (!) := negb.
 
 Functions
 
@@ -32,30 +26,34 @@ Procedures
 
     (* a completely imperative version of factorial calculation *)
     Procedure fact_imp (n : nat) : nat :=
-        local result := ref 1,
-              i := ref 1
-        in loop
+        local result := ref 1 in
+        local i := ref 1 in
+        loop
             if (read i) `leb` n then
                 write result ((read result) * (read i));
+                write i ((read i) + 1)
             else
                 return (read result)
             end
         end.
 
-Trusted procedures
+Axiom
 
     (* if you believe that your imperative code is referentially transparent and will terminate, you
-       can use [unsafe_trust] to extract the value from [partial] without any checks *)
-    Definition fact_imp_trusted (n : nat) : nat := unsafe_trust (fact_imp n).
-
-Axiom
+       can use [trust] to extract the value from [partial] without any checks *)
+    Definition fact_imp_trusted (n : nat) : nat := trust (fact_imp n).
 
     (* and if you believe that your imperative code is correct, you may introduce axioms to
        postulate its properties *)
     Axiom fact_imp_behaves_same_as_fact : forall {n : nat}, fact_imp_trusted n = fact n.
 
-    (* then you may prove that the two definitions are equal as functions using function
-       extensionality, if you'd like to *)
+    (* directly asserting equivalence of a partial function and a total function is not allowed,
+       since a partial function returns [partial T], not [T] *)
+    Fail Axiom fact_imp_untrusted_behaves_same_as_fact : forall {n : nat}, fact_imp n = fact n.
+    (* type error: cannot unify [nat] (inferred from [fact_imp n])
+                          with  [partial nat] (inferred from [fact n]) *)
+
+    (* widely accepted axiom of function extensionality *)
     Axiom funext : forall {A B : Type},
                    forall (f g : A -> B),
                    (forall x : A, f x = g x) ->
@@ -64,17 +62,12 @@ Axiom
     Definition fact_imp_is_fact : fact_imp_trusted = fact :=
         funext fact_imp_trusted fact fact_imp_behaves_same_as_fact.
 
-    (* directly asserting equivalence of a partial function and a total function is not allowed,
-       since a partial function returns [partial T], not [T] *)
-    Fail Axiom fact_imp_untrusted_behaves_same_as_fact : forall {n : nat}, fact_imp n = fact n.
-
 A somewhat less trivial example
 
     (* factorials from 0 to 10 *)
     Procedure main : unit :=
         print "Hello, world!";
-        local i := ref 0
-        in loop
+        local i := ref 0 in loop
             if i `leb` 10 then
                 print "fact " i " = " (fact (read i)) "\n";
                 print "fact_imp " i " = " (fact_imp (read i)) "\n";
@@ -84,29 +77,3 @@ A somewhat less trivial example
                 return
             end
         end.
-
-Lambda
-
-    Definition double_list (l : list nat) : list nat :=
-        map (fun x : nat => x + x) l.
-
-    Procedure for_each_list (l : list nat) (action : nat -> partial unit) : partial unit :=
-        foreach (proc x : nat => action x) l.
-
-Proofs via term construction
-
-    Definition add_assoc (a b c : nat) : a + b + c = a + (b + c) :=
-        case a of
-        | 0 => eq_refl
-        | S a' => cong S (add_assoc a' b c)
-        end.
-
-Proof via tactics
-
-    Definition add_assoc : forall (a b c : nat), a + b + c = a + (b + c).
-    Proof.
-        intros a b c.
-        induction a as [| a IHa].
-        - (* base case *) reflexivity.
-        - (* inductive step *) simpl. rewrite IHa. reflexivity.
-    Qed.
