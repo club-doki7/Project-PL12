@@ -72,9 +72,7 @@ public sealed interface Term {
         record ImplicitArg(@NotNull Param param, @NotNull App app, int argIndex)
             implements MetaSource
         {}
-
         record FunParamType(@NotNull Expr.Fun fun, int paramIndex) implements MetaSource {}
-
         record Hole(@NotNull Expr.Hole hole) implements MetaSource {}
     }
 }
