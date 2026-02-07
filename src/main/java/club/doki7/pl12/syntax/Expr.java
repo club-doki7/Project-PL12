@@ -3,10 +3,11 @@ package club.doki7.pl12.syntax;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /// ```bnf
-/// expr ::= ann | univ | pi | var | app | fun | hole | paren
+/// expr ::= ann | univ | pi | var | lit | app | fun | hole | paren
 /// ```
 public sealed interface Expr extends Node {
     /// ```bnf
@@ -66,6 +67,36 @@ public sealed interface Expr extends Node {
         @Override
         public @NotNull String toString() {
             return name.lexeme();
+        }
+    }
+
+    /// ```bnf
+    /// lit ::= string | nat
+    /// ```
+    record Lit(@NotNull Token lit) implements Expr {
+        public Lit {
+            assert (lit instanceof Token.LitString && lit.kind() == Token.Kind.LIT_STRING)
+                   || (lit instanceof Token.LitNat && lit.kind() == Token.Kind.LIT_NAT);
+        }
+
+        @TestOnly
+        public Lit(@NotNull String lit) {
+            this(Token.string(lit));
+        }
+
+        @TestOnly
+        public Lit(long num) {
+            this(Token.nat(BigInteger.valueOf(num)));
+        }
+
+        @TestOnly
+        public Lit(@NotNull BigInteger num) {
+            this(Token.nat(num));
+        }
+
+        @Override
+        public @NotNull String toString() {
+            return lit.lexeme();
         }
     }
 
