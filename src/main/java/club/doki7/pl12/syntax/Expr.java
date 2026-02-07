@@ -5,7 +5,13 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.util.List;
 
+/// ```bnf
+/// expr ::= ann | univ | pi | var | app | fun | hole | paren
+/// ```
 public sealed interface Expr extends Node {
+    /// ```bnf
+    /// ann ::= expression ":" expression
+    /// ```
     record Ann(@NotNull Expr term, @NotNull Expr ann, @NotNull Token colon) implements Expr {
         @Override
         public @NotNull String toString() {
@@ -17,6 +23,9 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// univ ::= "𝒰" | "*"
+    /// ```
     record Univ(@NotNull Token aster) implements Expr {
         @TestOnly
         public Univ() {
@@ -29,6 +38,10 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// pi ::= pi-keyword param-group "," expression
+    /// pi-keyword ::= "∀" | "Π" | "forall"
+    /// ```
     record Pi(@NotNull ParamGroup paramGroup,
               @NotNull Expr body,
               @NotNull Token pi,
@@ -41,6 +54,9 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// var ::= identifier
+    /// ```
     record Var(@NotNull Token name) implements Expr {
         @TestOnly
         public Var(@NotNull String name) {
@@ -53,6 +69,9 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// app ::= expression argument+
+    /// ```
     record App(@NotNull Expr func,
                @NotNull List<@NotNull Argument> args,
                boolean infix)
@@ -99,7 +118,10 @@ public sealed interface Expr extends Node {
         }
     }
 
-    record Fun(@NotNull List<ParamGroup> paramGroups,
+    /// ```bnf
+    /// fun ::= "fun" param-group* "=>" expression
+    /// ```
+    record Fun(@NotNull List<@NotNull ParamGroup> paramGroups,
                @NotNull Expr body,
                @NotNull Token fun,
                @NotNull Token arrow)
@@ -136,6 +158,9 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// hole ::= "?"
+    /// ```
     record Hole(@NotNull Token hole) implements Expr {
         @TestOnly
         public Hole() {
@@ -148,6 +173,9 @@ public sealed interface Expr extends Node {
         }
     }
 
+    /// ```bnf
+    /// paren ::= "(" expression ")"
+    /// ```
     record Paren(@NotNull Expr expr, @NotNull Token lParen, @NotNull Token rParen) implements Expr {
         @TestOnly
         public Paren(@NotNull Expr expr) {

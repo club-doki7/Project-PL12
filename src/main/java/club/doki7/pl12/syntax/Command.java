@@ -4,8 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/// ```bnf
+/// command ::= axiom | check | definition | notation
+/// ```
 public sealed interface Command extends Node {
-    record Axiom(@NotNull Token name,
+    /// ```bnf
+    /// axiom ::= "Axiom" identifier-list ":" expr "."
+    /// ```
+    record Axiom(@NotNull List<Token> names,
                  @NotNull Expr type,
                  @NotNull Token axiom,
                  @NotNull Token dot)
@@ -13,10 +19,19 @@ public sealed interface Command extends Node {
     {
         @Override
         public @NotNull String toString() {
-            return "Axiom " + name + " : " + type + ".";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Axiom ");
+            for (Token name : names) {
+                sb.append(name).append(' ');
+            }
+            sb.append(": ").append(type).append('.');
+            return sb.toString();
         }
     }
 
+    /// ```bnf
+    /// check ::= "Check" expr "."
+    /// ```
     record Check(@NotNull Expr expr,
                  @NotNull Token check,
                  @NotNull Token dot)
@@ -28,6 +43,10 @@ public sealed interface Command extends Node {
         }
     }
 
+    /// ```bnf
+    /// definition ::= definition-keyword name param-group* "*" expr ":=" expr "."
+    /// definition-keyword ::= "Definition" | "Procedure"
+    /// ```
     record Definition(@NotNull Token name,
                       @NotNull List<@NotNull ParamGroup> paramGroups,
                       @NotNull Expr type,
@@ -59,6 +78,11 @@ public sealed interface Command extends Node {
         }
     }
 
+    /// ```bnf
+    /// notation ::= "Notation" name assoc prec expr "."`
+    /// assoc ::= "left" | "right" | "none"
+    /// prec ::= nat
+    /// ```
     record Notation(@NotNull Token name,
                     @NotNull Operator.Assoc assoc,
                     int prec,

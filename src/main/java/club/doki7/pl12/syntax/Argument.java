@@ -2,9 +2,15 @@ package club.doki7.pl12.syntax;
 
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Argument {
+/// ```bnf
+/// argument ::= explicit-argument | implicit-argument | named-implicit-argument
+/// ```
+public sealed interface Argument extends Node {
     boolean isImplicit();
 
+    /// ```bnf
+    /// explicit-argument ::= expression
+    /// ```
     record Explicit(@NotNull Expr expr) implements Argument {
         @Override
         public boolean isImplicit() {
@@ -17,6 +23,9 @@ public sealed interface Argument {
         }
     }
 
+    /// ```bnf
+    /// implicit-argument ::= "{" expression "}"
+    /// ```
     record Implicit(@NotNull Expr expr,
                     @NotNull Token lbrace,
                     @NotNull Token rbrace) implements Argument {
@@ -31,6 +40,9 @@ public sealed interface Argument {
         }
     }
 
+    /// ```bnf
+    /// named-implicit-argument ::= "{" identifier "=" expression "}"
+    /// ```
     record NamedImplicit(@NotNull Token name,
                          @NotNull Expr expr,
                          @NotNull Token lbrace,

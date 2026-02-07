@@ -4,7 +4,6 @@ import club.doki7.pl12.util.ConsRevList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public final class MetaContext {
     public void unify(Value value1, Value value2) {
@@ -49,7 +48,7 @@ public final class MetaContext {
         }
     }
 
-    private final HashMap<Integer, Value> solutions = new HashMap<>();
+    private final ArrayList<Value> solutions = new ArrayList<>();
     private final ArrayList<Pending> pending = new ArrayList<>();
     private int counter = 0;
 }

@@ -9,7 +9,7 @@ import java.util.List;
 public record ParamGroup(@NotNull List<@NotNull Token> names,
                          @Nullable Expr type,
                          @Nullable Token colon,
-                         @Nullable Pair<@NotNull Token, @NotNull Token> delim) {
+                         @Nullable Pair<@NotNull Token, @NotNull Token> delim) implements Node {
     public ParamGroup {
         assert delim == null || delim.first().kind() == delim.second().kind();
     }
