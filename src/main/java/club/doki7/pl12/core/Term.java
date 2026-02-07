@@ -14,15 +14,9 @@ public sealed interface Term {
 
     record Free(@NotNull Name name, @NotNull Expr source) implements Term {}
 
-    record Lam(@NotNull List<@NotNull Param> params, @NotNull Term body, @NotNull Node source)
+    record Lam(@NotNull List<@NotNull Param> params, @NotNull Term body, @NotNull LamSource source)
         implements Term
-    {
-        public Lam {
-            assert source instanceof Expr.Fun
-                   || source instanceof Expr.PartialApp
-                   || source instanceof Command.Definition;
-        }
-    }
+    {}
 
     record Univ(@NotNull Expr.Univ source) implements Term {
         @Override
@@ -56,6 +50,16 @@ public sealed interface Term {
         record PartialAppArg(@NotNull Expr.PartialApp partialApp,
                              int argIndex,
                              @NotNull Term type) implements Param {}
+        record MetaSolvedLamParam(@NotNull Meta meta,
+                                  int paramIndex,
+                                  @NotNull Term type) implements Param {}
+    }
+
+    sealed interface LamSource {
+        record Fun(@NotNull Expr.Fun fun) implements LamSource {}
+        record PartialApp(@NotNull Expr.PartialApp partialApp) implements LamSource {}
+        record Def(@NotNull Command.Definition def, int paramGroupIndex) implements LamSource {}
+        record MetaSolve(@NotNull Meta meta) implements LamSource {}
     }
 
     sealed interface PiSource {
