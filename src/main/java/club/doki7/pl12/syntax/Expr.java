@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 /// ```bnf
-/// expr ::= ann | univ | pi | var | lit | app | fun | hole | paren
+/// expr ::= ann | univ | pi | arrow | var | lit | app | partial-app | fun | hole | paren
 /// ```
 public sealed interface Expr extends Node {
     /// ```bnf
@@ -35,7 +35,7 @@ public sealed interface Expr extends Node {
 
         @Override
         public @NotNull String toString() {
-            return "𝒰";
+            return "*";
         }
     }
 
@@ -47,13 +47,31 @@ public sealed interface Expr extends Node {
               @NotNull Expr body,
               @NotNull Token pi,
               @NotNull Token comma)
-            implements Expr
-    {
+            implements Expr {
         @Override
         public @NotNull String toString() {
             return "∀" + paramGroup + ", " + body;
         }
     }
+
+
+    record Arrow(@NotNull Expr from,
+                 @NotNull Expr to,
+                 @NotNull Token arrow)
+            implements Expr
+        {
+            @Override
+            public @NotNull String toString() {
+                String fromStr = (from instanceof App
+                                || from instanceof Fun
+                                || from instanceof Pi
+                                || from instanceof Arrow
+                                || from instanceof Ann)
+                                ? "(" + from + ")"
+                                : from.toString();
+                return fromStr + " -> " + to;
+            }
+        }
 
     /// ```bnf
     /// var ::= identifier
@@ -106,8 +124,7 @@ public sealed interface Expr extends Node {
     record App(@NotNull Expr func,
                @NotNull List<@NotNull Argument> args,
                boolean infix)
-        implements Expr
-    {
+            implements Expr {
         @TestOnly
         public App(@NotNull Expr func, @NotNull Argument arg, boolean infix) {
             this(func, List.of(arg), infix);
@@ -116,7 +133,10 @@ public sealed interface Expr extends Node {
         @Override
         public @NotNull String toString() {
             StringBuilder sb = new StringBuilder();
-            if (func instanceof Fun || func instanceof Pi || func instanceof Ann) {
+            if (func instanceof Fun
+                || func instanceof Pi
+                || func instanceof Arrow
+                || func instanceof Ann) {
                 sb.append("(").append(func).append(")");
             } else {
                 sb.append(func);
@@ -131,6 +151,7 @@ public sealed interface Expr extends Node {
                     if (expr instanceof App
                         || expr instanceof Fun
                         || expr instanceof Pi
+                        || expr instanceof Arrow
                         || expr instanceof Ann) {
                         sb.append("(").append(expr).append(")");
                     } else {
@@ -148,6 +169,17 @@ public sealed interface Expr extends Node {
             return sb.toString();
         }
     }
+
+    /// ```bnf
+    /// partial-app ::= "@(" expression argument+ ")"
+    /// ```
+    record PartialApp(@NotNull Expr func,
+                      @NotNull List<@NotNull Argument> args,
+                      @NotNull Token at,
+                      @NotNull Token lparen,
+                      @NotNull Token rparen)
+        implements Expr
+    {}
 
     /// ```bnf
     /// fun ::= "fun" param-group* "=>" expression
