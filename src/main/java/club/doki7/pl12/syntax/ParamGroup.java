@@ -18,7 +18,9 @@ public record ParamGroup(@NotNull List<@NotNull Token> names,
                          @Nullable Token colon,
                          @Nullable Pair<@NotNull Token, @NotNull Token> delim) implements Node {
     public ParamGroup {
-        assert delim == null || delim.first().kind() == delim.second().kind();
+        assert delim == null
+        || (delim.first().kind() == Token.Kind.L_PAREN && delim.second().kind() == Token.Kind.R_PAREN)
+        || (delim.first().kind() == Token.Kind.L_BRACE && delim.second().kind() == Token.Kind.R_BRACE);
     }
 
     public boolean isImplicit() {
