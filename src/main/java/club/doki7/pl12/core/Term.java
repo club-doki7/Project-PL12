@@ -50,29 +50,27 @@ public sealed interface Term {
     {}
 
     sealed interface Param {
-        record FromParamGroup(@NotNull ParamGroup paramGroup,
+        record ParamGroupItem(@NotNull ParamGroup paramGroup,
                               int paramIndex,
                               @NotNull Term type) implements Param {}
-        record FromPartialApp(@NotNull Expr.PartialApp partialApp,
-                              int argIndex,
-                              @NotNull Term type) implements Param {}
+        record PartialAppArg(@NotNull Expr.PartialApp partialApp,
+                             int argIndex,
+                             @NotNull Term type) implements Param {}
     }
 
     sealed interface PiSource {
-        record FromPi(@NotNull Expr.Pi pi) implements PiSource {}
-        record FromArrow(@NotNull Expr.Arrow first, @NotNull Expr.Arrow last) implements PiSource {}
-        record FromDef(@NotNull Command.Definition def, int paramGroupIndex) implements PiSource {}
+        record Pi(@NotNull Expr.Pi pi) implements PiSource {}
+        record Arrow(@NotNull Expr.Arrow first, @NotNull Expr.Arrow last) implements PiSource {}
+        record Def(@NotNull Command.Definition def, int paramGroupIndex) implements PiSource {}
     }
 
     sealed interface MetaSource {
-        record FromImplicitArg(@NotNull Param param, @NotNull App app, int argIndex)
+        record ImplicitArg(@NotNull Param param, @NotNull App app, int argIndex)
             implements MetaSource
         {}
 
-        record ForFunParamType(@NotNull Expr.Fun fun, int paramIndex)
-            implements MetaSource
-        {}
+        record FunParamType(@NotNull Expr.Fun fun, int paramIndex) implements MetaSource {}
 
-        record FromHole(@NotNull Expr.Hole hole) implements MetaSource {}
+        record Hole(@NotNull Expr.Hole hole) implements MetaSource {}
     }
 }
