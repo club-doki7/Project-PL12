@@ -44,7 +44,7 @@ public sealed interface Command extends Node {
     }
 
     /// ```bnf
-    /// definition ::= definition-keyword name param-group* "*" expr ":=" expr "."
+    /// definition ::= definition-keyword name param-group* ":" expr ":=" expr "."
     /// definition-keyword ::= "Definition" | "Procedure"
     /// ```
     record Definition(@NotNull Token name,

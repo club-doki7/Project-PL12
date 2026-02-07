@@ -6,6 +6,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/// ```bnf
+/// param-group ::= "{" identifier+ (":" expr)? "}"
+///               | "(" identifier+ (":" expr)? ")"
+///               | identifier+ (":" simple-expr)?
+///
+/// simple-expr ::= to-be-determined
+/// ```
 public record ParamGroup(@NotNull List<@NotNull Token> names,
                          @Nullable Expr type,
                          @Nullable Token colon,
