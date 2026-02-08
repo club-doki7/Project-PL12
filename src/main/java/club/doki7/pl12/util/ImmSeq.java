@@ -15,13 +15,50 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
         this.end = end;
     }
 
-    @SafeVarargs
-    public static <T> @NotNull ImmSeq<T> of(T @NotNull... elements) {
+    public static <T> @NotNull ImmSeq<T> ofUnsafe(T @NotNull[] elements) {
         if (elements.length == 0) {
             //noinspection unchecked
             return (ImmSeq<T>) EMPTY;
         } else {
             return new ImmSeq<>(elements, 0, elements.length);
+        }
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull ImmSeq<T> of(T @NotNull... elements) {
+        return ofUnsafe(elements);
+    }
+
+    public static <T> @NotNull ImmSeq<T> of(List<T> list) {
+        if (list instanceof ImmSeq<T> immSeq) {
+            return immSeq;
+        } else if (list.isEmpty()) {
+            //noinspection unchecked
+            return (ImmSeq<T>) EMPTY;
+        } else {
+            //noinspection unchecked
+            T[] array = (T[]) new Object[list.size()];
+            list.toArray(array);
+            return ImmSeq.ofUnsafe(array);
+        }
+    }
+
+    public static <T> @NotNull ImmSeq<T> nil() {
+        //noinspection unchecked
+        return (ImmSeq<T>) EMPTY;
+    }
+
+    public static <T> @NotNull ImmSeq<T> concat(@NotNull ImmSeq<T> a, @NotNull ImmSeq<T> b) {
+        if (a.isEmpty()) {
+            return b;
+        } else if (b.isEmpty()) {
+            return a;
+        } else {
+            //noinspection unchecked
+            T[] newArray = (T[]) new Object[a.size() + b.size()];
+            System.arraycopy(a.array, a.start, newArray, 0, a.size());
+            System.arraycopy(b.array, b.start, newArray, a.size(), b.size());
+            return ImmSeq.ofUnsafe(newArray);
         }
     }
 
@@ -108,15 +145,19 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
     }
 
     @Override
-    public @NotNull List<T> subList(int fromIndex, int toIndex) {
+    public @NotNull ImmSeq<T> subList(int fromIndex, int toIndex) {
         if (fromIndex < 0 || toIndex > size() || fromIndex > toIndex) {
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + ", toIndex: " + toIndex);
         } else if (fromIndex == toIndex) {
             //noinspection unchecked
-            return (List<T>) EMPTY;
+            return (ImmSeq<T>) EMPTY;
         } else {
             return new ImmSeq<>(array, start + fromIndex, start + toIndex);
         }
+    }
+
+    public @NotNull ImmSeq<T> subList(int fromIndex) {
+        return subList(fromIndex, size());
     }
 
     @Override

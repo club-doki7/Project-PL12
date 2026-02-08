@@ -18,8 +18,10 @@ public record ParamGroup(@NotNull ImmSeq<@NotNull Token> names,
                          @Nullable Pair<@NotNull Token, @NotNull Token> delim) implements Node {
     public ParamGroup {
         assert delim == null
-        || (delim.first().kind() == Token.Kind.L_PAREN && delim.second().kind() == Token.Kind.R_PAREN)
-        || (delim.first().kind() == Token.Kind.L_BRACE && delim.second().kind() == Token.Kind.R_BRACE);
+        || (delim.first().kind() == Token.Kind.L_PAREN
+            && delim.second().kind() == Token.Kind.R_PAREN)
+        || (delim.first().kind() == Token.Kind.L_BRACE
+            && delim.second().kind() == Token.Kind.R_BRACE);
     }
 
     public boolean isImplicit() {
