@@ -54,7 +54,6 @@ public sealed interface Expr extends Node {
         }
     }
 
-
     record Arrow(@NotNull Expr from,
                  @NotNull Expr to,
                  @NotNull Token arrow)

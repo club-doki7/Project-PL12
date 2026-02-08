@@ -1,5 +1,7 @@
-package club.doki7.pl12.core;
+package club.doki7.pl12.elab;
 
+import club.doki7.pl12.core.Type;
+import club.doki7.pl12.core.Value;
 import club.doki7.pl12.syntax.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
