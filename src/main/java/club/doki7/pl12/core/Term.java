@@ -23,7 +23,8 @@ public sealed interface Term {
         }
     }
 
-    record Pi(@NotNull ImmSeq<@NotNull ParamGroupTm> paramGroups,
+    record Pi(@NotNull ImmSeq<String> names,
+              @NotNull Term type,
               @NotNull Term body)
         implements Term
     {}
@@ -33,6 +34,4 @@ public sealed interface Term {
     record Meta(int id) implements Term {}
 
     record SolvedMeta(int id, @NotNull Term solution) implements Term {}
-
-    record ParamGroupTm(ImmSeq<String> names, Term type) {}
 }

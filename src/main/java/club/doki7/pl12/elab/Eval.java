@@ -34,14 +34,9 @@ public final class Eval {
                 case Term.Lam(ImmSeq<String> names, Term body) -> {
                     return new Value.Lam(localEnv, names, body);
                 }
-                case Term.Pi(ImmSeq<Term.ParamGroupTm> paramGroups, Term body) -> {
-                    Term.ParamGroupTm firstGroup = paramGroups.getFirst();
-                    ImmSeq<String> names = firstGroup.names();
-                    Type paramType = Type.ofVal(eval(env, localEnv, firstGroup.type()));
-                    Term newBody = paramGroups.size() == 1
-                        ? body
-                        : new Term.Pi(paramGroups.subList(1), body);
-                    return new Value.Pi(localEnv, names, paramType, newBody);
+                case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
+                    Type typeVal = Type.ofVal(eval(env, localEnv, type));
+                    return new Value.Pi(localEnv, names, typeVal, body);
                 }
                 case Term.Univ _ -> {
                     return Value.Univ.UNIV;
