@@ -1,6 +1,5 @@
 package club.doki7.pl12.util;
 
-import club.doki7.pl12.syntax.Argument;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
