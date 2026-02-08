@@ -29,13 +29,9 @@ public sealed interface Term {
         implements Term
     {}
 
-    record App(@NotNull Term func, @NotNull List<Term> args, @NotNull Expr.App source)
+    record App(@NotNull Term func, @NotNull List<Term> args)
         implements Term
-    {
-        public App {
-            assert source.args().size() == args.size();
-        }
-    }
+    {}
 
     record Meta(int id, @NotNull MetaSource source) implements Term {}
 
