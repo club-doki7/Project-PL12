@@ -1,9 +1,8 @@
 package club.doki7.pl12.core;
 
 import club.doki7.pl12.syntax.*;
+import club.doki7.pl12.util.ImmSeq;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public sealed interface Term {
     record Ann(@NotNull Term term, @NotNull Term type, @NotNull Expr.Ann source)
@@ -14,7 +13,7 @@ public sealed interface Term {
 
     record Free(@NotNull Name name, @NotNull Expr source) implements Term {}
 
-    record Lam(@NotNull List<@NotNull Param> params, @NotNull Term body, @NotNull LamSource source)
+    record Lam(@NotNull ImmSeq<@NotNull Param> params, @NotNull Term body, @NotNull LamSource source)
         implements Term
     {}
 
@@ -25,11 +24,11 @@ public sealed interface Term {
         }
     }
 
-    record Pi(@NotNull List<@NotNull Param> params, @NotNull Term body, @NotNull PiSource source)
+    record Pi(@NotNull ImmSeq<@NotNull Param> params, @NotNull Term body, @NotNull PiSource source)
         implements Term
     {}
 
-    record App(@NotNull Term func, @NotNull List<Term> args)
+    record App(@NotNull Term func, @NotNull ImmSeq<Term> args)
         implements Term
     {}
 
