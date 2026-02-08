@@ -1,10 +1,9 @@
 package club.doki7.pl12.syntax;
 
+import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /// ```bnf
 /// param-group ::= "{" identifier+ (":" expr)? "}"
@@ -13,7 +12,7 @@ import java.util.List;
 ///
 /// simple-expr ::= to-be-determined
 /// ```
-public record ParamGroup(@NotNull List<@NotNull Token> names,
+public record ParamGroup(@NotNull ImmSeq<@NotNull Token> names,
                          @Nullable Expr type,
                          @Nullable Token colon,
                          @Nullable Pair<@NotNull Token, @NotNull Token> delim) implements Node {

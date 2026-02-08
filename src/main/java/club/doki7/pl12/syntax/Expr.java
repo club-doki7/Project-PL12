@@ -1,10 +1,10 @@
 package club.doki7.pl12.syntax;
 
+import club.doki7.pl12.util.ImmSeq;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /// ```bnf
 /// expr ::= ann | univ | pi | arrow | var | lit | app | partial-app | fun | hole | paren
@@ -122,12 +122,12 @@ public sealed interface Expr extends Node {
     /// app ::= expression argument+
     /// ```
     record App(@NotNull Expr func,
-               @NotNull List<@NotNull Argument> args,
+               @NotNull ImmSeq<@NotNull Argument> args,
                boolean infix)
             implements Expr {
         @TestOnly
         public App(@NotNull Expr func, @NotNull Argument arg, boolean infix) {
-            this(func, List.of(arg), infix);
+            this(func, ImmSeq.of(arg), infix);
         }
 
         @Override
@@ -174,7 +174,7 @@ public sealed interface Expr extends Node {
     /// partial-app ::= "@(" expression argument+ ")"
     /// ```
     record PartialApp(@NotNull Expr func,
-                      @NotNull List<@NotNull Argument> args,
+                      @NotNull ImmSeq<@NotNull Argument> args,
                       @NotNull Token at,
                       @NotNull Token lparen,
                       @NotNull Token rparen)
@@ -184,20 +184,20 @@ public sealed interface Expr extends Node {
     /// ```bnf
     /// fun ::= "fun" param-group* "=>" expression
     /// ```
-    record Fun(@NotNull List<@NotNull ParamGroup> paramGroups,
+    record Fun(@NotNull ImmSeq<@NotNull ParamGroup> paramGroups,
                @NotNull Expr body,
                @NotNull Token fun,
                @NotNull Token arrow)
         implements Expr
     {
         @TestOnly
-        public Fun(@NotNull List<ParamGroup> paramGroups, @NotNull Expr body) {
+        public Fun(@NotNull ImmSeq<ParamGroup> paramGroups, @NotNull Expr body) {
             this(paramGroups, body, Token.sym(Token.Kind.FUN), Token.sym(Token.Kind.ARROW));
         }
 
         @TestOnly
         public Fun(@NotNull ParamGroup paramGroup, @NotNull Expr body) {
-            this(List.of(paramGroup), body);
+            this(ImmSeq.of(paramGroup), body);
         }
 
         @Override

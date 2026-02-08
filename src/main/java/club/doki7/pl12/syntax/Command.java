@@ -1,8 +1,7 @@
 package club.doki7.pl12.syntax;
 
+import club.doki7.pl12.util.ImmSeq;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 /// ```bnf
 /// command ::= axiom | check | definition | notation
@@ -11,7 +10,7 @@ public sealed interface Command extends Node {
     /// ```bnf
     /// axiom ::= "Axiom" identifier-list ":" expr "."
     /// ```
-    record Axiom(@NotNull List<Token> names,
+    record Axiom(@NotNull ImmSeq<Token> names,
                  @NotNull Expr type,
                  @NotNull Token axiom,
                  @NotNull Token dot)
@@ -48,7 +47,7 @@ public sealed interface Command extends Node {
     /// definition-keyword ::= "Definition" | "Procedure"
     /// ```
     record Definition(@NotNull Token name,
-                      @NotNull List<@NotNull ParamGroup> paramGroups,
+                      @NotNull ImmSeq<@NotNull ParamGroup> paramGroups,
                       @NotNull Expr type,
                       @NotNull Expr body,
                       @NotNull Token def,

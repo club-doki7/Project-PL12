@@ -1,5 +1,6 @@
 package club.doki7.pl12.util;
 
+import club.doki7.pl12.syntax.Argument;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -13,6 +14,16 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
         this.array = array;
         this.start = start;
         this.end = end;
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull ImmSeq<T> of(T @NotNull... elements) {
+        if (elements.length == 0) {
+            //noinspection unchecked
+            return (ImmSeq<T>) EMPTY;
+        } else {
+            return new ImmSeq<>(elements, 0, elements.length);
+        }
     }
 
     @Override
