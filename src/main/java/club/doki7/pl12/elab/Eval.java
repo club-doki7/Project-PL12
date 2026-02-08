@@ -1,5 +1,6 @@
 package club.doki7.pl12.elab;
 
+import club.doki7.pl12.core.Name;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
@@ -17,6 +18,14 @@ public final class Eval {
                     return DBI.get(localEnv, index);
                 }
                 case Term.Free free -> {
+                    if (free.name() instanceof Name.Global(String name)) {
+                        Env.Entry entry = env.lookup(name);
+                        if (entry == null) {
+                            throw new IllegalStateException("Unbound global: " + name);
+                        }
+                        return entry.value();
+                    }
+
                     return new Value.Rigid(free, ImmSeq.nil());
                 }
                 case Term.Meta meta -> {
