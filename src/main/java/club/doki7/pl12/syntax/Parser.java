@@ -440,7 +440,7 @@ public final class Parser {
         Pair<Token, ParseContext> p2 = p1.second().nextToken();
         Token colonOrEnd = p2.first();
         if (colonOrEnd.kind() != Token.Kind.COLON) {
-            return Pair.of(new ParamGroup(p1.first(), null, null, null), p2.second());
+            return Pair.of(new ParamGroup(p1.first(), null, null, null), p1.second());
         }
 
         Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
