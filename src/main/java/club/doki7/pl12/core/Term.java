@@ -26,8 +26,7 @@ public sealed interface Term {
     record Pi(@NotNull ImmSeq<String> names,
               @NotNull Term type,
               @NotNull Term body)
-        implements Term
-    {}
+        implements Term {}
 
     record App(@NotNull Term func, @NotNull ImmSeq<Term> args) implements Term {}
 

@@ -44,7 +44,7 @@ Unfortunately, your language (has/lacks):
   [✓] comprehensible syntax  [×] significant whitespace  [✓] semicolon  [×] assignment expressions
   [✓] infix operators  [½] operator overloading  [✓] nested comments  [×] multi-line strings  [×] regexes
   [×] string templates  [×] pipe  [✓] variable shadowing  [✓] emoji names [✓] pattern matching/destructuring
-  [½] ergonomic error values  [×] currying
+  [½] ergonomic error values  [✓] currying
 - Semantics
   [✓] closures  [×] objects
   [✓] call by value  [×] call by name  [✓] call by reference
@@ -118,8 +118,9 @@ You seem to be targeting the market for:
 [ ] systems programming  [ ] scripting  [ ] shells  [ ] web  [ ] games
 [ ] batch jobs  [ ] app making  [½] teaching programming
 [ ] appeasing ops/security officers  [ ] freaking out ops/security officers
-[ ] code golfing  [ ] parody languages  [ ] writing type-theory papers
+[ ] code golfing  [ ] parody languages  [½] writing type-theory papers
 [ ] creating AI  [ ] *mumble* blockchain *mumble*  [ ] other forms of raising VC money
+[✓] personal experiment
 but I'm afraid the market is:
 [ ] already saturated with frankly better options
 [ ] unwilling to adopt solutions from small companies

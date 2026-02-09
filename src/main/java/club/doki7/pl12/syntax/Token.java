@@ -37,7 +37,7 @@ public sealed interface Token {
         FUN,
         /// `->` 和 `→`
         ARROW,
-        /// `=>`，`⇒`，`↦` 和 `|->`
+        /// `=>` 和 `⇒`
         D_ARROW,
         /// `.`
         DOT,
@@ -65,7 +65,7 @@ public sealed interface Token {
         KW_BVR_NONE,
 
         // DOGFIGHT 状态的关键字
-        KW_DF_LOCAL,
+        KW_DF_LET,
         KW_DF_IN,
         KW_DF_IF,
         KW_DF_THEN,
@@ -94,7 +94,7 @@ public sealed interface Token {
         );
 
         public static final Map<String, Kind> DF_KEYWORDS_MAP = Map.ofEntries(
-            Map.entry("local", KW_DF_LOCAL),
+            Map.entry("let", KW_DF_LET),
             Map.entry("in", KW_DF_IN),
             Map.entry("if", KW_DF_IF),
             Map.entry("then", KW_DF_THEN),
