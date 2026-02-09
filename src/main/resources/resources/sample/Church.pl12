@@ -1,11 +1,17 @@
 Definition nat : type := forall {X : type}, (X -> X) -> X -> X.
-
 Definition zero {X : type} (f : X -> X) (x : X) : X := x.
-
 Check zero : nat.
 
 Definition one {X : type} (f : X -> X) (x : X) : X := f x.
+Definition two {X : type} (f : X -> X) (x : X) : X := f (f x).
+Check one : nat.
+Check two : nat.
 
 Definition succ (n : nat) := fun {X : type} (f : X -> X) (x : X) => f (n f x).
-
 Check succ : nat -> nat.
+
+Definition one_by_succ : nat := succ zero.
+Definition two_by_succ : nat := succ one.
+
+Check one_by_succ : nat.
+Check two_by_succ : nat.
