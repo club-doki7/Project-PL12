@@ -94,7 +94,7 @@ public sealed interface Token {
             Map.entry("Notation", KW_NOTATION)
         );
 
-        public static final Map<String, Kind> DF_KEYWORDS_MAP = Map.ofEntries(
+        public static final Map<String, Kind> BVR_KEYWORDS_MAP = Map.ofEntries(
             Map.entry("let", KW_BVR_LET),
             Map.entry("in", KW_BVR_IN),
             Map.entry("if", KW_BVR_IF),
