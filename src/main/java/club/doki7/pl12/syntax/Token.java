@@ -61,22 +61,22 @@ public sealed interface Token {
         KW_CHECK,
         KW_NOTATION,
 
-        // BVR 状态的关键字，暂无
-        KW_BVR_NONE,
+        // DOGFIGHT 状态的关键字，暂无
+        KW_DF_NONE,
 
-        // DOGFIGHT 状态的关键字
-        KW_DF_LET,
-        KW_DF_IN,
-        KW_DF_IF,
-        KW_DF_THEN,
-        KW_DF_ELSE,
-        KW_DF_CASE,
-        KW_DF_OF,
-        KW_DF_LOOP,
-        KW_DF_BREAK,
-        KW_DF_CONTINUE,
-        KW_DF_RETURN,
-        KW_DF_END,
+        // BVR 状态的关键字
+        KW_BVR_LET,
+        KW_BVR_IN,
+        KW_BVR_IF,
+        KW_BVR_THEN,
+        KW_BVR_ELSE,
+        KW_BVR_CASE,
+        KW_BVR_OF,
+        KW_BVR_LOOP,
+        KW_BVR_BREAK,
+        KW_BVR_CONTINUE,
+        KW_BVR_RETURN,
+        KW_BVR_END,
 
         /// End Of Input
         EOI;
@@ -94,18 +94,18 @@ public sealed interface Token {
         );
 
         public static final Map<String, Kind> DF_KEYWORDS_MAP = Map.ofEntries(
-            Map.entry("let", KW_DF_LET),
-            Map.entry("in", KW_DF_IN),
-            Map.entry("if", KW_DF_IF),
-            Map.entry("then", KW_DF_THEN),
-            Map.entry("else", KW_DF_ELSE),
-            Map.entry("case", KW_DF_CASE),
-            Map.entry("of", KW_DF_OF),
-            Map.entry("loop", KW_DF_LOOP),
-            Map.entry("break", KW_DF_BREAK),
-            Map.entry("continue", KW_DF_CONTINUE),
-            Map.entry("return", KW_DF_RETURN),
-            Map.entry("end", KW_DF_END)
+            Map.entry("let", KW_BVR_LET),
+            Map.entry("in", KW_BVR_IN),
+            Map.entry("if", KW_BVR_IF),
+            Map.entry("then", KW_BVR_THEN),
+            Map.entry("else", KW_BVR_ELSE),
+            Map.entry("case", KW_BVR_CASE),
+            Map.entry("of", KW_BVR_OF),
+            Map.entry("loop", KW_BVR_LOOP),
+            Map.entry("break", KW_BVR_BREAK),
+            Map.entry("continue", KW_BVR_CONTINUE),
+            Map.entry("return", KW_BVR_RETURN),
+            Map.entry("end", KW_BVR_END)
         );
     }
 
