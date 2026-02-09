@@ -178,7 +178,16 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
 
     @Override
     public @NotNull String toString() {
-        return Arrays.toString(array);
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = start; i < end; i++) {
+            sb.append(array[i]);
+            if (i != end - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+        return sb.toString();
     }
 
     static final ImmSeq<Object> EMPTY = new ImmSeq<>(new Object[0], 0, 0);
