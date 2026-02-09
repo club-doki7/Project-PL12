@@ -78,7 +78,7 @@ public sealed interface Command extends Node {
     }
 
     /// ```bnf
-    /// notation ::= "Notation" name assoc prec expr "."`
+    /// notation ::= "Notation" name assoc prec expr "."
     /// assoc ::= "left" | "right" | "none"
     /// prec ::= nat
     /// ```
