@@ -20,9 +20,9 @@ simple-param-group ::= identifier+ type-ann?
 
 type-ann ::= ":" expr
 
-notation-command ::= "Notation" identifier assoc prec expr "."
+notation-command ::= "Notation" assoc prec "(" identifier ")" ":=" expr "."
 
-assoc ::= "left" | "right" | "none"
+assoc ::= "left" | "right" | "noassoc"
 
 prec ::= nat
 

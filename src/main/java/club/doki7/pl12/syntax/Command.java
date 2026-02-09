@@ -13,6 +13,7 @@ public sealed interface Command extends Node {
     record Axiom(@NotNull ImmSeq<Token> names,
                  @NotNull Expr type,
                  @NotNull Token axiom,
+                 @NotNull Token colon,
                  @NotNull Token dot)
         implements Command
     {
@@ -97,7 +98,7 @@ public sealed interface Command extends Node {
         public Notation {
             assert (assoc == Operator.Assoc.LEFT && assocToken.lexeme().equals("left"))
                    || (assoc == Operator.Assoc.RIGHT && assocToken.lexeme().equals("right"))
-                   || (assoc == Operator.Assoc.NONE && assocToken.lexeme().equals("none"));
+                   || (assoc == Operator.Assoc.NONE && assocToken.lexeme().equals("noassoc"));
         }
 
         @Override
