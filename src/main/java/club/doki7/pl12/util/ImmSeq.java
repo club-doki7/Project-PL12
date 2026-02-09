@@ -190,6 +190,33 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof List<?> list) {
+            if (list.size() != size()) {
+                return false;
+            }
+
+            for (int i = 0; i < size(); i++) {
+                if (!Objects.equals(get(i), list.get(i))) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        for (int i = start; i < end; i++) {
+            hash = 31 * hash + Objects.hashCode(array[i]);
+        }
+        return hash;
+    }
+
     static final ImmSeq<Object> EMPTY = new ImmSeq<>(new Object[0], 0, 0);
     static final String IMM_SEQ_IS_IMMUTABLE = "ImmSeq is immutable";
 }
