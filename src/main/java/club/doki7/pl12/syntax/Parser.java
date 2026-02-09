@@ -156,26 +156,25 @@ public final class Parser {
         Token tok = peek.first();
 
         List<ParamGroup> paramGroups = new ArrayList<>();
-        ParseContext currentCtx = ctx;
 
         if (tok.kind() == Token.Kind.L_PAREN || tok.kind() == Token.Kind.L_BRACE) {
             while (true) {
-                Pair<Token, ParseContext> p = currentCtx.nextToken();
+                Pair<Token, ParseContext> p = ctx.nextToken();
                 Token t = p.first();
                 if (t.kind() != Token.Kind.L_PAREN && t.kind() != Token.Kind.L_BRACE) {
                     break;
                 }
                 Pair<ParamGroup, ParseContext> pg = parseParamGroup(t, p.second());
                 paramGroups.add(pg.first());
-                currentCtx = pg.second();
+                ctx = pg.second();
             }
         } else {
             Pair<ParamGroup, ParseContext> pg = parseSimpleParamGroup(ctx);
             paramGroups.add(pg.first());
-            currentCtx = pg.second();
+            ctx = pg.second();
         }
 
-        Pair<Token, ParseContext> p2 = expectConsume(currentCtx, Token.Kind.D_ARROW);
+        Pair<Token, ParseContext> p2 = expectConsume(ctx, Token.Kind.D_ARROW);
         Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
 
         return Pair.of(new Expr.Fun(ImmSeq.of(paramGroups), p3.first(), funTok, p2.first()),
@@ -192,18 +191,17 @@ public final class Parser {
         Token startTok = p1.first();
 
         ParamGroup paramGroup;
-        ParseContext currentCtx;
         if (startTok.kind() == Token.Kind.L_PAREN || startTok.kind() == Token.Kind.L_BRACE) {
             Pair<ParamGroup, ParseContext> pg = parseParamGroup(startTok, p1.second());
             paramGroup = pg.first();
-            currentCtx = pg.second();
+            ctx = pg.second();
         } else {
             Pair<ParamGroup, ParseContext> pg = parseSimpleParamGroup(ctx);
             paramGroup = pg.first();
-            currentCtx = pg.second();
+            ctx = pg.second();
         }
 
-        Pair<Token, ParseContext> p2 = expectConsume(currentCtx, Token.Kind.COMMA);
+        Pair<Token, ParseContext> p2 = expectConsume(ctx, Token.Kind.COMMA);
         Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
 
         return Pair.of(new Expr.Pi(paramGroup, p3.first(), piTok, p2.first()), p3.second());
@@ -260,10 +258,10 @@ public final class Parser {
     parseTerm(ParseContext ctx, int minPrec) throws ParseException {
         Pair<Expr, ParseContext> p1 = parseApp(ctx);
         Expr left = p1.first();
-        ParseContext currentCtx = p1.second();
+        ctx = p1.second();
 
         while (true) {
-            Pair<Token, ParseContext> peek = currentCtx.nextToken();
+            Pair<Token, ParseContext> peek = ctx.nextToken();
             Token tok = peek.first();
 
             if (tok.kind() != Token.Kind.INFIX) {
@@ -277,16 +275,16 @@ public final class Parser {
                 break;
             }
 
-            currentCtx = peek.second();
+            ctx = peek.second();
 
             int nextMinPrec = switch (op.assoc()) {
                 case LEFT, NONE -> op.prec() + 1;
                 case RIGHT -> op.prec();
             };
 
-            Pair<Expr, ParseContext> p2 = parseTerm(currentCtx, nextMinPrec);
+            Pair<Expr, ParseContext> p2 = parseTerm(ctx, nextMinPrec);
             Expr right = p2.first();
-            currentCtx = p2.second();
+            ctx = p2.second();
 
             Expr opExpr = new Expr.Var(tok);
             left = new Expr.App(opExpr,
@@ -295,7 +293,7 @@ public final class Parser {
                                 true);
         }
 
-        return Pair.of(left, currentCtx);
+        return Pair.of(left, ctx);
     }
 
     /// ```bnf
@@ -306,31 +304,31 @@ public final class Parser {
     parseApp(ParseContext ctx) throws ParseException {
         Pair<Expr, ParseContext> p1 = parseAtom(ctx);
         Expr func = p1.first();
-        ParseContext currentCtx = p1.second();
+        ctx = p1.second();
 
         List<Argument> args = new ArrayList<>();
 
         while (true) {
-            Pair<Token, ParseContext> peek = currentCtx.nextToken();
+            Pair<Token, ParseContext> peek = ctx.nextToken();
             Token tok = peek.first();
 
             if (tok.kind() == Token.Kind.L_BRACE) {
                 Pair<Argument, ParseContext> argP = parseImplicitArg(tok, peek.second());
                 args.add(argP.first());
-                currentCtx = argP.second();
+                ctx = argP.second();
             } else if (isAtomStart(tok)) {
-                Pair<Expr, ParseContext> argExpr = parseAtom(currentCtx);
+                Pair<Expr, ParseContext> argExpr = parseAtom(ctx);
                 args.add(new Argument.Explicit(argExpr.first()));
-                currentCtx = argExpr.second();
+                ctx = argExpr.second();
             } else {
                 break;
             }
         }
 
         if (args.isEmpty()) {
-            return Pair.of(func, currentCtx);
+            return Pair.of(func, ctx);
         } else {
-            return Pair.of(new Expr.App(func, ImmSeq.of(args), false), currentCtx);
+            return Pair.of(new Expr.App(func, ImmSeq.of(args), false), ctx);
         }
     }
 
