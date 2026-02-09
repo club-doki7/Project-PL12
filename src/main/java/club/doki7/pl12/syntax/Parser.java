@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Parser {
+    /// ```bnf
+    /// command ::= axion | check | definition | notation
+    /// ```
     public static @NotNull Pair<@Nullable Command, @NotNull ParseContext>
     parseCommand(ParseContext ctx) throws ParseException {
         Pair<Token, ParseContext> p = ctx.nextToken();
@@ -30,11 +33,24 @@ public final class Parser {
         };
     }
 
+    /// ```bnf
+    /// expr ::= fun | pi | ann
+    /// ```
     public static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parseExpr(ParseContext ctx) throws ParseException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Pair<Token, ParseContext> p = ctx.nextToken();
+        Token tok = p.first();
+
+        return switch (tok.kind()) {
+            case Token.Kind.FUN -> Pair.upcast(parseFun(tok, p.second()));
+            case Token.Kind.PI -> Pair.upcast(parsePi(tok, p.second()));
+            default -> parseAnn(ctx);
+        };
     }
 
+    /// ```bnf
+    /// axiom ::= "Axiom" identifier-list ":" expr "."
+    /// ```
     private static @NotNull Pair<Command.@NotNull Axiom, @NotNull ParseContext>
     parseAxiom(Token axiomTok, ParseContext ctx) throws ParseException {
         Pair<ImmSeq<Token>, ParseContext> p1 = parseIdentList(ctx);
@@ -50,6 +66,9 @@ public final class Parser {
         return Pair.of(new Command.Axiom(names, type, colon, axiomTok, dot), p4.second());
     }
 
+    /// ```bnf
+    /// check ::= "Check" expr "."
+    /// ```
     private static @NotNull Pair<Command.@NotNull Check, @NotNull ParseContext>
     parseCheck(Token checkTok, ParseContext ctx) throws ParseException {
         Pair<Expr, ParseContext> p1 = parseExpr(ctx);
@@ -62,6 +81,10 @@ public final class Parser {
         return Pair.of(new Command.Check(expr, checkTok, dot), ctx1);
     }
 
+    /// ```bnf
+    /// definition ::= definition-keyword name param-group* ":" expr ":=" expr "."
+    /// definition-keyword ::= "Definition" | "Procedure"
+    /// ```
     private static @NotNull Pair<Command.@NotNull Definition, @NotNull ParseContext>
     parseDefinition(Token defTok, ParseContext ctx) throws ParseException {
         Pair<Token, ParseContext> p1 = expectConsume(ctx, Token.Kind.IDENT);
@@ -85,6 +108,9 @@ public final class Parser {
                        p7.second());
     }
 
+    /// ```bnf
+    /// notation ::= "Notation" assoc prec "(" name ")" ":=" expr "."
+    /// ```
     private static @NotNull Pair<Command.@NotNull Notation, @NotNull ParseContext>
     parseNotation(Token notationTok, ParseContext ctx) throws ParseException {
         Pair<Token, ParseContext> p1 = expectConsume(ctx, Token.Kind.IDENT);
@@ -118,6 +144,219 @@ public final class Parser {
         return Pair.of(new Command.Notation(name, assoc, prec, expr,
                                             notationTok, assocToken, lParen, rParen, assign, dot),
                        p8.second());
+    }
+
+    /// ```bnf
+    /// fun ::= "fun" param-group+ "=>" expr
+    ///       | "fun" simple-param-group "=>" expr
+    /// ```
+    private static @NotNull Pair<Expr.@NotNull Fun, @NotNull ParseContext>
+    parseFun(Token funTok, ParseContext ctx) throws ParseException {
+        Pair<Token, ParseContext> peek = ctx.nextToken();
+        Token tok = peek.first();
+
+        List<ParamGroup> paramGroups = new ArrayList<>();
+        ParseContext currentCtx = ctx;
+
+        if (tok.kind() == Token.Kind.L_PAREN || tok.kind() == Token.Kind.L_BRACE) {
+            while (true) {
+                Pair<Token, ParseContext> p = currentCtx.nextToken();
+                Token t = p.first();
+                if (t.kind() != Token.Kind.L_PAREN && t.kind() != Token.Kind.L_BRACE) {
+                    break;
+                }
+                Pair<ParamGroup, ParseContext> pg = parseParamGroup(t, p.second());
+                paramGroups.add(pg.first());
+                currentCtx = pg.second();
+            }
+        } else {
+            Pair<ParamGroup, ParseContext> pg = parseSimpleParamGroup(ctx);
+            paramGroups.add(pg.first());
+            currentCtx = pg.second();
+        }
+
+        Pair<Token, ParseContext> p2 = expectConsume(currentCtx, Token.Kind.D_ARROW);
+        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+
+        return Pair.of(new Expr.Fun(ImmSeq.of(paramGroups), p3.first(), funTok, p2.first()),
+                       p3.second());
+    }
+
+    /// ```bnf
+    /// pi ::= pi-keyword param-group "," expr
+    /// ```
+    private static @NotNull Pair<Expr.@NotNull Pi, @NotNull ParseContext>
+    parsePi(Token piTok, ParseContext ctx) throws ParseException {
+        Pair<Token, ParseContext> p1 = ctx.nextToken();
+        Token startTok = p1.first();
+
+        ParamGroup paramGroup;
+        ParseContext currentCtx;
+        if (startTok.kind() == Token.Kind.L_PAREN || startTok.kind() == Token.Kind.L_BRACE) {
+            Pair<ParamGroup, ParseContext> pg = parseParamGroup(startTok, p1.second());
+            paramGroup = pg.first();
+            currentCtx = pg.second();
+        } else {
+            Pair<ParamGroup, ParseContext> pg = parseSimpleParamGroup(ctx);
+            paramGroup = pg.first();
+            currentCtx = pg.second();
+        }
+
+        Pair<Token, ParseContext> p2 = expectConsume(currentCtx, Token.Kind.COMMA);
+        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+
+        return Pair.of(new Expr.Pi(paramGroup, p3.first(), piTok, p2.first()), p3.second());
+    }
+
+    /// ```bnf
+    /// ann ::= term (":" expr)?
+    /// ```
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseAnn(ParseContext ctx) throws ParseException {
+        Pair<Expr, ParseContext> p1 = parseTerm(ctx);
+        Pair<Token, ParseContext> peek = p1.second().nextToken();
+
+        if (peek.first().kind() == Token.Kind.COLON) {
+            Pair<Expr, ParseContext> p2 = parseExpr(peek.second());
+            return Pair.of(new Expr.Ann(p1.first(), p2.first(), peek.first()), p2.second());
+        } else {
+            return p1;
+        }
+    }
+
+    /// ```bnf
+    /// term ::= app (binary-tail)*
+    /// binary-tail ::= op app | "->" app
+    /// ```
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseTerm(ParseContext ctx) throws ParseException {
+        Pair<Expr, ParseContext> p1 = parseApp(ctx);
+        Expr left = p1.first();
+        ParseContext currentCtx = p1.second();
+
+        while (true) {
+            Pair<Token, ParseContext> peek = currentCtx.nextToken();
+            Token tok = peek.first();
+
+            if (tok.kind() == Token.Kind.ARROW) {
+                Pair<Expr, ParseContext> p2 = parseApp(peek.second());
+                left = new Expr.Arrow(left, p2.first(), tok);
+                currentCtx = p2.second();
+            } else if (tok.kind() == Token.Kind.INFIX) {
+                Token.Infix infixTok = (Token.Infix) tok;
+                Operator op = infixTok.infixOp();
+                Pair<Expr, ParseContext> p2 = parseApp(peek.second());
+
+                // Build infix application: op left right
+                Expr opExpr = new Expr.Var(Token.ident(op.lexeme(), tok.file(), tok.pos(), tok.line(), tok.col()));
+                Argument leftArg = new Argument.Explicit(left);
+                Argument rightArg = new Argument.Explicit(p2.first());
+                left = new Expr.App(opExpr, ImmSeq.of(leftArg, rightArg), true);
+                currentCtx = p2.second();
+            } else {
+                break;
+            }
+        }
+
+        return Pair.of(left, currentCtx);
+    }
+
+    /// ```bnf
+    /// app ::= atom arg*
+    /// arg ::= atom | "_" | "{" expr "}" | "{" name "=" expr "}"
+    /// ```
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseApp(ParseContext ctx) throws ParseException {
+        Pair<Expr, ParseContext> p1 = parseAtom(ctx);
+        Expr func = p1.first();
+        ParseContext currentCtx = p1.second();
+
+        List<Argument> args = new ArrayList<>();
+
+        while (true) {
+            Pair<Token, ParseContext> peek = currentCtx.nextToken();
+            Token tok = peek.first();
+
+            if (tok.kind() == Token.Kind.L_BRACE) {
+                Pair<Argument, ParseContext> argP = parseImplicitArg(tok, peek.second());
+                args.add(argP.first());
+                currentCtx = argP.second();
+            } else if (isAtomStart(tok)) {
+                Pair<Expr, ParseContext> argExpr = parseAtom(currentCtx);
+                args.add(new Argument.Explicit(argExpr.first()));
+                currentCtx = argExpr.second();
+            } else {
+                break;
+            }
+        }
+
+        if (args.isEmpty()) {
+            return Pair.of(func, currentCtx);
+        } else {
+            return Pair.of(new Expr.App(func, ImmSeq.of(args), false), currentCtx);
+        }
+    }
+
+    /// ```bnf
+    /// implicit-arg ::= "{" expr "}" | "{" name "=" expr "}"
+    /// ```
+    private static @NotNull Pair<@NotNull Argument, @NotNull ParseContext>
+    parseImplicitArg(Token lbrace, ParseContext ctx) throws ParseException {
+        Pair<Token, ParseContext> p1 = ctx.nextToken();
+        Token first = p1.first();
+
+        if (first.kind() == Token.Kind.IDENT) {
+            Pair<Token, ParseContext> p2 = p1.second().nextToken();
+            if ((p2.first().kind() == Token.Kind.INFIX
+                 || p2.first().kind() == Token.Kind.IDENT)
+                && p2.first().lexeme().equals("=")) {
+                Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+                Pair<Token, ParseContext> p4 = expectConsume(p3.second(), Token.Kind.R_BRACE);
+                return Pair.of(new Argument.NamedImplicit(first, p3.first(),
+                                                          lbrace, p4.first(), p2.first()),
+                               p4.second());
+            }
+        }
+
+        Pair<Expr, ParseContext> exprP = parseExpr(ctx);
+        Pair<Token, ParseContext> rbrace = expectConsume(exprP.second(), Token.Kind.R_BRACE);
+        return Pair.of(new Argument.Implicit(exprP.first(), lbrace, rbrace.first()), rbrace.second());
+    }
+
+    private static boolean isAtomStart(Token tok) {
+        return switch (tok.kind()) {
+            case Token.Kind.UNIV,
+                 Token.Kind.IDENT,
+                 Token.Kind.LIT_NAT,
+                 Token.Kind.LIT_STRING,
+                 Token.Kind.D_QUES,
+                 Token.Kind.L_PAREN -> true;
+            default -> false;
+        };
+    }
+
+    /// ```bnf
+    /// atom ::= univ | var | lit | hole | paren
+    /// ```
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseAtom(ParseContext ctx) throws ParseException {
+        Pair<Token, ParseContext> p = ctx.nextToken();
+        Token tok = p.first();
+        ParseContext ctx1 = p.second();
+
+        return switch (tok.kind()) {
+            case Token.Kind.UNIV -> Pair.of(new Expr.Univ(tok), ctx1);
+            case Token.Kind.IDENT -> Pair.of(new Expr.Var(tok), ctx1);
+            case Token.Kind.LIT_NAT, Token.Kind.LIT_STRING -> Pair.of(new Expr.Lit(tok), ctx1);
+            case Token.Kind.D_QUES -> Pair.of(new Expr.Hole(tok), ctx1);
+            case Token.Kind.L_PAREN -> {
+                Pair<Expr, ParseContext> innerP = parseExpr(ctx1);
+                Pair<Token, ParseContext> rparenP = expectConsume(innerP.second(), Token.Kind.R_PAREN);
+                yield Pair.of(new Expr.Paren(innerP.first(), tok, rparenP.first()), rparenP.second());
+            }
+            default -> throw new ParseException(tok.range(),
+                                                "Expected expression, got " + tok.kind());
+        };
     }
 
     private static Pair<ImmSeq<ParamGroup>, ParseContext>

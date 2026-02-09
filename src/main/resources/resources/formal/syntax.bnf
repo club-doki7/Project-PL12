@@ -1,15 +1,12 @@
 program ::= command*
 
-command ::= axiom-command
-          | check-command
-          | definition-command
-          | notation-command
+command ::= axiom | check | definition | notation
 
-axiom-command ::= "Axiom" identifier+ ":" expr "."
+axiom ::= "Axiom" identifier+ ":" expr "."
 
-check-command ::= "Check" expr "."
+check ::= "Check" expr "."
 
-definition-command ::= definition-keyword identifier param-group* ":" expr ":=" expr "."
+definition ::= definition-keyword identifier param-group* ":" expr ":=" expr "."
 
 definition-keyword ::= "Definition" | "Procedure"
 
@@ -20,7 +17,7 @@ simple-param-group ::= identifier+ type-ann?
 
 type-ann ::= ":" expr
 
-notation-command ::= "Notation" assoc prec "(" identifier ")" ":=" expr "."
+notation ::= "Notation" assoc prec "(" identifier ")" ":=" expr "."
 
 assoc ::= "left" | "right" | "noassoc"
 
@@ -48,6 +45,8 @@ app ::= atom arg*
 
 arg ::= atom
       | "_"
+      | "{" expr "}"
+      | "{" identifier "=" expr "}"
 
 atom ::= univ
        | var
