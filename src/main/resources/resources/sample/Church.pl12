@@ -15,3 +15,6 @@ Definition two_by_succ : nat := succ one.
 
 Check one_by_succ : nat.
 Check two_by_succ : nat.
+
+Definition plus (n m : nat) := fun {X : type} (f : X -> X) (x : X) => n f (m f x).
+Check plus : nat -> nat -> nat.

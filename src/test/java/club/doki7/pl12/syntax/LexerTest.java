@@ -42,102 +42,79 @@ class LexerTest {
 
     @Test
     void testIdentifier() throws LexicalException {
-        assertEquals(
-            List.of(ident("foo"), ident("bar_baz"), ident("x'"), eoi()),
-            tokenize("foo bar_baz x'")
-        );
+        assertEquals(List.of(ident("foo"), ident("bar_baz"), ident("x'"), eoi()),
+                     tokenize("foo bar_baz x'"));
     }
 
     @Test
     void testKeywords() throws LexicalException {
-        assertEquals(
-            List.of(
-                    sym(Kind.PI),
-                    sym(Kind.KW_AXIOM),
-                    sym(Kind.KW_DEFINITION),
-                    sym(Kind.KW_PROCEDURE),
-                    sym(Kind.KW_CHECK),
-                    sym(Kind.KW_NOTATION),
-                    eoi()
-            ),
-            tokenize("forall Axiom Definition Procedure Check Notation")
-        );
+        assertEquals(List.of(sym(Kind.PI),
+                             sym(Kind.KW_AXIOM),
+                             sym(Kind.KW_DEFINITION),
+                             sym(Kind.KW_PROCEDURE),
+                             sym(Kind.KW_CHECK),
+                             sym(Kind.KW_NOTATION),
+                             eoi()),
+                     tokenize("forall Axiom Definition Procedure Check Notation"));
     }
 
     @Test
     void testSymbols() throws LexicalException {
-        assertEquals(
-            List.of(
-                    sym(Kind.L_PAREN),
-                    sym(Kind.R_PAREN),
-                    sym(Kind.DOT),
-                    sym(Kind.COMMA),
-                    sym(Kind.COLON),
-                    sym(Kind.FUN),
-                    sym(Kind.FUN),
-                    sym(Kind.PI),
-                    sym(Kind.PI),
-                    sym(Kind.ARROW),
-                    sym(Kind.ARROW),
-                    sym(Kind.D_ARROW),
-                    sym(Kind.D_ARROW),
-                    sym(Kind.D_QUES),
-                    sym(Kind.UNIV),
-                    eoi()
-            ),
-            tokenize("( ) . , : fun λ ∀ Π → -> ⇒ => ?? *")
-        );
+        assertEquals(List.of(sym(Kind.L_PAREN),
+                             sym(Kind.R_PAREN),
+                             sym(Kind.DOT),
+                             sym(Kind.COMMA),
+                             sym(Kind.COLON),
+                             sym(Kind.FUN),
+                             sym(Kind.FUN),
+                             sym(Kind.PI),
+                             sym(Kind.PI),
+                             sym(Kind.ARROW),
+                             sym(Kind.ARROW),
+                             sym(Kind.D_ARROW),
+                             sym(Kind.D_ARROW),
+                             sym(Kind.D_QUES),
+                             sym(Kind.UNIV),
+                             eoi()),
+                     tokenize("( ) . , : fun λ ∀ Π → -> ⇒ => ?? type"));
     }
 
     @Test
     void testNaturalNumbers() throws LexicalException {
-        assertEquals(
-            List.of(
-                    nat(BigInteger.ZERO),
-                    nat(BigInteger.valueOf(42)),
-                    nat(new BigInteger("12345678901234567890")),
-                    eoi()
-            ),
-            tokenize("0 42 12345678901234567890")
-        );
+        assertEquals(List.of(nat(BigInteger.ZERO),
+                             nat(BigInteger.valueOf(42)),
+                             nat(new BigInteger("12345678901234567890")),
+                             eoi()),
+                     tokenize("0 42 12345678901234567890"));
     }
 
     @Test
     void testStringLiterals() throws LexicalException {
-        assertEquals(
-            List.of(string("hello"), string("world"), eoi()),
-            tokenize("\"hello\" \"world\"")
-        );
+        assertEquals(List.of(string("hello"), string("world"), eoi()),
+                     tokenize("\"hello\" \"world\""));
     }
 
     @Test
     void testStringEscapeSequences() throws LexicalException {
-        assertEquals(
-            List.of(
-                    string("hello\nworld"),
-                    string("tab\there"),
-                    string("quote\"inside"),
-                    string("backslash\\end"),
-                    eoi()
-            ),
-            tokenize("\"hello\\nworld\" \"tab\\there\" \"quote\\\"inside\" \"backslash\\\\end\"")
-        );
+        assertEquals(List.of(string("hello\nworld"),
+                             string("tab\there"),
+                             string("quote\"inside"),
+                             string("backslash\\end"),
+                             eoi()),
+                     tokenize("\"hello\\nworld\" "
+                              + "\"tab\\there\" \"quote\\\"inside\" \"backslash\\\\end\""));
     }
 
     @Test
     void testBlockComment() throws LexicalException {
-        assertEquals(
-            List.of(ident("foo"), ident("bar"), eoi()),
-            tokenize("foo (* this is a comment *) bar")
-        );
+        assertEquals(List.of(ident("foo"), ident("bar"), eoi()),
+                     tokenize("foo (* this is a comment *) bar"));
     }
 
     @Test
     void testMultipleComments() throws LexicalException {
-        assertEquals(
-            List.of(ident("foo"), ident("bar"), eoi()),
-            tokenize("(* first *) foo (* second *) (* third *) bar")
-        );
+        assertEquals(List.of(ident("foo"), ident("bar"), eoi()),
+                     tokenize("(* first *) foo (* second *) (* third *) bar"));
     }
 
     @Test
@@ -162,36 +139,28 @@ class LexerTest {
 
     @Test
     void testComplexExpression() throws LexicalException {
-        assertEquals(
-            List.of(
-                    sym(Kind.FUN),
-                    ident("x"),
-                    sym(Kind.COLON),
-                    sym(Kind.UNIV),
-                    sym(Kind.DOT),
-                    ident("x"),
-                    eoi()
-            ),
-            tokenize("λx : * . x")
-        );
+        assertEquals(List.of(sym(Kind.FUN),
+                             ident("x"),
+                             sym(Kind.COLON),
+                             sym(Kind.UNIV),
+                             sym(Kind.DOT),
+                             ident("x"),
+                             eoi()),
+                     tokenize("λx : type . x"));
     }
 
     @Test
     void testPiType() throws LexicalException {
-        assertEquals(
-            List.of(
-                    sym(Kind.PI),
-                    sym(Kind.L_PAREN),
-                    ident("x"),
-                    sym(Kind.COLON),
-                    ident("A"),
-                    sym(Kind.R_PAREN),
-                    sym(Kind.ARROW),
-                    ident("B"),
-                    eoi()
-            ),
-            tokenize("∀(x : A) -> B")
-        );
+        assertEquals(List.of(sym(Kind.PI),
+                             sym(Kind.L_PAREN),
+                             ident("x"),
+                             sym(Kind.COLON),
+                             ident("A"),
+                             sym(Kind.R_PAREN),
+                             sym(Kind.ARROW),
+                             ident("B"),
+                             eoi()),
+                     tokenize("∀(x : A) -> B"));
     }
 
     @Test
@@ -212,34 +181,26 @@ class LexerTest {
     @Test
     void testOperatorChars() throws LexicalException {
         // 运算符字符在没有注册中缀运算符时作为标识符处理
-        assertEquals(
-            List.of(ident("+"), ident("-"), ident("++"), ident("--"), eoi()),
-            tokenize("+ - ++ --")
-        );
+        assertEquals(List.of(ident("+"), ident("-"), ident("++"), ident("--"), eoi()),
+                     tokenize("+ - ++ --"));
     }
 
     @Test
     void testInfixDeclaration() throws LexicalException {
-        assertEquals(
-            List.of(
-                    sym(Kind.KW_NOTATION),
-                    ident("left"),
-                    nat(BigInteger.valueOf(50)),
-                    ident("+"),
-                    sym(Kind.COLON_EQ),
-                    ident("add"),
-                    sym(Kind.DOT),
-                    eoi()
-            ),
-            tokenize("Notation left 50 + := add.")
-        );
+        assertEquals(List.of(sym(Kind.KW_NOTATION),
+                             ident("left"),
+                             nat(BigInteger.valueOf(50)),
+                             ident("+"),
+                             sym(Kind.COLON_EQ),
+                             ident("add"),
+                             sym(Kind.DOT),
+                             eoi()),
+                     tokenize("Notation left 50 + := add."));
     }
 
     @Test
     void testHoleToken() throws LexicalException {
-        assertEquals(
-            List.of(sym(Kind.D_QUES), eoi()),
-            tokenize("??")
-        );
+        assertEquals(List.of(sym(Kind.D_QUES), eoi()),
+                     tokenize("??"));
     }
 }
