@@ -18,10 +18,10 @@ public sealed interface Name {
         }
     }
 
-    record Quote(int index, @NotNull String name) implements Name {
+    record Quote(int level, @NotNull String name) implements Name {
         @Override
         public @NotNull String toString() {
-            return TextUtil.superscriptNum("𝒬〈" + name + "〉", index);
+            return TextUtil.superscriptNum("𝒬〈" + name + "〉", level);
         }
     }
 }

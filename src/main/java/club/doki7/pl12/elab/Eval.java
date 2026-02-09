@@ -120,6 +120,10 @@ public final class Eval {
     }
 
     private Term reifySpine(int level, Term head, ImmSeq<Value> spine) {
+        if (head instanceof Term.Free(Name.Quote(int quotedLevel, String name))) {
+            head = new Term.Bound(level - quotedLevel - 1, name);
+        }
+
         if (spine.isEmpty()) {
             return head;
         }
@@ -132,12 +136,12 @@ public final class Eval {
     }
 
     private Term.Lam reifyLam(int level, Value.Lam lam) {
-        Term body = reifyClosure(level + lam.paramNames().size(), lam);
+        Term body = reifyClosure(level, lam);
         return new Term.Lam(lam.paramNames(), body);
     }
 
     private Term.Pi reifyPi(int level, Value.Pi pi) {
-        Term body = reifyClosure(level + pi.paramNames().size(), pi);
+        Term body = reifyClosure(level, pi);
         Term paramTypeTerm = reify(level, pi.paramType());
         return new Term.Pi(pi.paramNames(), paramTypeTerm, body);
     }
@@ -148,15 +152,15 @@ public final class Eval {
 
         Value[] freshVars = new Value[paramCount];
         for (int i = 0; i < paramCount; i++) {
-            int idx = paramCount - 1 - i;
-            Term.Bound bound = new Term.Bound(idx, paramNames.get(i));
-            freshVars[i] = new Value.Rigid(bound, ImmSeq.nil());
+            int paramLevel = level + i;
+            Term.Free free = new Term.Free(new Name.Quote(paramLevel, paramNames.get(i)));
+            freshVars[i] = new Value.Rigid(free, ImmSeq.nil());
         }
 
         ConsRevList<ImmSeq<Value>> extendedEnv = ConsRevList.rcons(closure.localEnv(),
                                                                    ImmSeq.ofUnsafe(freshVars));
         Value bodyValue = eval(extendedEnv, closure.body());
-        return reify(level, bodyValue);
+        return reify(level + paramCount, bodyValue);
     }
 
     private Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
