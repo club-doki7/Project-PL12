@@ -13,12 +13,12 @@ definition-command ::= definition-keyword identifier param-group* ":" expr ":=" 
 
 definition-keyword ::= "Definition" | "Procedure"
 
-param-group ::= "(" identifier+ param-group-type? ")"
-              | "{" identifier+ param-group-type? "}"
+param-group ::= "(" identifier+ type-ann? ")"
+              | "{" identifier+ type-ann? "}"
 
-simple-param-group ::= identifier+ param-group-type?
+simple-param-group ::= identifier+ type-ann?
 
-param-group-type ::= ":" expr
+type-ann ::= ":" expr
 
 notation-command ::= "Notation" identifier assoc prec expr "."
 
@@ -26,31 +26,43 @@ assoc ::= "left" | "right" | "none"
 
 prec ::= nat
 
-expr ::= ann | univ | pi | arrow | var | lit | app | partial-app | fun | hole | paren | binary
+expr ::= fun
+       | pi
+       | ann
 
-ann ::= simple-expr ":" expr
-
-univ ::= "*" | "𝒰"
+ann ::= term (":" expr)?
 
 pi ::= pi-keyword param-group "," expr
 
 pi-keyword ::= "∀" | "Π" | "forall"
 
-arrow ::= expr "->" expr
+fun ::= "fun" param-group+ "=>" expr
+      | "fun" simple-param-group "=>" expr
+
+term ::= app (binary-tail)*
+
+binary-tail ::= op app
+              | "->" app
+
+app ::= atom arg*
+
+arg ::= atom
+      | "_"
+
+atom ::= univ
+       | var
+       | lit
+       | hole
+       | paren
+
+univ ::= "*" | "𝒰"
 
 var ::= identifier
 
 lit ::= nat | string
 
-app ::= expr expr+
-
-partial-app ::= expr expr* "_"
-
-fun ::= "fun" param-group+ "=>" expr
-      | "fun" simple-param-group "=>" expr
-
 hole ::= "??"
 
 paren ::= "(" expr ")"
 
-binary ::= expr op expr
+op ::= identifier
