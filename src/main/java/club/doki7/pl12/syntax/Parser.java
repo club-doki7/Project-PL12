@@ -184,6 +184,7 @@ public final class Parser {
 
     /// ```bnf
     /// pi ::= pi-keyword param-group "," expr
+    /// pi-keyword ::= "∀" | "Π" | "forall"
     /// ```
     private static @NotNull Pair<Expr.@NotNull Pi, @NotNull ParseContext>
     parsePi(Token piTok, ParseContext ctx) throws ParseException {
@@ -213,7 +214,7 @@ public final class Parser {
     /// ```
     private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parseAnn(ParseContext ctx) throws ParseException {
-        Pair<Expr, ParseContext> p1 = parseTerm(ctx);
+        Pair<Expr, ParseContext> p1 = parseArrow(ctx);
         Pair<Token, ParseContext> peek = p1.second().nextToken();
 
         if (peek.first().kind() == Token.Kind.COLON) {
@@ -225,11 +226,38 @@ public final class Parser {
     }
 
     /// ```bnf
-    /// term ::= app (binary-tail)*
-    /// binary-tail ::= op app | "->" app
+    /// arrow ::= term ("->" arrow)?
     /// ```
     private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseArrow(ParseContext ctx) throws ParseException {
+        Pair<Expr, ParseContext> p1 = parseTerm(ctx);
+        Expr left = p1.first();
+
+        Pair<Token, ParseContext> peek = p1.second().nextToken();
+        if (peek.first().kind() == Token.Kind.ARROW) {
+            Pair<Expr, ParseContext> p2 = parseArrow(peek.second());
+            Token arrow = peek.first();
+            Expr right = p2.first();
+            return Pair.of(new Expr.Arrow(left, right, arrow), p2.second());
+        } else {
+            return Pair.of(left, p1.second());
+        }
+    }
+
+    /// ```bnf
+    /// term ::= app (binary-tail)*
+    /// binary-tail ::= op app
+    /// ```
+    ///
+    /// Pratt parsing with operator precedence.
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parseTerm(ParseContext ctx) throws ParseException {
+        return parseTerm(ctx, Integer.MIN_VALUE);
+    }
+
+    @SuppressWarnings("InfiniteRecursion")
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseTerm(ParseContext ctx, int minPrec) throws ParseException {
         Pair<Expr, ParseContext> p1 = parseApp(ctx);
         Expr left = p1.first();
         ParseContext currentCtx = p1.second();
@@ -238,24 +266,33 @@ public final class Parser {
             Pair<Token, ParseContext> peek = currentCtx.nextToken();
             Token tok = peek.first();
 
-            if (tok.kind() == Token.Kind.ARROW) {
-                Pair<Expr, ParseContext> p2 = parseApp(peek.second());
-                left = new Expr.Arrow(left, p2.first(), tok);
-                currentCtx = p2.second();
-            } else if (tok.kind() == Token.Kind.INFIX) {
-                Token.Infix infixTok = (Token.Infix) tok;
-                Operator op = infixTok.infixOp();
-                Pair<Expr, ParseContext> p2 = parseApp(peek.second());
-
-                // Build infix application: op left right
-                Expr opExpr = new Expr.Var(Token.ident(op.lexeme(), tok.file(), tok.pos(), tok.line(), tok.col()));
-                Argument leftArg = new Argument.Explicit(left);
-                Argument rightArg = new Argument.Explicit(p2.first());
-                left = new Expr.App(opExpr, ImmSeq.of(leftArg, rightArg), true);
-                currentCtx = p2.second();
-            } else {
+            if (tok.kind() != Token.Kind.INFIX) {
                 break;
             }
+
+            Token.Infix infixTok = (Token.Infix) tok;
+            Operator op = infixTok.infixOp();
+
+            if (op.prec() < minPrec) {
+                break;
+            }
+
+            currentCtx = peek.second();
+
+            int nextMinPrec = switch (op.assoc()) {
+                case LEFT, NONE -> op.prec() + 1;
+                case RIGHT -> op.prec();
+            };
+
+            Pair<Expr, ParseContext> p2 = parseTerm(currentCtx, nextMinPrec);
+            Expr right = p2.first();
+            currentCtx = p2.second();
+
+            Expr opExpr = new Expr.Var(tok);
+            left = new Expr.App(opExpr,
+                                ImmSeq.of(new Argument.Explicit(left),
+                                          new Argument.Explicit(right)),
+                                true);
         }
 
         return Pair.of(left, currentCtx);

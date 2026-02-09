@@ -27,7 +27,7 @@ expr ::= fun
        | pi
        | ann
 
-ann ::= term (":" expr)?
+ann ::= arrow (":" expr)?
 
 pi ::= pi-keyword param-group "," expr
 
@@ -35,6 +35,8 @@ pi-keyword ::= "∀" | "Π" | "forall"
 
 fun ::= "fun" param-group+ "=>" expr
       | "fun" simple-param-group "=>" expr
+
+arrow ::= term ("->" arrow)?
 
 term ::= app (binary-tail)*
 
