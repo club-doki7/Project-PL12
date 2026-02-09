@@ -7,9 +7,9 @@ import club.doki7.pl12.util.ImmSeq;
 public final class DBI {
     public static Value get(ConsRevList<ImmSeq<Value>> ctx, int index) {
         while (true) {
-            if (!(ctx instanceof ConsRevList.Cons<ImmSeq<Value>>(ConsRevList<ImmSeq<Value>> init,
-                                                                 ImmSeq<Value> last,
-                                                                 _))) {
+            if (!(ctx instanceof ConsRevList.Cons(ConsRevList<ImmSeq<Value>> init,
+                                                  ImmSeq<Value> last,
+                                                  _))) {
                 throw new IndexOutOfBoundsException(index);
             }
 

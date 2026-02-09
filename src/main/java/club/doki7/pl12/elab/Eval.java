@@ -137,12 +137,21 @@ public final class Eval {
 
     private Term.Lam reifyLam(int level, Value.Lam lam) {
         Term body = reifyClosure(level, lam);
+        if (body instanceof Term.Lam(ImmSeq<String> paramNames, Term body1)) {
+            ImmSeq<String> allParamNames = ImmSeq.concat(lam.paramNames(), paramNames);
+            return new Term.Lam(allParamNames, body1);
+        }
         return new Term.Lam(lam.paramNames(), body);
     }
 
     private Term.Pi reifyPi(int level, Value.Pi pi) {
         Term body = reifyClosure(level, pi);
         Term paramTypeTerm = reify(level, pi.paramType());
+        if ((body instanceof Term.Pi(ImmSeq<String> paramNames, Term type, Term body1)
+             && type.equals(paramTypeTerm))) {
+            ImmSeq<String> allParamNames = ImmSeq.concat(pi.paramNames(), paramNames);
+            return new Term.Pi(allParamNames, paramTypeTerm, body1);
+        }
         return new Term.Pi(pi.paramNames(), paramTypeTerm, body);
     }
 

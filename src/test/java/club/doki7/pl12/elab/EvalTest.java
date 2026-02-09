@@ -17,18 +17,22 @@ class EvalTest {
 
     static Term ZERO = churchNat(0);
     static Term SUCC = new Term.Lam(ImmSeq.of("n", "f", "x"),
-            new Term.App(new Term.Bound(1, "f"),
-                         new Term.App(new Term.Bound(2, "n"),
-                                      new Term.Bound(1, "f"),
-                                      new Term.Bound(0, "x"))));
+                                    new Term.App(new Term.Bound(1, "f"),
+                                                 new Term.App(new Term.Bound(2, "n"),
+                                                              new Term.Bound(1, "f"),
+                                                              new Term.Bound(0, "x"))));
 
     static Term ADD = new Term.Lam(ImmSeq.of("m", "n", "f", "x"),
-            new Term.App(new Term.Bound(3, "m"),
-                         new Term.Bound(1, "f"),
-                         new Term.App(new Term.Bound(2, "n"),
-                                      new Term.Bound(1, "f"),
-                                      new Term.Bound(0, "x"))));
+                                   new Term.App(new Term.Bound(3, "m"),
+                                                new Term.Bound(1, "f"),
+                                                new Term.App(new Term.Bound(2, "n"),
+                                                             new Term.Bound(1, "f"),
+                                                             new Term.Bound(0, "x"))));
 
+    static Term MUL = new Term.Lam(ImmSeq.of("m", "n", "f"),
+                                   new Term.App(new Term.Bound(2, "m"),
+                                                new Term.App(new Term.Bound(1, "n"),
+                                                             new Term.Bound(0, "f"))));
 
     @Test
     void testEvalSelect2() {
@@ -68,5 +72,22 @@ class EvalTest {
         Term one = churchNat(1);
         Term addOneZero = new Term.App(ADD, one, ZERO);
         Assertions.assertEquals(churchNat(1), eval.reify(eval.eval(addOneZero)));
+    }
+
+    @Test
+    void testChurchMultiplication() {
+        Env env = Env.empty();
+        Eval eval = Eval.make(env);
+
+        Term two = churchNat(2);
+        Term three = churchNat(3);
+        Term mulTwoThree = new Term.App(MUL, two, three);
+        Assertions.assertEquals(churchNat(6), eval.reify(eval.eval(mulTwoThree)));
+
+        Term mulZeroTwo = new Term.App(MUL, ZERO, two);
+        Assertions.assertEquals(churchNat(0), eval.reify(eval.eval(mulZeroTwo)));
+
+        Term mulOneThree = new Term.App(MUL, churchNat(1), three);
+        Assertions.assertEquals(churchNat(3), eval.reify(eval.eval(mulOneThree)));
     }
 }

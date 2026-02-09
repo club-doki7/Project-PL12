@@ -30,9 +30,9 @@ public sealed interface Term {
 
     record Free(@NotNull Name name) implements Term, Value.RigidHead {}
 
-    record Lam(ImmSeq<String> names, @NotNull Term body) implements Term {
-        public static @NotNull Lam of(ImmSeq<String> names, @NotNull Term body) {
-            return new Lam(names, body);
+    record Lam(ImmSeq<String> paramNames, @NotNull Term body) implements Term {
+        public static @NotNull Lam of(ImmSeq<String> paramNames, @NotNull Term body) {
+            return new Lam(paramNames, body);
         }
     }
 
