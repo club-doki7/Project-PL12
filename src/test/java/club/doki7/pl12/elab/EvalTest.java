@@ -7,13 +7,15 @@ import org.junit.jupiter.api.Test;
 
 class EvalTest {
     @Test
-    void testEvalId() {
-        Term id = new Term.Lam(ImmSeq.of("x"), new Term.Bound(0, "x"));
-        Term k2 = new Term.Lam(ImmSeq.of("x", "y", "z"), new Term.Bound(1, "y"));
-        Term app = new Term.App(k2, ImmSeq.of(id));
+    void testEvalSelect2() {
+        Env env = Env.empty();
+        Eval eval = Eval.make(env);
 
-        Eval eval = Eval.make(Env.empty());
-
-        System.out.println(eval.reify(eval.eval(k2)));
+        Term select2 = new Term.Lam(ImmSeq.of("a", "b", "c", "d"), new Term.Bound(2, "b"));
+        System.out.println("select2 = " + select2);
+        Value select2Value = eval.eval(select2);
+        System.out.println("evaluated = " + select2Value);
+        Term select2Reified = eval.reify(select2Value);
+        System.out.println("reified = " + select2Reified);
     }
 }
