@@ -28,14 +28,12 @@ public record ParseContext(char[] buf,
                                 new HashMap<>());
     }
 
-    public static ParseContext clone(ParseContext ctx, int position, int line, int col) {
-        return new ParseContext(ctx.buf,
-                                position,
-                                ctx.file,
-                                line,
-                                col,
-                                ctx.mode,
-                                ctx.infixOps);
+    public ParseContext clone(int pos1, int line1, int col1) {
+        return new ParseContext(buf, pos1, file, line1, col1, mode, infixOps);
+    }
+
+    public ParseContext setMode(Mode mode) {
+        return new ParseContext(buf, pos, file, line, col, mode, infixOps);
     }
 
     public Pair<Token, ParseContext> nextToken() throws LexicalException {
@@ -72,7 +70,7 @@ public record ParseContext(char[] buf,
 
         if (pos >= buf.length) {
             return Pair.of(Token.eoi(ctx.file, pos, line, col),
-                           ParseContext.clone(ctx, pos, line, col));
+                           ctx.clone(pos, line, col));
         }
 
         return switch (buf[pos]) {
@@ -85,28 +83,28 @@ public record ParseContext(char[] buf,
             case ':' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '=')
                     ? Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
-                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                              ctx.clone(pos + 2, line, col + 2))
                     : Pair.of(Token.sym(Token.Kind.COLON, ":", ctx.file, pos, line, col),
-                              ParseContext.clone(ctx, pos + 1, line, col + 1));
+                              ctx.clone(pos + 1, line, col + 1));
             case '-' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '>')
                     ? Pair.of(Token.sym(Token.Kind.ARROW, "->", ctx.file, pos, line, col),
-                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                              ctx.clone(pos + 2, line, col + 2))
                     : nextIdent(ctx, pos, line, col);
             case '(' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '*')
                     ? skipComment(ctx, pos, line, col)
                     : Pair.of(Token.sym(Token.Kind.L_PAREN, "(", ctx.file, pos, line, col),
-                          ParseContext.clone(ctx, pos + 1, line, col + 1));
+                          ctx.clone(pos + 1, line, col + 1));
             case '=' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '>')
                     ? Pair.of(Token.sym(Token.Kind.D_ARROW, "=>", ctx.file, pos, line, col),
-                              ParseContext.clone(ctx, pos + 2, line, col + 2))
+                              ctx.clone(pos + 2, line, col + 2))
                     : nextIdent(ctx, pos, line, col);
             case '?' -> {
                 if (pos + 1 < buf.length && buf[pos + 1] == '?') {
                     yield Pair.of(Token.sym(Token.Kind.D_QUES, "??", ctx.file, pos, line, col),
-                                  ParseContext.clone(ctx, pos + 2, line, col + 2));
+                                  ctx.clone(pos + 2, line, col + 2));
                 } else {
                     throw new LexicalException(SourceRange.of(ctx.file, pos, line, col),
                                                "Identifiers cannot start with '?'."
@@ -139,25 +137,25 @@ public record ParseContext(char[] buf,
         @Nullable Token.Kind kwKind = Token.Kind.KEYWORDS_MAP.get(lexeme);
         if (kwKind != null) {
             return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
-                           ParseContext.clone(ctx, pos, line, col));
+                           ctx.clone(pos, line, col));
         }
 
         if (ctx.mode == Mode.DOGFIGHT) {
             kwKind = Token.Kind.DF_KEYWORDS_MAP.get(lexeme);
             if (kwKind != null) {
                 return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
-                               ParseContext.clone(ctx, pos, line, col));
+                               ctx.clone(pos, line, col));
             }
         }
 
         @Nullable Operator infix = ctx.infixOps.get(lexeme);
         if (infix != null) {
             return Pair.of(Token.infixOp(infix, ctx.file, startPos, line, startCol),
-                           ParseContext.clone(ctx, pos, line, col));
+                           ctx.clone(pos, line, col));
         }
 
         return Pair.of(Token.ident(lexeme, ctx.file, startPos, line, startCol),
-                       ParseContext.clone(ctx, pos, line, col));
+                       ctx.clone(pos, line, col));
     }
 
     private static Pair<Token, ParseContext>
@@ -180,7 +178,7 @@ public record ParseContext(char[] buf,
                                  startPos,
                                  line,
                                  startCol),
-                       ParseContext.clone(ctx, pos, line, col));
+                       ctx.clone(pos, line, col));
     }
 
     private static Pair<Token, ParseContext>
@@ -230,7 +228,7 @@ public record ParseContext(char[] buf,
         col++;
 
         return Pair.of(Token.string(str, lexeme, ctx.file, startPos, line, startCol),
-                       ParseContext.clone(ctx, pos, line, col));
+                       ctx.clone(pos, line, col));
     }
 
     private static Pair<Token, ParseContext>
@@ -253,7 +251,7 @@ public record ParseContext(char[] buf,
         };
 
         return Pair.of(Token.sym(kind, Character.toString(c), ctx.file, pos, line, col),
-                       ParseContext.clone(ctx, pos + 1, line, col + 1));
+                       ctx.clone(pos + 1, line, col + 1));
     }
 
     private static Pair<Token, ParseContext>

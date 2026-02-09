@@ -33,19 +33,18 @@ public final class Parser {
         };
     }
 
-    /// ```bnf
-    /// expr ::= fun | pi | ann
-    /// ```
     public static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parseExpr(ParseContext ctx) throws ParseException {
-        Pair<Token, ParseContext> p = ctx.nextToken();
-        Token tok = p.first();
+        @Nullable ParseContext.Mode originalMode = ctx.mode();
+        if (ctx.mode() != ParseContext.Mode.BVR) {
+            ctx = ctx.setMode(ParseContext.Mode.BVR);
+        }
 
-        return switch (tok.kind()) {
-            case Token.Kind.FUN -> Pair.upcast(parseFun(tok, p.second()));
-            case Token.Kind.PI -> Pair.upcast(parsePi(tok, p.second()));
-            default -> parseAnn(ctx);
-        };
+        Pair<Expr, ParseContext> p = parseExprImpl(ctx);
+        if (originalMode == null) {
+            return p;
+        }
+        return Pair.of(p.first(), p.second().setMode(originalMode));
     }
 
     /// ```bnf
@@ -147,10 +146,24 @@ public final class Parser {
     }
 
     /// ```bnf
+    /// expr ::= fun | pi | ann
+    /// ```
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
+    parseExprImpl(ParseContext ctx) throws ParseException {
+        Pair<Token, ParseContext> p = ctx.nextToken();
+        Token tok = p.first();
+        return switch (tok.kind()) {
+            case Token.Kind.FUN -> parseFun(tok, p.second());
+            case Token.Kind.PI -> parsePi(tok, p.second());
+            default -> parseAnn(ctx);
+        };
+    }
+
+    /// ```bnf
     /// fun ::= "fun" param-group+ "=>" expr
     ///       | "fun" simple-param-group "=>" expr
     /// ```
-    private static @NotNull Pair<Expr.@NotNull Fun, @NotNull ParseContext>
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parseFun(Token funTok, ParseContext ctx) throws ParseException {
         Pair<Token, ParseContext> peek = ctx.nextToken();
         Token tok = peek.first();
@@ -175,7 +188,7 @@ public final class Parser {
         }
 
         Pair<Token, ParseContext> p2 = expectConsume(ctx, Token.Kind.D_ARROW);
-        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+        Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
 
         return Pair.of(new Expr.Fun(ImmSeq.of(paramGroups), p3.first(), funTok, p2.first()),
                        p3.second());
@@ -185,7 +198,7 @@ public final class Parser {
     /// pi ::= pi-keyword param-group "," expr
     /// pi-keyword ::= "∀" | "Π" | "forall"
     /// ```
-    private static @NotNull Pair<Expr.@NotNull Pi, @NotNull ParseContext>
+    private static @NotNull Pair<@NotNull Expr, @NotNull ParseContext>
     parsePi(Token piTok, ParseContext ctx) throws ParseException {
         Pair<Token, ParseContext> p1 = ctx.nextToken();
         Token startTok = p1.first();
@@ -202,7 +215,7 @@ public final class Parser {
         }
 
         Pair<Token, ParseContext> p2 = expectConsume(ctx, Token.Kind.COMMA);
-        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+        Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
 
         return Pair.of(new Expr.Pi(paramGroup, p3.first(), piTok, p2.first()), p3.second());
     }
@@ -216,7 +229,7 @@ public final class Parser {
         Pair<Token, ParseContext> peek = p1.second().nextToken();
 
         if (peek.first().kind() == Token.Kind.COLON) {
-            Pair<Expr, ParseContext> p2 = parseExpr(peek.second());
+            Pair<Expr, ParseContext> p2 = parseExprImpl(peek.second());
             return Pair.of(new Expr.Ann(p1.first(), p2.first(), peek.first()), p2.second());
         } else {
             return p1;
@@ -345,7 +358,7 @@ public final class Parser {
             if ((p2.first().kind() == Token.Kind.INFIX
                  || p2.first().kind() == Token.Kind.IDENT)
                 && p2.first().lexeme().equals("=")) {
-                Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+                Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
                 Pair<Token, ParseContext> p4 = expectConsume(p3.second(), Token.Kind.R_BRACE);
                 return Pair.of(new Argument.NamedImplicit(first, p3.first(),
                                                           lbrace, p4.first(), p2.first()),
@@ -353,7 +366,7 @@ public final class Parser {
             }
         }
 
-        Pair<Expr, ParseContext> exprP = parseExpr(ctx);
+        Pair<Expr, ParseContext> exprP = parseExprImpl(ctx);
         Pair<Token, ParseContext> rbrace = expectConsume(exprP.second(), Token.Kind.R_BRACE);
         return Pair.of(new Argument.Implicit(exprP.first(), lbrace, rbrace.first()), rbrace.second());
     }
@@ -385,7 +398,7 @@ public final class Parser {
             case Token.Kind.LIT_NAT, Token.Kind.LIT_STRING -> Pair.of(new Expr.Lit(tok), ctx1);
             case Token.Kind.D_QUES -> Pair.of(new Expr.Hole(tok), ctx1);
             case Token.Kind.L_PAREN -> {
-                Pair<Expr, ParseContext> innerP = parseExpr(ctx1);
+                Pair<Expr, ParseContext> innerP = parseExprImpl(ctx1);
                 Pair<Token, ParseContext> rparenP = expectConsume(innerP.second(), Token.Kind.R_PAREN);
                 yield Pair.of(new Expr.Paren(innerP.first(), tok, rparenP.first()), rparenP.second());
             }
@@ -427,7 +440,7 @@ public final class Parser {
             return Pair.of(new ParamGroup(p1.first(), null, null, delim), p2.second());
         }
 
-        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+        Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
         Pair<Token, ParseContext> p4 = expectConsume(p3.second(),
                                                      matchToken(startToken.kind()));
         Pair<Token, Token> delim = Pair.of(startToken, p4.first());
@@ -443,7 +456,7 @@ public final class Parser {
             return Pair.of(new ParamGroup(p1.first(), null, null, null), p1.second());
         }
 
-        Pair<Expr, ParseContext> p3 = parseExpr(p2.second());
+        Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
         return Pair.of(new ParamGroup(p1.first(), p3.first(), colonOrEnd, null), p3.second());
     }
 
