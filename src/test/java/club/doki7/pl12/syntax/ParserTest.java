@@ -24,7 +24,7 @@ class ParserTest {
     class ExpressionTests {
         @Test
         void testUniv() throws Exception {
-            Expr expr = parseExpr("*");
+            Expr expr = parseExpr("type");
             assertInstanceOf(Expr.Univ.class, expr);
         }
 
@@ -92,7 +92,7 @@ class ParserTest {
 
         @Test
         void testArrowFromUniv() throws Exception {
-            Expr expr = parseExpr("* -> *");
+            Expr expr = parseExpr("type -> type");
             assertInstanceOf(Expr.Arrow.class, expr);
             Expr.Arrow arrow = (Expr.Arrow) expr;
             assertInstanceOf(Expr.Univ.class, arrow.from());

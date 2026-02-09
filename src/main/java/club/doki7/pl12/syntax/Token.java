@@ -85,6 +85,7 @@ public sealed interface Token {
             Map.entry("forall", PI),
             Map.entry("fun", FUN),
             Map.entry("𝒰", UNIV),
+            Map.entry("type", UNIV),
 
             Map.entry("Axiom", KW_AXIOM),
             Map.entry("Definition", KW_DEFINITION),
