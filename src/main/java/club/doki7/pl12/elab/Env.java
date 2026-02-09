@@ -37,6 +37,10 @@ public final class Env {
         return modules.get(name);
     }
 
+    public static Env empty() {
+        return new Env(null);
+    }
+
     private Env(@Nullable Env parent) {
         this.parent = parent;
     }

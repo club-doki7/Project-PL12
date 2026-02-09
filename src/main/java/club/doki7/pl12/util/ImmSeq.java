@@ -176,6 +176,11 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
         throw new UnsupportedOperationException("ImmSeq.toArray(T[]) is not implemented");
     }
 
+    @Override
+    public @NotNull String toString() {
+        return Arrays.toString(array);
+    }
+
     static final ImmSeq<Object> EMPTY = new ImmSeq<>(new Object[0], 0, 0);
     static final String IMM_SEQ_IS_IMMUTABLE = "ImmSeq is immutable";
 }

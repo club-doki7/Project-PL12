@@ -12,7 +12,19 @@ public final class Eval {
         return new Eval(env);
     }
 
-    public Value eval(ConsRevList<ImmSeq<Value>> localEnv, Term term) {
+    public Value eval(Term term) {
+        return eval(ConsRevList.nil(), term);
+    }
+
+    public Term reify(Value value) {
+        return reify(0, value);
+    }
+
+    public Term reify(Type type) {
+        return reify(0, type.value());
+    }
+
+    private Value eval(ConsRevList<ImmSeq<Value>> localEnv, Term term) {
         while (true) {
             switch (term) {
                 case Term.Ann(Term annotated, _) -> term = annotated;
@@ -56,14 +68,6 @@ public final class Eval {
                 }
             }
         }
-    }
-
-    public Term reify(Value value) {
-        return reify(0, value);
-    }
-
-    public Term reify(Type type) {
-        return reify(0, type.value());
     }
 
     private Value apply(Value funcValue, ImmSeq<Value> args) {
@@ -145,7 +149,8 @@ public final class Eval {
             freshVars[i] = new Value.Rigid(bound, ImmSeq.nil());
         }
 
-        ConsRevList<ImmSeq<Value>> extendedEnv = ConsRevList.rcons(closure.localEnv(), ImmSeq.ofUnsafe(freshVars));
+        ConsRevList<ImmSeq<Value>> extendedEnv = ConsRevList.rcons(closure.localEnv(),
+                                                                   ImmSeq.ofUnsafe(freshVars));
         Value bodyValue = eval(extendedEnv, closure.body());
         return reify(level, bodyValue);
     }
