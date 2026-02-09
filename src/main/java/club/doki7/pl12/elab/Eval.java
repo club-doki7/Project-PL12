@@ -119,7 +119,11 @@ public final class Eval {
         return reify(level, type.value());
     }
 
-    private Term.App reifySpine(int level, Term head, ImmSeq<Value> spine) {
+    private Term reifySpine(int level, Term head, ImmSeq<Value> spine) {
+        if (spine.isEmpty()) {
+            return head;
+        }
+
         Term[] spineTerms = new Term[spine.size()];
         for (int i = 0; i < spine.size(); i++) {
             spineTerms[i] = reify(level, spine.get(i));
