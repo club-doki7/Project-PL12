@@ -10,7 +10,11 @@ public sealed interface Term {
 
     record Free(@NotNull Name name) implements Term, Value.RigidHead {}
 
-    record Lam(ImmSeq<String> names, @NotNull Term body) implements Term {}
+    record Lam(ImmSeq<String> names, @NotNull Term body) implements Term {
+        public static @NotNull Lam of(ImmSeq<String> names, @NotNull Term body) {
+            return new Lam(names, body);
+        }
+    }
 
     final class Univ implements Term {
         public static final @NotNull Univ UNIV = new Univ();
@@ -26,7 +30,14 @@ public sealed interface Term {
     record Pi(@NotNull ImmSeq<String> names,
               @NotNull Term type,
               @NotNull Term body)
-        implements Term {}
+        implements Term
+    {
+        public static @NotNull Pi of(@NotNull ImmSeq<String> names,
+                                     @NotNull Term type,
+                                     @NotNull Term body) {
+            return new Pi(names, type, body);
+        }
+    }
 
     record App(@NotNull Term func, @NotNull ImmSeq<Term> args) implements Term {}
 

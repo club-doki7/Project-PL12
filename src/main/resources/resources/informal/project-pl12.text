@@ -50,7 +50,7 @@ Unfortunately, your language (has/lacks):
   [✓] call by value  [×] call by name  [✓] call by reference
   [✓] memory safety  [×] borrow checking
 - Control flow
-  [×] goto  [×] comefrom, but unironically  [✓] asynchronous  [×] coroutines  [×] exceptions
+  [×] goto  [×] comefrom, but unironically  [✓] asynchronous  [½] coroutines  [×] exceptions
   [✓] type and effect system  [×] monads  [×] algebraic effects
   [✓] tail recursion  [×] call/cc
 - Type system
@@ -116,11 +116,11 @@ Your implementation has the following flaws:
 
 You seem to be targeting the market for:
 [ ] systems programming  [ ] scripting  [ ] shells  [ ] web  [ ] games
-[ ] batch jobs  [ ] app making  [½] teaching programming
+[ ] batch jobs  [ ] app making  [ ] teaching programming
 [ ] appeasing ops/security officers  [ ] freaking out ops/security officers
-[ ] code golfing  [ ] parody languages  [½] writing type-theory papers
+[ ] code golfing  [ ] parody languages  [ ] writing type-theory papers
 [ ] creating AI  [ ] *mumble* blockchain *mumble*  [ ] other forms of raising VC money
-[✓] personal experiment
+[✓] personal experiment  [½] teaching people writing type-theory papers
 but I'm afraid the market is:
 [ ] already saturated with frankly better options
 [ ] unwilling to adopt solutions from small companies

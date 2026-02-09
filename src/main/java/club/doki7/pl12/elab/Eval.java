@@ -32,11 +32,11 @@ public final class Eval {
                     return new Value.Flex(meta, ImmSeq.nil());
                 }
                 case Term.Lam(ImmSeq<String> names, Term body) -> {
-                    return new Value.Rigid(new Value.Lam(localEnv, names, body), ImmSeq.nil());
+                    return new Value.Rigid(new Value.Lam(env, localEnv, names, body), ImmSeq.nil());
                 }
                 case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
                     Type typeVal = Type.ofVal(eval(env, localEnv, type));
-                    return new Value.Pi(localEnv, names, typeVal, body);
+                    return new Value.Pi(env, localEnv, names, typeVal, body);
                 }
                 case Term.Univ _ -> {
                     return Value.Univ.UNIV;
@@ -71,7 +71,9 @@ public final class Eval {
                     }
 
                     ImmSeq<Value> appliedArgs = allArgs.subList(0, lam.paramNames().size());
-                    funcValue = eval(env, ConsRevList.rcons(lam.localEnv(), appliedArgs), lam.body());
+                    funcValue = eval(env,
+                                     ConsRevList.rcons(lam.localEnv(), appliedArgs),
+                                     lam.body());
                     args = allArgs.subList(lam.paramNames().size());
                 }
                 case Value.Pi _ -> throw new IllegalStateException("Cannot apply a Pi type");
