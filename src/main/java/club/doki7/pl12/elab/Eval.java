@@ -82,4 +82,12 @@ public final class Eval {
         }
         return funcValue;
     }
+
+    private static Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
+        assert lam.paramNames().size() > args.size();
+        return new Value.Lam(lam.env(),
+                             ConsRevList.rcons(lam.localEnv(), args),
+                             lam.paramNames().subList(args.size()),
+                             lam.body());
+    }
 }
