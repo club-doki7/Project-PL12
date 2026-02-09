@@ -1,0 +1,11 @@
+Definition nat : type := forall {X : type}, (X -> X) -> X -> X.
+
+Definition zero {X : type} (f : X -> X) (x : X) : X := x.
+
+Check zero : nat.
+
+Definition one {X : type} (f : X -> X) (x : X) : X := f x.
+
+Definition succ (n : nat) := fun {X : type} (f : X -> X) (x : X) => f (n f x).
+
+Check succ : nat -> nat.
