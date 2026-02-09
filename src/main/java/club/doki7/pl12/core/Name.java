@@ -1,7 +1,6 @@
 package club.doki7.pl12.core;
 
-import club.doki7.pl12.util.CommonUtil;
-import club.doki7.pl12.util.UV;
+import club.doki7.pl12.util.TextUtil;
 import org.jetbrains.annotations.NotNull;
 
 public sealed interface Name {
@@ -12,17 +11,17 @@ public sealed interface Name {
         }
     }
 
-    record Local(int index, @NotNull UV<String> name) implements Name {
+    record Local(int index, @NotNull String name) implements Name {
         @Override
         public @NotNull String toString() {
-            return CommonUtil.superscriptNum(name.value, index);
+            return TextUtil.superscriptNum(name, index);
         }
     }
 
-    record Quote(int index) implements Name {
+    record Quote(int index, @NotNull String name) implements Name {
         @Override
         public @NotNull String toString() {
-            return CommonUtil.superscriptNum("𝒬", index);
+            return TextUtil.superscriptNum("𝒬〈" + name + "〉", index);
         }
     }
 }

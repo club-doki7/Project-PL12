@@ -1,6 +1,6 @@
 package club.doki7.pl12.util;
 
-public final class CommonUtil {
+public final class TextUtil {
     public static String superscriptNum(String prefix, int index) {
         String indexString = Integer.toString(index);
         StringBuilder sb = new StringBuilder();

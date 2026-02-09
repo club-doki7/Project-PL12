@@ -6,6 +6,7 @@ import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
 import club.doki7.pl12.util.ConsRevList;
 import club.doki7.pl12.util.ImmSeq;
+import club.doki7.pl12.util.Pair;
 
 public final class Eval {
     public static Value eval(Env env, ConsRevList<ImmSeq<Value>> localEnv, Term term) {
@@ -32,11 +33,11 @@ public final class Eval {
                     return new Value.Flex(meta, ImmSeq.nil());
                 }
                 case Term.Lam(ImmSeq<String> names, Term body) -> {
-                    return new Value.Rigid(new Value.Lam(env, localEnv, names, body), ImmSeq.nil());
+                    return new Value.Rigid(new Value.Lam(localEnv, names, body), ImmSeq.nil());
                 }
                 case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
                     Type typeVal = Type.ofVal(eval(env, localEnv, type));
-                    return new Value.Pi(env, localEnv, names, typeVal, body);
+                    return new Value.Pi(localEnv, names, typeVal, body);
                 }
                 case Term.Univ _ -> {
                     return Value.Univ.UNIV;
@@ -52,6 +53,14 @@ public final class Eval {
                 }
             }
         }
+    }
+
+    public static Term reify(Value value) {
+        return reify(0, value);
+    }
+
+    public static Term reify(Type type) {
+        return reify(0, type.value());
     }
 
     private static Value apply(Env env, Value funcValue, ImmSeq<Value> args) {
@@ -83,11 +92,55 @@ public final class Eval {
         return funcValue;
     }
 
+    private static Term reify(int level, Value value) {
+        return switch (value) {
+            case Value.Flex(Term.Meta head, ImmSeq<Value> spine) -> reifySpine(level, head, spine);
+            case Value.Rigid(Value.RigidHead head, ImmSeq<Value> spine) -> switch (head) {
+                case Value.Lam lam -> {
+                    if (!spine.isEmpty()) {
+                        lam = forcePartial(lam, spine);
+                    }
+                    yield reifyLam(level, lam);
+                }
+                case Term.Bound bound -> reifySpine(level, bound, spine);
+                case Term.Free free -> reifySpine(level, free, spine);
+            };
+            case Value.Pi pi -> reifyPi(level, pi);
+            case Value.Univ _ -> Term.Univ.UNIV;
+        };
+    }
+
+    private static Term reify(int level, Type type) {
+        return reify(level, type.value());
+    }
+
+    private static Term.App reifySpine(int level, Term head, ImmSeq<Value> spine) {
+        Term[] spineTerms = new Term[spine.size()];
+        for (int i = 0; i < spine.size(); i++) {
+            spineTerms[i] = reify(level, spine.get(i));
+        }
+        return new Term.App(head, ImmSeq.ofUnsafe(spineTerms));
+    }
+
+    private static Term.Lam reifyLam(int level, Value.Lam lam) {
+        Pair<ImmSeq<String>, Term> reified = reifyClosure(level + lam.paramNames().size(), lam);
+        return new Term.Lam(reified.first(), reified.second());
+    }
+
+    private static Term.Pi reifyPi(int level, Value.Pi pi) {
+        Pair<ImmSeq<String>, Term> reified = reifyClosure(level + pi.paramNames().size(), pi);
+        Term paramTypeTerm = reify(level, pi.paramType());
+        return new Term.Pi(reified.first(), paramTypeTerm, reified.second());
+    }
+
+    private static Pair<ImmSeq<String>, Term> reifyClosure(int level, Value.Closure closure) {
+    }
+
     private static Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
-        assert lam.paramNames().size() > args.size();
-        return new Value.Lam(lam.env(),
-                             ConsRevList.rcons(lam.localEnv(), args),
+        assert !args.isEmpty() && lam.paramNames().size() > args.size();
+        return new Value.Lam(ConsRevList.rcons(lam.localEnv(), args),
                              lam.paramNames().subList(args.size()),
                              lam.body());
     }
 }
+
