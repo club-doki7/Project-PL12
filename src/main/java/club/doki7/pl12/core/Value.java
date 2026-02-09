@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public sealed interface Value {
     record Flex(Term.Meta head, @NotNull ImmSeq<Value> args) implements Value {}
 
-    sealed interface RigidHead permits Term.Bound, Term.Free {}
+    sealed interface RigidHead permits Term.Bound, Term.Free, Lam {}
 
     record Rigid(RigidHead head, @NotNull ImmSeq<Value> args) implements Value {}
 
@@ -19,7 +19,7 @@ public sealed interface Value {
     record Lam(@NotNull ConsRevList<ImmSeq<Value>> localEnv,
                @NotNull ImmSeq<String> paramNames,
                @NotNull Term body)
-        implements Value, Closure
+        implements Closure, RigidHead
     {}
 
     record Pi(@NotNull ConsRevList<ImmSeq<Value>> localEnv,

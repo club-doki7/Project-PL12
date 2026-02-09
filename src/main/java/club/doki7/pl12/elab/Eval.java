@@ -32,7 +32,7 @@ public final class Eval {
                     return new Value.Flex(meta, ImmSeq.nil());
                 }
                 case Term.Lam(ImmSeq<String> names, Term body) -> {
-                    return new Value.Lam(localEnv, names, body);
+                    return new Value.Rigid(new Value.Lam(localEnv, names, body), ImmSeq.nil());
                 }
                 case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
                     Type typeVal = Type.ofVal(eval(env, localEnv, type));
@@ -61,17 +61,18 @@ public final class Eval {
                     return new Value.Flex(head, ImmSeq.concat(args0, args));
                 }
                 case Value.Rigid(Value.RigidHead head, ImmSeq<Value> args0) -> {
-                    return new Value.Rigid(head, ImmSeq.concat(args0, args));
-                }
-                case Value.Lam(ConsRevList<ImmSeq<Value>> localEnv,
-                               ImmSeq<String> paramNames,
-                               Term body) -> {
-                    if (paramNames.size() > args.size()) {
-                        throw new IllegalStateException("Not enough arguments to apply Lam");
+                    ImmSeq<Value> allArgs = ImmSeq.concat(args0, args);
+                    if (!(head instanceof Value.Lam lam)) {
+                        return new Value.Rigid(head, allArgs);
                     }
-                    ImmSeq<Value> appliedArgs = args.subList(0, paramNames.size());
-                    funcValue = eval(env, ConsRevList.rcons(localEnv, appliedArgs), body);
-                    args = args.subList(paramNames.size());
+
+                    if (lam.paramNames().size() > allArgs.size()) {
+                        return new Value.Rigid(lam, allArgs);
+                    }
+
+                    ImmSeq<Value> appliedArgs = allArgs.subList(0, lam.paramNames().size());
+                    funcValue = eval(env, ConsRevList.rcons(lam.localEnv(), appliedArgs), lam.body());
+                    args = allArgs.subList(lam.paramNames().size());
                 }
                 case Value.Pi _ -> throw new IllegalStateException("Cannot apply a Pi type");
                 case Value.Univ _ -> throw new IllegalStateException("Cannot apply a Univ type");
