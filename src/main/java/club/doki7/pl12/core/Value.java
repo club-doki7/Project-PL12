@@ -38,7 +38,7 @@ public sealed interface Value {
 
         @Override
         public @NotNull String toString() {
-            return "*";
+            return "type";
         }
     }
 }

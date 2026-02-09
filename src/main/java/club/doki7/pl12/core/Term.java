@@ -43,7 +43,7 @@ public sealed interface Term {
 
         @Override
         public @NotNull String toString() {
-            return "*";
+            return "type";
         }
     }
 

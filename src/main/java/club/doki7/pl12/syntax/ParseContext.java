@@ -80,8 +80,8 @@ public record ParseContext(char[] buf,
                  '5', '6', '7', '8', '9' -> nextNat(ctx, pos, line, col);
             case '"' -> nextString(ctx, pos, line, col);
             case ')', '[', ']', '{', '}',
-                 '→', '⇒', '.', ',', '*',
-                 '∀', 'Π', 'λ' -> nextSingleChar(ctx, pos, line, col);
+                 '→', '⇒', '.', ',', 'λ',
+                 '∀', 'Π' -> nextSingleChar(ctx, pos, line, col);
             case ':' ->
                 (pos + 1 < buf.length && buf[pos + 1] == '=')
                     ? Pair.of(Token.sym(Token.Kind.COLON_EQ, ":=", ctx.file, pos, line, col),
@@ -249,7 +249,6 @@ public record ParseContext(char[] buf,
             case ',' -> Token.Kind.COMMA;
             case '∀', 'Π' -> Token.Kind.PI;
             case 'λ' -> Token.Kind.FUN;
-            case '*' -> Token.Kind.UNIV;
             default -> throw new IllegalStateException("Unexpected character: " + c);
         };
 

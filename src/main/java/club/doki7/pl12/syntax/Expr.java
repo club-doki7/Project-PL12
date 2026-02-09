@@ -25,7 +25,7 @@ public sealed interface Expr extends Node {
     }
 
     /// ```bnf
-    /// univ ::= "𝒰" | "*"
+    /// univ ::= "𝒰" | "type"
     /// ```
     record Univ(@NotNull Token aster) implements Expr {
         @TestOnly
@@ -35,7 +35,7 @@ public sealed interface Expr extends Node {
 
         @Override
         public @NotNull String toString() {
-            return "*";
+            return "type";
         }
     }
 

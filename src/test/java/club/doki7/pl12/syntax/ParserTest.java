@@ -146,7 +146,7 @@ class ParserTest {
             assertInstanceOf(Expr.App.class, expr);
             Expr.App app = (Expr.App) expr;
             assertEquals(1, app.args().size());
-            assertInstanceOf(Argument.Implicit.class, app.args().get(0));
+            assertInstanceOf(Argument.Implicit.class, app.args().getFirst());
         }
 
         @Test
@@ -155,8 +155,8 @@ class ParserTest {
             assertInstanceOf(Expr.App.class, expr);
             Expr.App app = (Expr.App) expr;
             assertEquals(1, app.args().size());
-            assertInstanceOf(Argument.NamedImplicit.class, app.args().get(0));
-            Argument.NamedImplicit ni = (Argument.NamedImplicit) app.args().get(0);
+            assertInstanceOf(Argument.NamedImplicit.class, app.args().getFirst());
+            Argument.NamedImplicit ni = (Argument.NamedImplicit) app.args().getFirst();
             assertEquals("x", ni.name().lexeme());
         }
 
@@ -166,7 +166,7 @@ class ParserTest {
             assertInstanceOf(Expr.App.class, expr);
             Expr.App app = (Expr.App) expr;
             assertEquals(3, app.args().size());
-            assertInstanceOf(Argument.Implicit.class, app.args().get(0));
+            assertInstanceOf(Argument.Implicit.class, app.args().getFirst());
             assertInstanceOf(Argument.Explicit.class, app.args().get(1));
             assertInstanceOf(Argument.NamedImplicit.class, app.args().get(2));
         }
@@ -177,7 +177,7 @@ class ParserTest {
             assertInstanceOf(Expr.App.class, expr);
             Expr.App app = (Expr.App) expr;
             assertEquals(1, app.args().size());
-            Argument.Explicit arg = (Argument.Explicit) app.args().get(0);
+            Argument.Explicit arg = (Argument.Explicit) app.args().getFirst();
             assertInstanceOf(Expr.Paren.class, arg.expr());
         }
     }
@@ -199,7 +199,7 @@ class ParserTest {
             assertInstanceOf(Expr.Fun.class, expr);
             Expr.Fun fun = (Expr.Fun) expr;
             assertEquals(1, fun.paramGroups().size());
-            assertEquals(3, fun.paramGroups().get(0).names().size());
+            assertEquals(3, fun.paramGroups().getFirst().names().size());
         }
 
         @Test
@@ -208,7 +208,7 @@ class ParserTest {
             assertInstanceOf(Expr.Fun.class, expr);
             Expr.Fun fun = (Expr.Fun) expr;
             assertEquals(1, fun.paramGroups().size());
-            assertFalse(fun.paramGroups().get(0).isImplicit());
+            assertFalse(fun.paramGroups().getFirst().isImplicit());
         }
 
         @Test
@@ -217,7 +217,7 @@ class ParserTest {
             assertInstanceOf(Expr.Fun.class, expr);
             Expr.Fun fun = (Expr.Fun) expr;
             assertEquals(1, fun.paramGroups().size());
-            assertTrue(fun.paramGroups().get(0).isImplicit());
+            assertTrue(fun.paramGroups().getFirst().isImplicit());
         }
 
         @Test
@@ -226,7 +226,7 @@ class ParserTest {
             assertInstanceOf(Expr.Fun.class, expr);
             Expr.Fun fun = (Expr.Fun) expr;
             assertEquals(3, fun.paramGroups().size());
-            assertFalse(fun.paramGroups().get(0).isImplicit());
+            assertFalse(fun.paramGroups().getFirst().isImplicit());
             assertTrue(fun.paramGroups().get(1).isImplicit());
             assertFalse(fun.paramGroups().get(2).isImplicit());
         }
@@ -279,7 +279,7 @@ class ParserTest {
             assertInstanceOf(Command.Axiom.class, cmd);
             Command.Axiom axiom = (Command.Axiom) cmd;
             assertEquals(1, axiom.names().size());
-            assertEquals("x", axiom.names().get(0).lexeme());
+            assertEquals("x", axiom.names().getFirst().lexeme());
         }
 
         @Test
@@ -484,5 +484,158 @@ class ParserTest {
             assertNull(cmd);
         }
     }
-}
 
+    @Nested
+    class InfixOperatorTests {
+        private Expr parseExprWithOperators(String input, Operator... operators) throws Exception {
+            ParseContext ctx = ParseContext.of(input, "<test>");
+            for (Operator op : operators) {
+                ctx.infixOps().put(op.lexeme(), op);
+            }
+            Pair<Expr, ParseContext> result = Parser.parseExpr(ctx);
+            return result.first();
+        }
+
+        @Test
+        void testSimpleInfixOperator() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a + b", plus);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App app = (Expr.App) expr;
+            assertTrue(app.infix());
+        }
+
+        @Test
+        void testLeftAssociativity() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a + b + c", plus);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertTrue(outer.infix());
+            Argument.Explicit arg0 = (Argument.Explicit) outer.args().getFirst();
+            assertInstanceOf(Expr.App.class, arg0.expr());
+            Expr.App inner = (Expr.App) arg0.expr();
+            assertTrue(inner.infix());
+        }
+
+        @Test
+        void testRightAssociativity() throws Exception {
+            Operator arrow = new Operator("~>", 50, Operator.Assoc.RIGHT);
+            Expr expr = parseExprWithOperators("a ~> b ~> c", arrow);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertTrue(outer.infix());
+            assertEquals(2, outer.args().size());
+            Argument.Explicit arg1 = (Argument.Explicit) outer.args().get(1);
+            assertInstanceOf(Expr.App.class, arg1.expr());
+        }
+
+        @Test
+        void testPrecedence() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Operator times = new Operator("*", 60, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a + b * c", plus, times);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("+", ((Expr.Var) outer.func()).name().lexeme());
+            Argument.Explicit arg1 = (Argument.Explicit) outer.args().get(1);
+            assertInstanceOf(Expr.App.class, arg1.expr());
+            Expr.App inner = (Expr.App) arg1.expr();
+            assertEquals("*", ((Expr.Var) inner.func()).name().lexeme());
+        }
+
+        @Test
+        void testPrecedenceReversed() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Operator times = new Operator("*", 60, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a * b + c", plus, times);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("+", ((Expr.Var) outer.func()).name().lexeme());
+            Argument.Explicit arg0 = (Argument.Explicit) outer.args().getFirst();
+            assertInstanceOf(Expr.App.class, arg0.expr());
+            Expr.App inner = (Expr.App) arg0.expr();
+            assertEquals("*", ((Expr.Var) inner.func()).name().lexeme());
+        }
+
+        @Test
+        void testMixedPrecedence() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Operator times = new Operator("*", 60, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a * b + c * d", plus, times);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("+", ((Expr.Var) outer.func()).name().lexeme());
+        }
+
+        @Test
+        void testInfixWithParen() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Operator times = new Operator("*", 60, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("(a + b) * c", plus, times);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("*", ((Expr.Var) outer.func()).name().lexeme());
+        }
+
+        @Test
+        void testInfixWithApplication() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("f x + g y", plus);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("+", ((Expr.Var) outer.func()).name().lexeme());
+            assertTrue(outer.infix());
+            Argument.Explicit arg0 = (Argument.Explicit) outer.args().getFirst();
+            assertInstanceOf(Expr.App.class, arg0.expr());
+            Argument.Explicit arg1 = (Argument.Explicit) outer.args().get(1);
+            assertInstanceOf(Expr.App.class, arg1.expr());
+        }
+
+        @Test
+        void testNoAssocSingleUse() throws Exception {
+            Operator eq = new Operator("==", 40, Operator.Assoc.NONE);
+            Expr expr = parseExprWithOperators("a == b", eq);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App app = (Expr.App) expr;
+            assertEquals("==", ((Expr.Var) app.func()).name().lexeme());
+            assertTrue(app.infix());
+        }
+
+        @Test
+        void testMultipleOperatorsSamePrecedence() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            Operator minus = new Operator("-", 50, Operator.Assoc.LEFT);
+            Expr expr = parseExprWithOperators("a + b - c", plus, minus);
+            assertInstanceOf(Expr.App.class, expr);
+            Expr.App outer = (Expr.App) expr;
+            assertEquals("-", ((Expr.Var) outer.func()).name().lexeme());
+        }
+
+        @Test
+        void testInfixInFunBody() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            ParseContext ctx = ParseContext.of("fun x y => x + y", "<test>");
+            ctx.infixOps().put(plus.lexeme(), plus);
+            Pair<Expr, ParseContext> result = Parser.parseExpr(ctx);
+            Expr expr = result.first();
+            assertInstanceOf(Expr.Fun.class, expr);
+            Expr.Fun fun = (Expr.Fun) expr;
+            assertInstanceOf(Expr.App.class, fun.body());
+            Expr.App app = (Expr.App) fun.body();
+            assertTrue(app.infix());
+        }
+
+        @Test
+        void testInfixInPiBody() throws Exception {
+            Operator plus = new Operator("+", 50, Operator.Assoc.LEFT);
+            ParseContext ctx = ParseContext.of("∀ x, x + x", "<test>");
+            ctx.infixOps().put(plus.lexeme(), plus);
+            Pair<Expr, ParseContext> result = Parser.parseExpr(ctx);
+            Expr expr = result.first();
+            assertInstanceOf(Expr.Pi.class, expr);
+            Expr.Pi pi = (Expr.Pi) expr;
+            assertInstanceOf(Expr.App.class, pi.body());
+        }
+    }
+}

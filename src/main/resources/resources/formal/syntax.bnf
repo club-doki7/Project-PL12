@@ -56,7 +56,7 @@ atom ::= univ
        | hole
        | paren
 
-univ ::= "*" | "𝒰"
+univ ::= "type" | "𝒰"
 
 var ::= identifier
 
