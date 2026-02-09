@@ -6,10 +6,13 @@ import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
 import club.doki7.pl12.util.ConsRevList;
 import club.doki7.pl12.util.ImmSeq;
-import club.doki7.pl12.util.Pair;
 
 public final class Eval {
-    public static Value eval(Env env, ConsRevList<ImmSeq<Value>> localEnv, Term term) {
+    public static Eval make(Env env) {
+        return new Eval(env);
+    }
+
+    public Value eval(ConsRevList<ImmSeq<Value>> localEnv, Term term) {
         while (true) {
             switch (term) {
                 case Term.Ann(Term annotated, _) -> term = annotated;
@@ -36,34 +39,34 @@ public final class Eval {
                     return new Value.Rigid(new Value.Lam(localEnv, names, body), ImmSeq.nil());
                 }
                 case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
-                    Type typeVal = Type.ofVal(eval(env, localEnv, type));
+                    Type typeVal = Type.ofVal(eval(localEnv, type));
                     return new Value.Pi(localEnv, names, typeVal, body);
                 }
                 case Term.Univ _ -> {
                     return Value.Univ.UNIV;
                 }
                 case Term.App(Term func, ImmSeq<Term> args) -> {
-                    Value funcValue = eval(env, localEnv, func);
+                    Value funcValue = eval(localEnv, func);
                     Value[] argValues = new Value[args.size()];
                     for (int i = 0; i < args.size(); i++) {
-                        argValues[i] = eval(env, localEnv, args.get(i));
+                        argValues[i] = eval(localEnv, args.get(i));
                     }
 
-                    return apply(env, funcValue, ImmSeq.ofUnsafe(argValues));
+                    return apply(funcValue, ImmSeq.ofUnsafe(argValues));
                 }
             }
         }
     }
 
-    public static Term reify(Value value) {
+    public Term reify(Value value) {
         return reify(0, value);
     }
 
-    public static Term reify(Type type) {
+    public Term reify(Type type) {
         return reify(0, type.value());
     }
 
-    private static Value apply(Env env, Value funcValue, ImmSeq<Value> args) {
+    private Value apply(Value funcValue, ImmSeq<Value> args) {
         while (!args.isEmpty()) {
             switch (funcValue) {
                 case Value.Flex(Term.Meta head, ImmSeq<Value> args0) -> {
@@ -80,9 +83,7 @@ public final class Eval {
                     }
 
                     ImmSeq<Value> appliedArgs = allArgs.subList(0, lam.paramNames().size());
-                    funcValue = eval(env,
-                                     ConsRevList.rcons(lam.localEnv(), appliedArgs),
-                                     lam.body());
+                    funcValue = eval(ConsRevList.rcons(lam.localEnv(), appliedArgs), lam.body());
                     args = allArgs.subList(lam.paramNames().size());
                 }
                 case Value.Pi _ -> throw new IllegalStateException("Cannot apply a Pi type");
@@ -92,7 +93,7 @@ public final class Eval {
         return funcValue;
     }
 
-    private static Term reify(int level, Value value) {
+    private Term reify(int level, Value value) {
         return switch (value) {
             case Value.Flex(Term.Meta head, ImmSeq<Value> spine) -> reifySpine(level, head, spine);
             case Value.Rigid(Value.RigidHead head, ImmSeq<Value> spine) -> switch (head) {
@@ -110,11 +111,11 @@ public final class Eval {
         };
     }
 
-    private static Term reify(int level, Type type) {
+    private Term reify(int level, Type type) {
         return reify(level, type.value());
     }
 
-    private static Term.App reifySpine(int level, Term head, ImmSeq<Value> spine) {
+    private Term.App reifySpine(int level, Term head, ImmSeq<Value> spine) {
         Term[] spineTerms = new Term[spine.size()];
         for (int i = 0; i < spine.size(); i++) {
             spineTerms[i] = reify(level, spine.get(i));
@@ -122,25 +123,43 @@ public final class Eval {
         return new Term.App(head, ImmSeq.ofUnsafe(spineTerms));
     }
 
-    private static Term.Lam reifyLam(int level, Value.Lam lam) {
-        Pair<ImmSeq<String>, Term> reified = reifyClosure(level + lam.paramNames().size(), lam);
-        return new Term.Lam(reified.first(), reified.second());
+    private Term.Lam reifyLam(int level, Value.Lam lam) {
+        Term body = reifyClosure(level + lam.paramNames().size(), lam);
+        return new Term.Lam(lam.paramNames(), body);
     }
 
-    private static Term.Pi reifyPi(int level, Value.Pi pi) {
-        Pair<ImmSeq<String>, Term> reified = reifyClosure(level + pi.paramNames().size(), pi);
+    private Term.Pi reifyPi(int level, Value.Pi pi) {
+        Term body = reifyClosure(level + pi.paramNames().size(), pi);
         Term paramTypeTerm = reify(level, pi.paramType());
-        return new Term.Pi(reified.first(), paramTypeTerm, reified.second());
+        return new Term.Pi(pi.paramNames(), paramTypeTerm, body);
     }
 
-    private static Pair<ImmSeq<String>, Term> reifyClosure(int level, Value.Closure closure) {
+    private Term reifyClosure(int level, Value.Closure closure) {
+        ImmSeq<String> paramNames = closure.paramNames();
+        int paramCount = paramNames.size();
+
+        Value[] freshVars = new Value[paramCount];
+        for (int i = 0; i < paramCount; i++) {
+            int idx = paramCount - 1 - i;
+            Term.Bound bound = new Term.Bound(idx, paramNames.get(i));
+            freshVars[i] = new Value.Rigid(bound, ImmSeq.nil());
+        }
+
+        ConsRevList<ImmSeq<Value>> extendedEnv = ConsRevList.rcons(closure.localEnv(), ImmSeq.ofUnsafe(freshVars));
+        Value bodyValue = eval(extendedEnv, closure.body());
+        return reify(level, bodyValue);
     }
 
-    private static Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
+    private Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
         assert !args.isEmpty() && lam.paramNames().size() > args.size();
         return new Value.Lam(ConsRevList.rcons(lam.localEnv(), args),
                              lam.paramNames().subList(args.size()),
                              lam.body());
     }
-}
 
+    private Eval(Env env) {
+        this.env = env;
+    }
+
+    private final Env env;
+}
