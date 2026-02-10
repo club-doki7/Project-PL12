@@ -40,6 +40,7 @@ public final class InferCheck {
         Pair<Term, Type> inferred = infer(ctx, expr);
         Type inferredType = inferred.second();
 
+        // TODO: implement unification
         if (!inferredType.equals(expectedType)) {
             throw new TypeCheckException(
                 SourceRange.INVALID,

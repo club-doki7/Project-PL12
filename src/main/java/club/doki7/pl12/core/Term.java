@@ -14,7 +14,7 @@ public sealed interface Term {
     record Bound(int index, @NotNull String name) implements Term, Value.RigidHead {
         @Override
         public @NotNull String toString() {
-            return TextUtil.subscriptNum("D", index);
+            return TextUtil.subscriptNum(name, index);
         }
 
         @Override
