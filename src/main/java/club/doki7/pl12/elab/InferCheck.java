@@ -3,8 +3,12 @@ package club.doki7.pl12.elab;
 import club.doki7.pl12.core.Name;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
+import club.doki7.pl12.exc.SourceRange;
 import club.doki7.pl12.exc.TypeCheckException;
 import club.doki7.pl12.syntax.Expr;
+import club.doki7.pl12.syntax.ParamGroup;
+import club.doki7.pl12.syntax.Token;
+import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +29,7 @@ public final class InferCheck {
             case Expr.Hole hole -> inferHole(ctx, hole);
             case Expr.Lit lit -> inferLit(ctx, lit);
             case Expr.Paren paren -> infer(ctx, paren.expr());
-            case Expr.PartialApp partialApp -> throw new UnsupportedOperationException("部分应用尚未实现");
+            case Expr.PartialApp _ -> throw new UnsupportedOperationException("部分应用尚未实现");
             case Expr.Univ _ -> Pair.of(Term.UNIV, Type.UNIV);
         };
     }
@@ -33,7 +37,17 @@ public final class InferCheck {
     public static @NotNull Term check(Context ctx, Expr expr, Type expectedType)
         throws TypeCheckException
     {
-        throw new UnsupportedOperationException("类型检查尚未实现");
+        Pair<Term, Type> inferred = infer(ctx, expr);
+        Type inferredType = inferred.second();
+
+        if (!inferredType.equals(expectedType)) {
+            throw new TypeCheckException(
+                SourceRange.INVALID,
+                "类型不匹配: 期望 " + expectedType + "，但推导出 " + inferredType
+            );
+        }
+
+        return inferred.first();
     }
 
     public static @NotNull Pair<Term, Type> inferVar(Context ctx, Expr.Var var)
@@ -147,5 +161,26 @@ public final class InferCheck {
     private static @NotNull Pair<Term, Type> inferPiImpl(Context ctx, Expr.Pi pi)
         throws TypeCheckException
     {
+        ParamGroup group = pi.paramGroup();
+        ImmSeq<Token> names = group.names();
+        Expr typeExpr = group.type();
+
+        Term typeTerm = group.type() != null ? null : ctx.freshMeta(pi);
+
+        Term[] typeTerms = new Term[names.size()];
+        for (int i = 0; i < names.size(); i++) {
+            if (typeExpr != null) {
+                typeTerm = check(ctx, typeExpr, Type.UNIV);
+            }
+            typeTerms[i] = typeTerm;
+            ctx.bind(names.get(i).lexeme(), Type.ofVal(ctx.eval(typeTerm)));
+        }
+
+        Term bodyTerm = check(ctx, pi.body(), Type.UNIV);
+
+        for (int i = names.size() - 1; i >= 0; i--) {
+            bodyTerm = new Term.Pi(names.get(i).lexeme(), typeTerms[i], bodyTerm);
+        }
+        return Pair.of(bodyTerm, Type.UNIV);
     }
 }

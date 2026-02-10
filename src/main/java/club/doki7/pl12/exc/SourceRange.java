@@ -20,4 +20,7 @@ public record SourceRange(@NotNull SourceLocation start, @NotNull SourceLocation
         SourceLocation loc = SourceLocation.of(file, pos, line, col);
         return new SourceRange(loc, loc);
     }
+
+    public static final @NotNull SourceRange INVALID =
+        new SourceRange(SourceLocation.INVALID, SourceLocation.INVALID);
 }

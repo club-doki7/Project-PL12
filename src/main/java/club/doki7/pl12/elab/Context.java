@@ -85,6 +85,8 @@ public final class Context
                             int paramIndex)
             implements MetaSource {}
 
+        record PiParamType(@NotNull Expr.Pi pi) implements MetaSource {}
+
         record Hole(@NotNull Expr.Hole hole) implements MetaSource {}
 
         record HoleType(@NotNull Expr.Hole hole) implements MetaSource {}
@@ -107,6 +109,12 @@ public final class Context
                                int paramIndex) {
         MetaSource source = new MetaSource.FunParamType(fun, paramGroupIndex, paramIndex);
         String name = fun.paramGroups().get(paramGroupIndex).names().get(paramIndex).lexeme();
+        return freshMeta(source, name);
+    }
+
+    public Term.Meta freshMeta(@NotNull Expr.Pi pi) {
+        MetaSource source = new MetaSource.PiParamType(pi);
+        String name = pi.paramGroup().names().getFirst().lexeme();
         return freshMeta(source, name);
     }
 
