@@ -22,10 +22,10 @@ public final class InferCheck {
             case Expr.App app -> inferApp(ctx, app);
             case Expr.Arrow arrow -> inferArrow(ctx, arrow);
             case Expr.Pi pi -> inferPi(ctx, pi);
-            case Expr.Hole hole -> null;
-            case Expr.Lit lit -> null;
-            case Expr.Paren paren -> null;
-            case Expr.PartialApp partialApp -> null;
+            case Expr.Hole hole -> inferHole(ctx, hole);
+            case Expr.Lit lit -> inferLit(ctx, lit);
+            case Expr.Paren paren -> infer(ctx, paren.expr());
+            case Expr.PartialApp partialApp -> throw new UnsupportedOperationException("部分应用尚未实现");
             case Expr.Univ _ -> Pair.of(Term.UNIV, Type.UNIV);
         };
     }
@@ -47,7 +47,7 @@ public final class InferCheck {
             return Pair.of(new Term.Bound(index, varName), type);
         }
 
-        Env.Entry entry = ctx.env.lookup(varName);
+        Env.Entry entry = ctx.lookupGlobal(varName);
         if (entry != null) {
             return Pair.of(new Term.Free(new Name.Global(varName)), entry.type());
         }
@@ -71,7 +71,7 @@ public final class InferCheck {
         throws TypeCheckException
     {
         Term annTerm = check(ctx, ann.ann(), Type.UNIV);
-        Type annType = Type.ofVal(Eval.make(ctx.env).eval(annTerm));
+        Type annType = Type.ofVal(ctx.eval(annTerm));
         Term exprTerm = check(ctx, ann.expr(), annType);
         return Pair.of(new Term.Ann(exprTerm, annTerm), annType);
     }
@@ -86,6 +86,19 @@ public final class InferCheck {
         throws TypeCheckException
     {
         return withDepthTracking(ctx, InferCheck::inferPiImpl, pi);
+    }
+
+    public static @NotNull Pair<Term, Type> inferHole(Context ctx, Expr.Hole hole) {
+        Term.Meta alpha = ctx.freshMetaAlpha(hole);
+        Term.Meta tau = ctx.freshMetaTau(hole);
+        Type type = Type.ofVal(ctx.eval(tau));
+        return Pair.of(alpha, type);
+    }
+
+    public static @NotNull Pair<Term, Type> inferLit(Context ctx, Expr.Lit lit)
+        throws TypeCheckException
+    {
+        throw new UnsupportedOperationException("字面量类型推导尚未实现");
     }
 
     @FunctionalInterface

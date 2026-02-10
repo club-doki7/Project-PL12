@@ -2,6 +2,7 @@ package club.doki7.pl12.elab;
 
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
+import club.doki7.pl12.core.Value;
 import club.doki7.pl12.syntax.Command;
 import club.doki7.pl12.syntax.Expr;
 import club.doki7.pl12.util.Pair;
@@ -65,6 +66,14 @@ public final class Context
         return new Pair<>(localEnv.size() - 1 - index, type);
     }
 
+    public @Nullable Env.Entry lookupGlobal(String name) {
+        return env.lookup(name);
+    }
+
+    public Value eval(@NotNull Term term) {
+        return eval.eval(term);
+    }
+
     public sealed interface MetaSource {
         record DefParamType(@NotNull Command.Definition def,
                             int paramGroupIndex,
@@ -124,9 +133,11 @@ public final class Context
 
     private Context(@NotNull Env env) {
         this.env = env;
+        this.eval = Eval.make(env);
     }
 
-    public final @NotNull Env env;
+    private final @NotNull Env env;
+    private final @NotNull Eval eval;
     private final @NotNull ArrayList<@Nullable String> localEnv = new ArrayList<>();
     private final @NotNull ArrayList<@Nullable Type> types = new ArrayList<>();
     private final @NotNull ArrayList<@NotNull MetaSource> metaSources = new ArrayList<>();
