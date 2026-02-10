@@ -37,7 +37,7 @@ public sealed interface Term {
     }
 
     final class Univ implements Term {
-        public static final @NotNull Univ UNIV = new Univ();
+        private static final @NotNull Univ UNIV = new Univ();
 
         private Univ() {}
 
@@ -62,4 +62,6 @@ public sealed interface Term {
     record Meta(int id) implements Term {}
 
     record SolvedMeta(int id, @NotNull Term solution) implements Term {}
+
+    public static final @NotNull Univ UNIV = Univ.UNIV;
 }

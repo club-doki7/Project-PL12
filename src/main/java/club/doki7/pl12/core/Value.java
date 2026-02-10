@@ -31,7 +31,7 @@ public sealed interface Value {
     {}
 
     final class Univ implements Value {
-        public static final @NotNull Univ UNIV = new Univ();
+        private static final @NotNull Univ UNIV = new Univ();
 
         private Univ() {}
 
@@ -40,4 +40,6 @@ public sealed interface Value {
             return "type";
         }
     }
+
+    @NotNull Univ UNIV = Univ.UNIV;
 }

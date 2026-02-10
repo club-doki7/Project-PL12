@@ -55,7 +55,7 @@ public final class Eval {
                     return new Value.Pi(localEnv, names, typeVal, body);
                 }
                 case Term.Univ _ -> {
-                    return Value.Univ.UNIV;
+                    return Value.UNIV;
                 }
                 case Term.App(Term func, ImmSeq<Term> args) -> {
                     Value funcValue = eval(localEnv, func);
@@ -111,7 +111,7 @@ public final class Eval {
                 case Term.Free free -> reifySpine(level, free, spine);
             };
             case Value.Pi pi -> reifyPi(level, pi);
-            case Value.Univ _ -> Term.Univ.UNIV;
+            case Value.Univ _ -> Term.UNIV;
         };
     }
 
