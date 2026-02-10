@@ -3,6 +3,7 @@ package club.doki7.pl12.core;
 import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.TextUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Objects;
@@ -47,7 +48,7 @@ public sealed interface Term {
         }
     }
 
-    record Pi(@NotNull ImmSeq<String> names,
+    record Pi(@Nullable String pramName,
               @NotNull Term type,
               @NotNull Term body)
         implements Term {}

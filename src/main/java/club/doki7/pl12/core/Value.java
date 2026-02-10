@@ -3,6 +3,7 @@ package club.doki7.pl12.core;
 import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public sealed interface Value {
     record Flex(Term.Meta head, @NotNull ImmSeq<Value> args) implements Value {}
@@ -11,23 +12,17 @@ public sealed interface Value {
 
     record Rigid(RigidHead head, @NotNull ImmSeq<Value> args) implements Value {}
 
-    sealed interface Closure permits Lam, Pi {
-        @NotNull SnocList<ImmSeq<Value>> localEnv();
-        @NotNull ImmSeq<String> paramNames();
-        @NotNull Term body();
-    }
-
     record Lam(@NotNull SnocList<ImmSeq<Value>> localEnv,
                @NotNull ImmSeq<String> paramNames,
                @NotNull Term body)
-        implements Closure, RigidHead
+        implements RigidHead
     {}
 
     record Pi(@NotNull SnocList<ImmSeq<Value>> localEnv,
-              @NotNull ImmSeq<String> paramNames,
+              @Nullable String paramName,
               @NotNull Type paramType,
               @NotNull Term body)
-        implements Value, Closure
+        implements Value
     {}
 
     final class Univ implements Value {

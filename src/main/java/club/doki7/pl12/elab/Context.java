@@ -38,7 +38,7 @@ public record Context(Env env,
     }
 
     public Context bind(Seq<String> names, Seq<Type> types) {
-        assert names.size() == types.size();
+        assert names.getClass() == types.getClass() && names.size() == types.size();
         return new Context(env,
                            SnocList.snoc(localEnv, names),
                            SnocList.snoc(this.types, types),

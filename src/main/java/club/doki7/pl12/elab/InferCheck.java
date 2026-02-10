@@ -8,7 +8,11 @@ import club.doki7.pl12.syntax.Expr;
 import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
 import club.doki7.pl12.util.TextUtil;
+import club.doki7.pl12.util.VoidSeq;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class InferCheck {
     public static @NotNull Pair<Term, Type> infer(Context ctx, Expr expr)
@@ -78,13 +82,51 @@ public final class InferCheck {
     public static @NotNull Pair<Term, Type> inferArrow(Context ctx, Expr.Arrow arrow)
         throws TypeCheckException
     {
-        Term fromTypeTerm = check(ctx, arrow.from(), Type.UNIV);
-        Type fromType = Type.ofVal(Eval.make(ctx.env()).eval(fromTypeTerm));
+        // 假设存在这样一个类型：
+        //   forall (a b c : type), a -> b -> c -> nat
+        //                          ^~~~~~~~~~~
+        // 在检查类型 a -> (b -> (c -> nat)) 时，由于 a, b 和 c 上没有 forall，它们不会向上下文中引入新的绑定
+        // 因此，a, b, c 和 nat 的检查事实上都可以在原有的 context 上直接进行
 
-        Context ctx1 = ctx.bind(TextUtil.EMPTY_STRING_SEQ, ImmSeq.of(fromType));
-        Term toType = check(ctx1, arrow.to(), Type.UNIV);
+        // 首先，尽可能多地收集箭头类型
+        List<Expr> typeExprs = new ArrayList<>();
+        typeExprs.add(arrow.from());
+        Expr iter = arrow.to();
+        while (iter instanceof Expr.Arrow(Expr from, Expr to, _)) {
+            typeExprs.add(from);
+            iter = to;
+        }
 
-        return Pair.of(new Term.Pi(TextUtil.EMPTY_STRING_SEQ, fromTypeTerm, toType), Type.UNIV);
+        // 然后，对这部分箭头类型进行检查
+        Term[] typeTerms = new Term[typeExprs.size()];
+
+        // 这里还有个问题，考虑以下类型：
+        //   forall (a : type), a -> a -> a -> a
+        // 考虑德布鲁因索引，上述类型应该正规化为
+        //   forall (a : type), a₀ -> a₁ -> a₂ -> a₃
+        // 但如果我们真的用同一个 Context 来作检查，那么在检查过程中，四个 a 会被赋予同一个德布鲁因索引
+        // 这显然是错误的，所以我们面临问题：不需要真的向 Context 中插入绑定，但又需要在检查过程中区分不同的 a
+        // 解决方案就是 VoidSeq
+        VoidSeq<String> namesSeq = new VoidSeq<>(0);
+        VoidSeq<Type> typesSeq = new VoidSeq<>(0);
+        ctx = ctx.bind(namesSeq, typesSeq);
+        for (int i = 0; i < typeExprs.size(); i++) {
+            Term typeTerm = check(ctx, typeExprs.get(i), Type.UNIV);
+            typeTerms[i] = typeTerm;
+
+            // 修改 namesSeq/typesSeq 的大小来“撑开” Context
+            namesSeq.size += 1;
+            typesSeq.size += 1;
+        }
+
+        // 最后，检查箭头类型的结果类型
+        Term resultType = check(ctx, iter, Type.UNIV);
+
+        // 从后往前构造出 Pi 类型
+        for (int i = typeExprs.size() - 1; i >= 0; i--) {
+            resultType = new Term.Pi(null, typeTerms[i], resultType);
+        }
+        return Pair.of(resultType, Type.UNIV);
     }
 
     public static @NotNull Pair<Term, Type> inferPi(Context ctx, Expr.Pi pi)

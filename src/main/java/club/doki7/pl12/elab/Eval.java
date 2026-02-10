@@ -4,6 +4,7 @@ import club.doki7.pl12.core.Name;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
+import club.doki7.pl12.util.Seq;
 import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 
@@ -49,9 +50,9 @@ public final class Eval {
                 case Term.Lam(ImmSeq<String> names, Term body) -> {
                     return new Value.Rigid(new Value.Lam(localEnv, names, body), ImmSeq.nil());
                 }
-                case Term.Pi(ImmSeq<String> names, Term type, Term body) -> {
+                case Term.Pi(String paramName, Term type, Term body) -> {
                     Type typeVal = Type.ofVal(eval(localEnv, type));
-                    return new Value.Pi(localEnv, names, typeVal, body);
+                    return new Value.Pi(localEnv, paramName, typeVal, body);
                 }
                 case Term.Univ _ -> {
                     return Value.UNIV;
@@ -135,27 +136,7 @@ public final class Eval {
     }
 
     private Term.Lam reifyLam(int level, Value.Lam lam) {
-        Term body = reifyClosure(level, lam);
-        if (body instanceof Term.Lam(ImmSeq<String> paramNames, Term body1)) {
-            ImmSeq<String> allParamNames = ImmSeq.concat(lam.paramNames(), paramNames);
-            return new Term.Lam(allParamNames, body1);
-        }
-        return new Term.Lam(lam.paramNames(), body);
-    }
-
-    private Term.Pi reifyPi(int level, Value.Pi pi) {
-        Term body = reifyClosure(level, pi);
-        Term paramTypeTerm = reify(level, pi.paramType());
-        if ((body instanceof Term.Pi(ImmSeq<String> paramNames, Term type, Term body1)
-             && type.equals(paramTypeTerm))) {
-            ImmSeq<String> allParamNames = ImmSeq.concat(pi.paramNames(), paramNames);
-            return new Term.Pi(allParamNames, paramTypeTerm, body1);
-        }
-        return new Term.Pi(pi.paramNames(), paramTypeTerm, body);
-    }
-
-    private Term reifyClosure(int level, Value.Closure closure) {
-        ImmSeq<String> paramNames = closure.paramNames();
+        ImmSeq<String> paramNames = lam.paramNames();
         int paramCount = paramNames.size();
 
         Value[] freshVars = new Value[paramCount];
@@ -165,10 +146,30 @@ public final class Eval {
             freshVars[i] = new Value.Rigid(free, ImmSeq.nil());
         }
 
-        SnocList<ImmSeq<Value>> extendedEnv = SnocList.snoc(closure.localEnv(),
+        SnocList<ImmSeq<Value>> extendedEnv = SnocList.snoc(lam.localEnv(),
                                                             ImmSeq.ofUnsafe(freshVars));
-        Value bodyValue = eval(extendedEnv, closure.body());
-        return reify(level + paramCount, bodyValue);
+        Value bodyValue = eval(extendedEnv, lam.body());
+        Term body = reify(level + paramCount, bodyValue);
+
+        if (body instanceof Term.Lam(ImmSeq<String> paramNames1, Term body1)) {
+            ImmSeq<String> allParamNames = ImmSeq.concat((paramNames), paramNames1);
+            return new Term.Lam(allParamNames, body1);
+        }
+        return new Term.Lam(lam.paramNames(), body);
+    }
+
+    private Term.Pi reifyPi(int level, Value.Pi pi) {
+        Term paramType = reify(level, pi.paramType());
+        Term.Free paramTerm = new Term.Free(new Name.Quote(level,
+                                                           pi.paramName() != null
+                                                               ? pi.paramName()
+                                                               : ""));
+        Term body = reify(level + 1,
+                          eval(SnocList.snoc(pi.localEnv(),
+                                             ImmSeq.of(new Value.Rigid(paramTerm, ImmSeq.nil()))),
+                               pi.body()));
+
+        return new Term.Pi(pi.paramName(), paramType, body);
     }
 
     private Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
