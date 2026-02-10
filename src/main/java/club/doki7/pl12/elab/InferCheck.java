@@ -5,10 +5,7 @@ import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.exc.TypeCheckException;
 import club.doki7.pl12.syntax.Expr;
-import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
-import club.doki7.pl12.util.TextUtil;
-import club.doki7.pl12.util.VoidSeq;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -50,7 +47,7 @@ public final class InferCheck {
             return Pair.of(new Term.Bound(index, varName), type);
         }
 
-        Env.Entry entry = ctx.env().lookup(varName);
+        Env.Entry entry = ctx.env.lookup(varName);
         if (entry != null) {
             return Pair.of(new Term.Free(new Name.Global(varName)), entry.type());
         }
@@ -74,7 +71,7 @@ public final class InferCheck {
         throws TypeCheckException
     {
         Term annTerm = check(ctx, ann.ann(), Type.UNIV);
-        Type annType = Type.ofVal(Eval.make(ctx.env()).eval(annTerm));
+        Type annType = Type.ofVal(Eval.make(ctx.env).eval(annTerm));
         Term exprTerm = check(ctx, ann.expr(), annType);
         return Pair.of(new Term.Ann(exprTerm, annTerm), annType);
     }
@@ -82,13 +79,35 @@ public final class InferCheck {
     public static @NotNull Pair<Term, Type> inferArrow(Context ctx, Expr.Arrow arrow)
         throws TypeCheckException
     {
-        // 假设存在这样一个类型：
-        //   forall (a b c : type), a -> b -> c -> nat
-        //                          ^~~~~~~~~~~
-        // 在检查类型 a -> (b -> (c -> nat)) 时，由于 a, b 和 c 上没有 forall，它们不会向上下文中引入新的绑定
-        // 因此，a, b, c 和 nat 的检查事实上不需要 context 包含更多的信息
+        return withDepthTracking(ctx, InferCheck::inferArrowImpl, arrow);
+    }
 
-        // 首先，尽可能多地收集箭头类型
+    public static @NotNull Pair<Term, Type> inferPi(Context ctx, Expr.Pi pi)
+        throws TypeCheckException
+    {
+        return withDepthTracking(ctx, InferCheck::inferPiImpl, pi);
+    }
+
+    @FunctionalInterface
+    private interface InferFn<E extends Expr> {
+        @NotNull Pair<Term, Type> apply(Context ctx, E e) throws TypeCheckException;
+    }
+
+    private static <E extends Expr>
+    @NotNull Pair<Term, Type> withDepthTracking(Context ctx, InferFn<E> fn, E expr)
+        throws TypeCheckException
+    {
+        int depth = ctx.depth();
+        try {
+            return fn.apply(ctx, expr);
+        } finally {
+            ctx.restoreDepth(depth);
+        }
+    }
+
+    private static @NotNull Pair<Term, Type> inferArrowImpl(Context ctx, Expr.Arrow arrow)
+        throws TypeCheckException
+    {
         List<Expr> typeExprs = new ArrayList<>();
         typeExprs.add(arrow.from());
         Expr iter = arrow.to();
@@ -97,44 +116,23 @@ public final class InferCheck {
             iter = to;
         }
 
-        // 然后，对这部分箭头类型进行检查
         Term[] typeTerms = new Term[typeExprs.size()];
-
-        // 这里还有个问题，考虑以下类型：
-        //   forall (a : type), a -> a -> a -> a
-        // 考虑德布鲁因索引，上述类型应该正规化为
-        //   forall (a : type), a₀ -> a₁ -> a₂ -> a₃
-        // 如果我们真的用同一个 Context 来作检查，那么在检查过程中，四个 a 会被赋予同一个德布鲁因索引
-        // 这显然是错误的，所以我们面临问题：不需要真的向 Context 中插入绑定，但又需要在检查过程中区分不同的 a
-        // 解决方案就是 VoidSeq
-        VoidSeq<String> namesSeq = new VoidSeq<>(0);
-        VoidSeq<Type> typesSeq = new VoidSeq<>(0);
-        ctx = ctx.bind(namesSeq, typesSeq);
         for (int i = 0; i < typeExprs.size(); i++) {
             Term typeTerm = check(ctx, typeExprs.get(i), Type.UNIV);
             typeTerms[i] = typeTerm;
-
-            // 修改 namesSeq/typesSeq 的大小来“撑开” Context
-            // 安全性考虑:
-            // - Context 不会被 check 的产物 (Term) 捕获
-            // - 这个循环是唯一对 VoidSeq.size 修改的地方
-            namesSeq.size += 1;
-            typesSeq.size += 1;
+            ctx.bind();
         }
 
-        // 最后，检查箭头类型的结果类型
         Term resultType = check(ctx, iter, Type.UNIV);
 
-        // 从后往前构造出 Pi 类型
         for (int i = typeExprs.size() - 1; i >= 0; i--) {
             resultType = new Term.Pi(null, typeTerms[i], resultType);
         }
         return Pair.of(resultType, Type.UNIV);
     }
 
-    public static @NotNull Pair<Term, Type> inferPi(Context ctx, Expr.Pi pi)
+    private static @NotNull Pair<Term, Type> inferPiImpl(Context ctx, Expr.Pi pi)
         throws TypeCheckException
     {
-        throw new UnsupportedOperationException("Pi 类型尚未实现");
     }
 }

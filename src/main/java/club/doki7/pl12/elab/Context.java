@@ -4,22 +4,66 @@ import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.syntax.Command;
 import club.doki7.pl12.syntax.Expr;
-import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
-import club.doki7.pl12.util.SnocList;
-import club.doki7.pl12.util.Seq;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-public record Context(Env env,
-                      SnocList<Seq<String>> localEnv,
-                      SnocList<Seq<Type>> types,
-                      MetaContext mctx)
+public final class Context
 {
-    public record MetaContext(ArrayList<@NotNull MetaSource> sources,
-                              ArrayList<@Nullable Term> solutions) {}
+    public int depth() {
+        return localEnv.size();
+    }
+
+    public void bind() {
+        localEnv.add(null);
+        types.add(null);
+    }
+
+    public void bind(String newName, Type newType) {
+        localEnv.add(newName);
+        types.add(newType);
+    }
+
+    public void bind(List<String> newNames, List<Type> newTypes) {
+        assert newNames.size() == newTypes.size();
+        localEnv.addAll(newNames);
+        types.addAll(newTypes);
+    }
+
+    public void unbind() {
+        localEnv.removeLast();
+        types.removeLast();
+    }
+
+    public void unbind(int n) {
+        for (int i = 0; i < n; i++) {
+            localEnv.removeLast();
+            types.removeLast();
+        }
+    }
+
+    public void restoreDepth(int depth) {
+        int currentDepth = depth();
+        assert currentDepth >= depth;
+        if (currentDepth == depth) {
+            return;
+        }
+        unbind(currentDepth - depth);
+    }
+
+    public @Nullable Pair<@NotNull Integer, @NotNull Type> lookupLocal(String name) {
+        int index = localEnv.lastIndexOf(name);
+        if (index == -1) {
+            return null;
+        }
+
+        Type type = Objects.requireNonNull(types.get(index));
+        return new Pair<>(localEnv.size() - 1 - index, type);
+    }
 
     public sealed interface MetaSource {
         record DefParamType(@NotNull Command.Definition def,
@@ -37,41 +81,8 @@ public record Context(Env env,
         record HoleType(@NotNull Expr.Hole hole) implements MetaSource {}
     }
 
-    public Context bind(Seq<String> names, Seq<Type> types) {
-        assert names.getClass() == types.getClass() && names.size() == types.size();
-        return new Context(env,
-                           SnocList.snoc(localEnv, names),
-                           SnocList.snoc(this.types, types),
-                           mctx);
-    }
-
-    public Pair<Integer, Type> lookupLocal(String name) {
-        int acc = 0;
-        SnocList<Seq<String>> localEnvIter = localEnv;
-        SnocList<Seq<Type>> typesIter = types;
-        while (localEnvIter instanceof SnocList.Snoc(SnocList<Seq<String>> init,
-                                                     Seq<String> last, _)
-               && typesIter instanceof SnocList.Snoc(SnocList<Seq<Type>> typesInit,
-                                                     Seq<Type> typesLast, _)) {
-            assert last.size() == typesLast.size();
-            if (last instanceof ImmSeq<String> lastImmSeq &&
-                typesLast instanceof ImmSeq<Type> typesLastImmSeq) {
-                for (int i = last.size() - 1; i >= 0; i--) {
-                    if (lastImmSeq.get(i).equals(name)) {
-                        return new Pair<>(acc + (last.size() - 1 - i), typesLastImmSeq.get(i));
-                    }
-                }
-            } else {
-                assert !(last instanceof ImmSeq) && !(typesLast instanceof ImmSeq);
-            }
-
-            acc += last.size();
-            localEnvIter = init;
-            typesIter = typesInit;
-        }
-
-        assert localEnvIter instanceof SnocList.Nil && typesIter instanceof SnocList.Nil;
-        return null;
+    public int metaCount() {
+        return metaSources.size();
     }
 
     public Term.Meta freshMeta(@NotNull Command.Definition def,
@@ -100,14 +111,24 @@ public record Context(Env env,
         return freshMeta(source, "τ");
     }
 
-    public int metaCount() {
-        return mctx.sources.size();
+    public static @NotNull Context make(@NotNull Env env) {
+        return new Context(env);
     }
 
     private Term.Meta freshMeta(@NotNull MetaSource source, @NotNull String name) {
         int metaId = metaCount();
-        mctx.sources.add(source);
-        mctx.solutions.add(null);
+        metaSources.add(source);
+        metaSolutions.add(null);
         return new Term.Meta(metaId, name);
     }
+
+    private Context(@NotNull Env env) {
+        this.env = env;
+    }
+
+    public final @NotNull Env env;
+    private final @NotNull ArrayList<@Nullable String> localEnv = new ArrayList<>();
+    private final @NotNull ArrayList<@Nullable Type> types = new ArrayList<>();
+    private final @NotNull ArrayList<@NotNull MetaSource> metaSources = new ArrayList<>();
+    private final @NotNull ArrayList<@Nullable Term> metaSolutions = new ArrayList<>();
 }

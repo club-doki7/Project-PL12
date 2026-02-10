@@ -47,7 +47,7 @@ public sealed interface Expr extends Node {
               @NotNull Expr body,
               @NotNull Token pi,
               @NotNull Token comma)
-            implements Expr
+        implements Expr
     {
         @Override
         public @NotNull String toString() {
@@ -58,7 +58,7 @@ public sealed interface Expr extends Node {
     record Arrow(@NotNull Expr from,
                  @NotNull Expr to,
                  @NotNull Token arrow)
-            implements Expr
+        implements Expr
     {
         @Override
         public @NotNull String toString() {
@@ -125,7 +125,7 @@ public sealed interface Expr extends Node {
     record App(@NotNull Expr func,
                @NotNull ImmSeq<@NotNull Argument> args,
                boolean infix)
-            implements Expr
+        implements Expr
     {
         @TestOnly
         public App(@NotNull Expr func, @NotNull Argument arg, boolean infix) {
