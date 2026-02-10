@@ -50,4 +50,8 @@ public final class TextUtil {
         }
         return sb.toString();
     }
+
+    public static final String EMPTY_STRING = "";
+
+    public static final ImmSeq<String> EMPTY_STRING_SEQ = ImmSeq.of(EMPTY_STRING);
 }

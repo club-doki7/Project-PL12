@@ -47,7 +47,8 @@ public sealed interface Expr extends Node {
               @NotNull Expr body,
               @NotNull Token pi,
               @NotNull Token comma)
-            implements Expr {
+            implements Expr
+    {
         @Override
         public @NotNull String toString() {
             return "∀" + paramGroup + ", " + body;
@@ -58,19 +59,20 @@ public sealed interface Expr extends Node {
                  @NotNull Expr to,
                  @NotNull Token arrow)
             implements Expr
-        {
-            @Override
-            public @NotNull String toString() {
-                String fromStr = (from instanceof App
-                                || from instanceof Fun
-                                || from instanceof Pi
-                                || from instanceof Arrow
-                                || from instanceof Ann)
-                                ? "(" + from + ")"
-                                : from.toString();
-                return fromStr + " -> " + to;
-            }
+    {
+        @Override
+        public @NotNull String toString() {
+            String fromStr =
+                (from instanceof App
+                 || from instanceof Fun
+                 || from instanceof Pi
+                 || from instanceof Arrow
+                 || from instanceof Ann)
+                ? "(" + from + ")"
+                : from.toString();
+            return fromStr + " -> " + to;
         }
+    }
 
     /// ```bnf
     /// var ::= identifier
@@ -123,7 +125,8 @@ public sealed interface Expr extends Node {
     record App(@NotNull Expr func,
                @NotNull ImmSeq<@NotNull Argument> args,
                boolean infix)
-            implements Expr {
+            implements Expr
+    {
         @TestOnly
         public App(@NotNull Expr func, @NotNull Argument arg, boolean infix) {
             this(func, ImmSeq.of(arg), infix);

@@ -5,7 +5,9 @@ import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.exc.TypeCheckException;
 import club.doki7.pl12.syntax.Expr;
+import club.doki7.pl12.util.ImmSeq;
 import club.doki7.pl12.util.Pair;
+import club.doki7.pl12.util.TextUtil;
 import org.jetbrains.annotations.NotNull;
 
 public final class InferCheck {
@@ -17,12 +19,12 @@ public final class InferCheck {
             case Expr.Fun fun -> inferFun(ctx, fun);
             case Expr.Ann ann -> inferAnn(ctx, ann);
             case Expr.App app -> inferApp(ctx, app);
-            case Expr.Arrow arrow -> null;
+            case Expr.Arrow arrow -> inferArrow(ctx, arrow);
+            case Expr.Pi pi -> inferPi(ctx, pi);
             case Expr.Hole hole -> null;
             case Expr.Lit lit -> null;
             case Expr.Paren paren -> null;
             case Expr.PartialApp partialApp -> null;
-            case Expr.Pi pi -> null;
             case Expr.Univ _ -> Pair.of(Term.UNIV, Type.UNIV);
         };
     }
@@ -70,5 +72,23 @@ public final class InferCheck {
         Type annType = Type.ofVal(Eval.make(ctx.env()).eval(annTerm));
         Term exprTerm = check(ctx, ann.expr(), annType);
         return Pair.of(new Term.Ann(exprTerm, annTerm), annType);
+    }
+
+    public static @NotNull Pair<Term, Type> inferArrow(Context ctx, Expr.Arrow arrow)
+        throws TypeCheckException
+    {
+        Term fromTypeTerm = check(ctx, arrow.from(), Type.UNIV);
+        Type fromType = Type.ofVal(Eval.make(ctx.env()).eval(fromTypeTerm));
+
+        Context ctx1 = ctx.bind(TextUtil.EMPTY_STRING_SEQ, ImmSeq.of(fromType));
+        Term toType = check(ctx1, arrow.to(), Type.UNIV);
+
+        return Pair.of(new Term.Pi(TextUtil.EMPTY_STRING_SEQ, fromTypeTerm, toType), Type.UNIV);
+    }
+
+    public static @NotNull Pair<Term, Type> inferPi(Context ctx, Expr.Pi pi)
+        throws TypeCheckException
+    {
+        throw new UnsupportedOperationException("Pi 类型尚未实现");
     }
 }

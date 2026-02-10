@@ -68,11 +68,10 @@ class SnocListTest {
         @DisplayName("revGet should return correct elements (reverse indexed)")
         void revGetShouldReturnCorrectElements() {
             // List is [a, b, c] built as rcons(rcons(rcons(nil, a), b), c)
-            SnocList<String> list = SnocList.snoc(
-                SnocList.snoc(
-                    SnocList.snoc(SnocList.nil(), "a"),
-                    "b"),
-                "c");
+            SnocList<String> list = SnocList.snoc(SnocList.snoc(SnocList.snoc(SnocList.nil(),
+                                                                              "a"),
+                                                                "b"),
+                                                  "c");
             // revGet(0) should return last element "c"
             assertEquals("c", list.revGet(0));
             // revGet(1) should return "b"

@@ -59,7 +59,23 @@ public sealed interface Term {
         }
     }
 
-    record Meta(int id) implements Term {}
+    record Meta(int id, @NotNull String name) implements Term {
+        @Override
+        public @NotNull String toString() {
+            return TextUtil.subscriptNum("?" + name, id);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Meta(int otherId, _))) return false;
+            return id == otherId;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Meta.class, id);
+        }
+    }
 
     record SolvedMeta(int id, @NotNull Term solution) implements Term {}
 
