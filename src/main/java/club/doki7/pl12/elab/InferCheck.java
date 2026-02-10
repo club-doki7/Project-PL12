@@ -39,9 +39,10 @@ public final class InferCheck {
         throws TypeCheckException
     {
         String varName = var.name().lexeme();
-        Integer index = DBI.find(ctx.localEnv(), varName);
-        if (index != null) {
-            Type type = DBI.get(ctx.types(), index);
+        Pair<Integer, Type> p = ctx.lookupLocal(varName);
+        if (p != null) {
+            int index = p.first();
+            Type type = p.second();
             return Pair.of(new Term.Bound(index, varName), type);
         }
 

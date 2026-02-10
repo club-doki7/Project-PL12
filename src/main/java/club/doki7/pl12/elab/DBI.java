@@ -48,6 +48,6 @@ public final class DBI {
             acc += last.size();
             ctx = init;
         }
-        return null;
+        return -1;
     }
 }

@@ -41,7 +41,6 @@ public final class Eval {
                         }
                         return entry.value();
                     }
-
                     return new Value.Rigid(free, ImmSeq.nil());
                 }
                 case Term.Meta meta -> {
