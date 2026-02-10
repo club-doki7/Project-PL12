@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class Parser {
     public static @NotNull Program
@@ -418,11 +420,12 @@ public final class Parser {
             case Token.Kind.D_QUES -> Pair.of(new Expr.Hole(tok), ctx1);
             case Token.Kind.L_PAREN -> {
                 Pair<Expr, ParseContext> innerP = parseExprImpl(ctx1);
-                Pair<Token, ParseContext> rparenP = expectConsume(innerP.second(), Token.Kind.R_PAREN);
-                yield Pair.of(new Expr.Paren(innerP.first(), tok, rparenP.first()), rparenP.second());
+                Pair<Token, ParseContext> rparenP = expectConsume(innerP.second(),
+                                                                  Token.Kind.R_PAREN);
+                yield Pair.of(new Expr.Paren(innerP.first(), tok, rparenP.first()),
+                              rparenP.second());
             }
-            default -> throw new ParseException(tok.range(),
-                                                "Expected expression, got " + tok.kind());
+            default -> throw new ParseException(tok.range(), "此处需要表达式，遇到记号 " + tok.kind());
         };
     }
 
@@ -436,6 +439,7 @@ public final class Parser {
             ParseContext ctx1 = p.second();
 
             if (tok.kind() != Token.Kind.L_PAREN && tok.kind() != Token.Kind.L_BRACE) {
+                checkNameShadowing(paramGroups);
                 return Pair.of(ImmSeq.of(paramGroups), ctx);
             }
 
@@ -472,11 +476,30 @@ public final class Parser {
         Pair<Token, ParseContext> p2 = p1.second().nextToken();
         Token colonOrEnd = p2.first();
         if (colonOrEnd.kind() != Token.Kind.COLON) {
-            return Pair.of(new ParamGroup(p1.first(), null, null, null), p1.second());
+            ParamGroup group = new ParamGroup(p1.first(), null, null, null);
+            checkNameShadowing(List.of(group));
+            return Pair.of(group, p1.second());
         }
 
         Pair<Expr, ParseContext> p3 = parseExprImpl(p2.second());
         return Pair.of(new ParamGroup(p1.first(), p3.first(), colonOrEnd, null), p3.second());
+    }
+
+    private static void checkNameShadowing(List<ParamGroup> paramGroups) throws ParseException {
+        Map<String, Token> usedNames = new HashMap<>();
+        for (ParamGroup group : paramGroups) {
+            for (Token nameTok : group.names()) {
+                String lexeme = nameTok.lexeme();
+                Token existing = usedNames.get(lexeme);
+                if (existing != null) {
+                    ParseException exc = new ParseException(nameTok.range(),
+                                                            "重复定义的形式参数 '" + lexeme + "'");
+                    exc.addTrace(existing.range(), "先前定义于此处");
+                    throw exc;
+                }
+                usedNames.put(lexeme, nameTok);
+            }
+        }
     }
 
     private static Pair<ImmSeq<Token>, ParseContext>
@@ -489,7 +512,7 @@ public final class Parser {
 
             if (tok.kind() != Token.Kind.IDENT) {
                 if (idents.isEmpty()) {
-                    throw new ParseException(tok.range(), "Expected identifier, got " + tok.kind());
+                    throw new ParseException(tok.range(), "此处需要标识符，遇到记号 " + tok.kind());
                 } else {
                     return Pair.of(ImmSeq.of(idents), ctx);
                 }
@@ -507,7 +530,7 @@ public final class Parser {
         ParseContext ctx1 = p.second();
 
         if (got.kind() != expected) {
-            throw new ParseException(got.range(), "Expected " + expected + ", got " + got.kind());
+            throw new ParseException(got.range(), "此处需要 " + expected + "，遇到 " + got.kind());
         }
         return Pair.of(got, ctx1);
     }
@@ -519,10 +542,10 @@ public final class Parser {
             if (i < expected.length - 2) {
                 sb.append(", ");
             } else if (i == expected.length - 2) {
-                sb.append(" or ");
+                sb.append(" 或 ");
             }
         }
-        return new ParseException(got.range(), "Expected any of " + sb + ", got " + got.kind());
+        return new ParseException(got.range(), "此处需要 " + sb + "，遇到" + got.kind());
     }
 
     private static Token.Kind matchToken(Token.Kind startKind) {
@@ -540,8 +563,8 @@ public final class Parser {
             case "right" -> Operator.Assoc.RIGHT;
             case "noassoc" -> Operator.Assoc.NONE;
             default -> throw new ParseException(tok.range(),
-                                                "Expected 'left', 'right' or 'noassoc', got "
-                                                + tok.lexeme());
+                                                "结合性必须是 'left', 'right' 或者 'noassoc'，遇到 '"
+                                                + tok.lexeme() + "'");
         };
     }
 

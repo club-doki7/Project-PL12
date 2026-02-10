@@ -13,13 +13,13 @@ public sealed interface Expr extends Node {
     /// ```bnf
     /// ann ::= expression ":" expression
     /// ```
-    record Ann(@NotNull Expr term, @NotNull Expr ann, @NotNull Token colon) implements Expr {
+    record Ann(@NotNull Expr expr, @NotNull Expr ann, @NotNull Token colon) implements Expr {
         @Override
         public @NotNull String toString() {
-            if (term instanceof Var || term instanceof Univ) {
-                return term + " : " + ann;
+            if (expr instanceof Var || expr instanceof Univ) {
+                return expr + " : " + ann;
             } else {
-                return "(" + term + ") : " + ann;
+                return "(" + expr + ") : " + ann;
             }
         }
     }

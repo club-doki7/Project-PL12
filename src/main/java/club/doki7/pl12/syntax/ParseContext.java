@@ -19,13 +19,7 @@ public record ParseContext(char[] buf,
     public enum Mode { IDLE, BVR, DOGFIGHT }
 
     public static ParseContext of(String content, String file) {
-        return new ParseContext(content.toCharArray(),
-                                0,
-                                file,
-                                1,
-                                1,
-                                Mode.IDLE,
-                                new HashMap<>());
+        return new ParseContext(content.toCharArray(), 0, file, 1, 1, Mode.IDLE, new HashMap<>());
     }
 
     public ParseContext clone(int pos1, int line1, int col1) {
@@ -107,8 +101,8 @@ public record ParseContext(char[] buf,
                                   ctx.clone(pos + 2, line, col + 2));
                 } else {
                     throw new LexicalException(SourceRange.of(ctx.file, pos, line, col),
-                                               "Identifiers cannot start with '?'."
-                                               + " Meanwhile, to input a hole, use '??'.");
+                                               "变量名不能以问号 '?' 开头。"
+                                               + "若要输入 Hole，请使用 '??'。");
                 }
             }
             default -> nextIdent(ctx, pos, line, col);
@@ -131,7 +125,7 @@ public record ParseContext(char[] buf,
         String lexeme = sb.toString();
         if (lexeme.isEmpty()) {
             throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
-                                       "Unexpected character: '" + buf[startPos] + "'");
+                                       "无效的字符：'" + buf[startPos] + "'");
         }
 
         @Nullable Token.Kind kwKind = Token.Kind.KEYWORDS_MAP.get(lexeme);
@@ -197,7 +191,7 @@ public record ParseContext(char[] buf,
                 col++;
                 if (pos >= buf.length) {
                     throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
-                                               "Unterminated string literal, premature EOF.");
+                                               "未终止的字符串字面量");
                 }
                 switch (buf[pos]) {
                     case 'n' -> sb.append('\n');
@@ -205,7 +199,7 @@ public record ParseContext(char[] buf,
                     case '"' -> sb.append('"');
                     case '\\' -> sb.append('\\');
                     default -> throw new LexicalException(SourceRange.of(ctx.file, pos, line, col),
-                                                         "Invalid escape sequence: \\" + buf[pos]);
+                                                          "无效的转义字序列：'\\" + buf[pos] + "'");
                 }
 
                 sbLexeme.append('\\').append(buf[pos]);
@@ -219,7 +213,7 @@ public record ParseContext(char[] buf,
 
         if (pos >= buf.length || buf[pos] != '"') {
             throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
-                                       "Unterminated string literal, premature EOF.");
+                                       "未终止的字符串字面量");
         }
 
         String str = sb.toString();
@@ -279,6 +273,6 @@ public record ParseContext(char[] buf,
         }
 
         throw new LexicalException(SourceRange.of(ctx.file, startPos, startLine, startCol),
-                                   "Unterminated comment, premature EOF.");
+                                   "未终止的注释");
     }
 }

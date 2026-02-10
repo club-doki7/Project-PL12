@@ -107,7 +107,7 @@ class ParserTest {
             Expr expr = parseExpr("x : A");
             assertInstanceOf(Expr.Ann.class, expr);
             Expr.Ann ann = (Expr.Ann) expr;
-            assertInstanceOf(Expr.Var.class, ann.term());
+            assertInstanceOf(Expr.Var.class, ann.expr());
             assertInstanceOf(Expr.Var.class, ann.ann());
         }
 
@@ -116,7 +116,7 @@ class ParserTest {
             Expr expr = parseExpr("f : A -> B");
             assertInstanceOf(Expr.Ann.class, expr);
             Expr.Ann ann = (Expr.Ann) expr;
-            assertInstanceOf(Expr.Var.class, ann.term());
+            assertInstanceOf(Expr.Var.class, ann.expr());
             assertInstanceOf(Expr.Arrow.class, ann.ann());
         }
     }

@@ -1,10 +1,13 @@
 package club.doki7.pl12.exc;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LocatedException extends Exception {
-    public record LocatedMessage(SourceRange location, String message) {}
+    public record LocatedMessage(@Nullable SourceRange location, @NotNull String message) {}
 
     public final SourceRange location;
     public final String message;
@@ -18,5 +21,13 @@ public abstract class LocatedException extends Exception {
               + ": " + message);
         this.location = location;
         this.message = message;
+    }
+
+    public void addTrace(SourceRange location, String message) {
+        trace.add(new LocatedMessage(location, message));
+    }
+
+    public void addTrace(String message) {
+        trace.add(new LocatedMessage(null, message));
     }
 }
