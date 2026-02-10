@@ -258,6 +258,7 @@ public record ParseContext(char[] buf,
     skipComment(ParseContext ctx, int pos, int line, int col) throws LexicalException {
         char[] buf = ctx.buf;
         int startPos = pos;
+        int startLine = line;
         int startCol = col;
         pos += 2;
 
@@ -277,7 +278,7 @@ public record ParseContext(char[] buf,
             }
         }
 
-        throw new LexicalException(SourceRange.of(ctx.file, startPos, line, startCol),
+        throw new LexicalException(SourceRange.of(ctx.file, startPos, startLine, startCol),
                                    "Unterminated comment, premature EOF.");
     }
 }

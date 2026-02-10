@@ -10,8 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Parser {
+    public static @NotNull Program
+    parseProgram(ParseContext ctx) throws ParseException {
+        List<Command> commands = new ArrayList<>();
+
+        while (true) {
+            Pair<Command, ParseContext> p = parseCommand(ctx);
+            Command cmd = p.first();
+            ctx = p.second();
+
+            if (cmd == null) {
+                break;
+            }
+
+            commands.add(cmd);
+        }
+
+        return Program.of(commands);
+    }
+
     /// ```bnf
-    /// command ::= axion | check | definition | notation
+    /// command ::= axiom | check | definition | notation
     /// ```
     public static @NotNull Pair<@Nullable Command, @NotNull ParseContext>
     parseCommand(ParseContext ctx) throws ParseException {
