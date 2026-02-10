@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, RandomAccess, Seq<T> {
+public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, RandomAccess {
     private final T @NotNull[] array;
     private final int start;
     private final int end;

@@ -4,7 +4,6 @@ import club.doki7.pl12.core.Name;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
-import club.doki7.pl12.util.Seq;
 import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 
