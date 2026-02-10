@@ -86,7 +86,7 @@ public final class InferCheck {
         //   forall (a b c : type), a -> b -> c -> nat
         //                          ^~~~~~~~~~~
         // 在检查类型 a -> (b -> (c -> nat)) 时，由于 a, b 和 c 上没有 forall，它们不会向上下文中引入新的绑定
-        // 因此，a, b, c 和 nat 的检查事实上都可以在原有的 context 上直接进行
+        // 因此，a, b, c 和 nat 的检查事实上不需要 context 包含更多的信息
 
         // 首先，尽可能多地收集箭头类型
         List<Expr> typeExprs = new ArrayList<>();
@@ -104,7 +104,7 @@ public final class InferCheck {
         //   forall (a : type), a -> a -> a -> a
         // 考虑德布鲁因索引，上述类型应该正规化为
         //   forall (a : type), a₀ -> a₁ -> a₂ -> a₃
-        // 但如果我们真的用同一个 Context 来作检查，那么在检查过程中，四个 a 会被赋予同一个德布鲁因索引
+        // 如果我们真的用同一个 Context 来作检查，那么在检查过程中，四个 a 会被赋予同一个德布鲁因索引
         // 这显然是错误的，所以我们面临问题：不需要真的向 Context 中插入绑定，但又需要在检查过程中区分不同的 a
         // 解决方案就是 VoidSeq
         VoidSeq<String> namesSeq = new VoidSeq<>(0);
@@ -115,6 +115,9 @@ public final class InferCheck {
             typeTerms[i] = typeTerm;
 
             // 修改 namesSeq/typesSeq 的大小来“撑开” Context
+            // 安全性考虑:
+            // - Context 不会被 check 的产物 (Term) 捕获
+            // - 这个循环是唯一对 VoidSeq.size 修改的地方
             namesSeq.size += 1;
             typesSeq.size += 1;
         }
