@@ -1,7 +1,6 @@
 package club.doki7.pl12.core;
 
-import club.doki7.pl12.elab.Env;
-import club.doki7.pl12.util.ConsRevList;
+import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,18 +12,18 @@ public sealed interface Value {
     record Rigid(RigidHead head, @NotNull ImmSeq<Value> args) implements Value {}
 
     sealed interface Closure permits Lam, Pi {
-        @NotNull ConsRevList<ImmSeq<Value>> localEnv();
+        @NotNull SnocList<ImmSeq<Value>> localEnv();
         @NotNull ImmSeq<String> paramNames();
         @NotNull Term body();
     }
 
-    record Lam(@NotNull ConsRevList<ImmSeq<Value>> localEnv,
+    record Lam(@NotNull SnocList<ImmSeq<Value>> localEnv,
                @NotNull ImmSeq<String> paramNames,
                @NotNull Term body)
         implements Closure, RigidHead
     {}
 
-    record Pi(@NotNull ConsRevList<ImmSeq<Value>> localEnv,
+    record Pi(@NotNull SnocList<ImmSeq<Value>> localEnv,
               @NotNull ImmSeq<String> paramNames,
               @NotNull Type paramType,
               @NotNull Term body)

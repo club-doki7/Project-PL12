@@ -4,7 +4,7 @@ import club.doki7.pl12.core.Name;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
-import club.doki7.pl12.util.ConsRevList;
+import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 
 public final class Eval {
@@ -13,7 +13,7 @@ public final class Eval {
     }
 
     public Value eval(Term term) {
-        return eval(ConsRevList.nil(), term);
+        return eval(SnocList.nil(), term);
     }
 
     public Term reify(Value value) {
@@ -24,7 +24,7 @@ public final class Eval {
         return reify(0, type.value());
     }
 
-    private Value eval(ConsRevList<ImmSeq<Value>> localEnv, Term term) {
+    private Value eval(SnocList<ImmSeq<Value>> localEnv, Term term) {
         while (true) {
             switch (term) {
                 case Term.Ann(Term annotated, _) -> term = annotated;
@@ -87,7 +87,7 @@ public final class Eval {
                     }
 
                     ImmSeq<Value> appliedArgs = allArgs.subList(0, lam.paramNames().size());
-                    funcValue = eval(ConsRevList.rcons(lam.localEnv(), appliedArgs), lam.body());
+                    funcValue = eval(SnocList.snoc(lam.localEnv(), appliedArgs), lam.body());
                     args = allArgs.subList(lam.paramNames().size());
                 }
                 case Value.Pi _ -> throw new IllegalStateException("Cannot apply a Pi type");
@@ -166,15 +166,15 @@ public final class Eval {
             freshVars[i] = new Value.Rigid(free, ImmSeq.nil());
         }
 
-        ConsRevList<ImmSeq<Value>> extendedEnv = ConsRevList.rcons(closure.localEnv(),
-                                                                   ImmSeq.ofUnsafe(freshVars));
+        SnocList<ImmSeq<Value>> extendedEnv = SnocList.snoc(closure.localEnv(),
+                                                            ImmSeq.ofUnsafe(freshVars));
         Value bodyValue = eval(extendedEnv, closure.body());
         return reify(level + paramCount, bodyValue);
     }
 
     private Value.Lam forcePartial(Value.Lam lam, ImmSeq<Value> args) {
         assert !args.isEmpty() && lam.paramNames().size() > args.size();
-        return new Value.Lam(ConsRevList.rcons(lam.localEnv(), args),
+        return new Value.Lam(SnocList.snoc(lam.localEnv(), args),
                              lam.paramNames().subList(args.size()),
                              lam.body());
     }

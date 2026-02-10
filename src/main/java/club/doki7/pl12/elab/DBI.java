@@ -1,15 +1,15 @@
 package club.doki7.pl12.elab;
 
 import club.doki7.pl12.core.Value;
-import club.doki7.pl12.util.ConsRevList;
+import club.doki7.pl12.util.SnocList;
 import club.doki7.pl12.util.ImmSeq;
 
 public final class DBI {
-    public static Value get(ConsRevList<ImmSeq<Value>> ctx, int index) {
+    public static Value get(SnocList<ImmSeq<Value>> ctx, int index) {
         while (true) {
-            if (!(ctx instanceof ConsRevList.Cons(ConsRevList<ImmSeq<Value>> init,
-                                                  ImmSeq<Value> last,
-                                                  _))) {
+            if (!(ctx instanceof SnocList.Snoc(SnocList<ImmSeq<Value>> init,
+                                               ImmSeq<Value> last,
+                                               _))) {
                 throw new IndexOutOfBoundsException(index);
             }
 

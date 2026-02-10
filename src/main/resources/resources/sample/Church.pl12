@@ -9,14 +9,13 @@ Definition two {X : type} (f : X -> X) (x : X) : X := f (f x).
 Check one : nat.
 Check two : nat.
 
-Definition succ (n : nat) : nat := fun {X : type} (f : X -> X) (x : X) => f (n f x).
-Check succ : nat -> nat.
+Definition suc (n : nat) : nat := fun {X : type} (f : X -> X) (x : X) => f (n f x).
+Check suc : nat -> nat.
 
-Definition one_by_succ : nat := succ zero.
-Definition two_by_succ : nat := succ one.
-
-Check one_by_succ : nat.
-Check two_by_succ : nat.
+Definition one_by_suc : nat := suc zero.
+Definition two_by_suc : nat := suc one.
+Check one_by_suc : nat.
+Check two_by_suc : nat.
 
 Definition plus (n m : nat) : nat := fun {X : type} (f : X -> X) (x : X) => n f (m f x).
 Check plus : nat -> nat -> nat.

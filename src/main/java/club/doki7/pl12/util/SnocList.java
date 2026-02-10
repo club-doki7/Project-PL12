@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public sealed interface ConsRevList<T> {
+public sealed interface SnocList<T> {
     @NotNull
     T revGet(int index);
 
@@ -18,8 +18,8 @@ public sealed interface ConsRevList<T> {
 
     boolean anyOf(Predicate<T> predicate);
 
-    record Cons<T>(@NotNull ConsRevList<T> init, @NotNull T last, int len)
-        implements ConsRevList<T>
+    record Snoc<T>(@NotNull SnocList<T> init, @NotNull T last, int len)
+        implements SnocList<T>
     {
         @Override
         public @NotNull T revGet(int index) {
@@ -27,9 +27,9 @@ public sealed interface ConsRevList<T> {
                 return last;
             }
 
-            ConsRevList<T> current = init;
+            SnocList<T> current = init;
             int currentIndex = index - 1;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
+            while (current instanceof Snoc<T>(SnocList<T> init1, T last1, _)) {
                 if (currentIndex == 0) {
                     return last1;
                 }
@@ -48,8 +48,8 @@ public sealed interface ConsRevList<T> {
         @Override
         public @NotNull List<T> toList() {
             List<T> elements = new ArrayList<>(len);
-            ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
+            SnocList<T> current = this;
+            while (current instanceof Snoc<T>(SnocList<T> init1, T last1, _)) {
                 elements.add(last1);
                 current = init1;
             }
@@ -59,8 +59,8 @@ public sealed interface ConsRevList<T> {
         @Override
         public @NotNull T[] toArray() {
             @SuppressWarnings("unchecked") T[] array = (T[]) new Object[len];
-            ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, int len1)) {
+            SnocList<T> current = this;
+            while (current instanceof Snoc<T>(SnocList<T> init1, T last1, int len1)) {
                 array[len1 - 1] = last1;
                 current = init1;
             }
@@ -69,8 +69,8 @@ public sealed interface ConsRevList<T> {
 
         @Override
         public boolean anyOf(Predicate<T> predicate) {
-            ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
+            SnocList<T> current = this;
+            while (current instanceof Snoc<T>(SnocList<T> init1, T last1, _)) {
                 if (predicate.test(last1)) {
                     return true;
                 }
@@ -82,8 +82,8 @@ public sealed interface ConsRevList<T> {
         @Override
         public @NotNull String toString() {
             List<String> elements = new ArrayList<>(len);
-            ConsRevList<T> current = this;
-            while (current instanceof Cons<T>(ConsRevList<T> init1, T last1, _)) {
+            SnocList<T> current = this;
+            while (current instanceof Snoc<T>(SnocList<T> init1, T last1, _)) {
                 elements.add(last1.toString());
                 current = init1;
             }
@@ -101,7 +101,7 @@ public sealed interface ConsRevList<T> {
         }
     }
 
-    final class Nil<T> implements ConsRevList<T> {
+    final class Nil<T> implements SnocList<T> {
         private static final Nil<?> INSTANCE = new Nil<>();
 
         @Override
@@ -136,34 +136,34 @@ public sealed interface ConsRevList<T> {
         }
     }
 
-    static <T> ConsRevList.@NotNull Cons<T> rcons(@NotNull ConsRevList<T> head, @NotNull T tail) {
-        return new Cons<>(head, tail, head.length() + 1);
+    static @NotNull <T> Snoc<T> snoc(@NotNull SnocList<T> head, @NotNull T tail) {
+        return new Snoc<>(head, tail, head.length() + 1);
     }
 
-    static <T> ConsRevList.@NotNull Nil<T> nil() {
+    static <T> SnocList.@NotNull Nil<T> nil() {
         @SuppressWarnings("unchecked")
         Nil<T> instance = (Nil<T>) Nil.INSTANCE;
         return instance;
     }
 
     @SafeVarargs
-    static <T> @NotNull ConsRevList<T> of(@NotNull T... elements) {
+    static <T> @NotNull SnocList<T> of(@NotNull T... elements) {
         return from(elements);
     }
 
-    static <T> @NotNull ConsRevList<T> from(@NotNull T[] array) {
-        ConsRevList<T> list = nil();
+    static <T> @NotNull SnocList<T> from(@NotNull T[] array) {
+        SnocList<T> list = nil();
         for (T element : array) {
-            list = rcons(list, element);
+            list = snoc(list, element);
         }
         return list;
     }
 
-    static <T> @NotNull ConsRevList<T> from(@NotNull List<@NotNull T> list) {
-        ConsRevList<T> consRevList = nil();
+    static <T> @NotNull SnocList<T> from(@NotNull List<@NotNull T> list) {
+        SnocList<T> snocList = nil();
         for (T element : list) {
-            consRevList = rcons(consRevList, element);
+            snocList = snoc(snocList, element);
         }
-        return consRevList;
+        return snocList;
     }
 }
