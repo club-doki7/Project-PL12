@@ -45,4 +45,10 @@ public final class InferCheck {
             case Expr.Univ univ -> null;
         };
     }
+
+    public static @NotNull Term check(Context ctx, Expr expr, Type expectedType)
+        throws TypeCheckException
+    {
+        throw new UnsupportedOperationException("类型检查尚未实现");
+    }
 }
