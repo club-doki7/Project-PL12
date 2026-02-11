@@ -36,7 +36,7 @@ public final class Application implements ANSIColor {
         Scanner scanner = new Scanner(System.in);
         long counter = 0;
         loop: while (true) {
-            print(ANSI_BOLD, "» ");
+            print(ANSI_BLUE + ANSI_BOLD, "» ");
             if (!scanner.hasNextLine()) {
                 break;
             }
