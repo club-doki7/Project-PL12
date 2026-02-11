@@ -13,8 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class Context
-{
+public final class Context {
     public int depth() {
         return localEnv.size();
     }
