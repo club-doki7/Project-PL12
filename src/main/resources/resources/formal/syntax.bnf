@@ -45,7 +45,6 @@ binary-tail ::= op app
 app ::= atom arg*
 
 arg ::= atom
-      | "_"
       | "{" expr "}"
       | "{" identifier "=" expr "}"
 
