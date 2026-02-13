@@ -38,10 +38,9 @@ fun ::= "fun" param-group+ "=>" expr
 
 arrow ::= term ("->" arrow)?
 
-term ::= app (binary-tail)*
+term ::= app binary-tail*
 
 binary-tail ::= op app
-              | "->" app
 
 app ::= atom arg*
 
