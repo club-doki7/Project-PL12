@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class InferCheck {
-    public static @NotNull Pair<Term, Type> infer(Context ctx, Expr expr)
+    public static @NotNull Pair<Term, Type> infer(TypeContext ctx, Expr expr)
         throws TypeCheckException
     {
         return switch (expr) {
@@ -34,7 +34,7 @@ public final class InferCheck {
         };
     }
 
-    public static @NotNull Term check(Context ctx, Expr expr, Type expectedType)
+    public static @NotNull Term check(TypeContext ctx, Expr expr, Type expectedType)
         throws TypeCheckException
     {
         Pair<Term, Type> inferred = infer(ctx, expr);
@@ -51,7 +51,7 @@ public final class InferCheck {
         return inferred.first();
     }
 
-    public static @NotNull Pair<Term, Type> inferVar(Context ctx, Expr.Var var)
+    public static @NotNull Pair<Term, Type> inferVar(TypeContext ctx, Expr.Var var)
         throws TypeCheckException
     {
         String varName = var.name().lexeme();
@@ -70,19 +70,19 @@ public final class InferCheck {
         throw new TypeCheckException(var.name().range(), "未定义的局部或全局变量: " + varName);
     }
 
-    public static @NotNull Pair<Term, Type> inferFun(Context ctx, Expr.Fun fun)
+    public static @NotNull Pair<Term, Type> inferFun(TypeContext ctx, Expr.Fun fun)
         throws TypeCheckException
     {
         throw new UnsupportedOperationException("函数定义尚未实现");
     }
 
-    public static @NotNull Pair<Term, Type> inferApp(Context ctx, Expr.App app)
+    public static @NotNull Pair<Term, Type> inferApp(TypeContext ctx, Expr.App app)
         throws TypeCheckException
     {
         throw new UnsupportedOperationException("函数应用尚未实现");
     }
 
-    public static @NotNull Pair<Term, Type> inferAnn(Context ctx, Expr.Ann ann)
+    public static @NotNull Pair<Term, Type> inferAnn(TypeContext ctx, Expr.Ann ann)
         throws TypeCheckException
     {
         Term annTerm = check(ctx, ann.ann(), Type.UNIV);
@@ -91,26 +91,26 @@ public final class InferCheck {
         return Pair.of(new Term.Ann(exprTerm, annTerm), annType);
     }
 
-    public static @NotNull Pair<Term, Type> inferArrow(Context ctx, Expr.Arrow arrow)
+    public static @NotNull Pair<Term, Type> inferArrow(TypeContext ctx, Expr.Arrow arrow)
         throws TypeCheckException
     {
         return withDepthTracking(ctx, InferCheck::inferArrowImpl, arrow);
     }
 
-    public static @NotNull Pair<Term, Type> inferPi(Context ctx, Expr.Pi pi)
+    public static @NotNull Pair<Term, Type> inferPi(TypeContext ctx, Expr.Pi pi)
         throws TypeCheckException
     {
         return withDepthTracking(ctx, InferCheck::inferPiImpl, pi);
     }
 
-    public static @NotNull Pair<Term, Type> inferHole(Context ctx, Expr.Hole hole) {
+    public static @NotNull Pair<Term, Type> inferHole(TypeContext ctx, Expr.Hole hole) {
         Term.Meta alpha = ctx.freshMetaAlpha(hole);
         Term.Meta tau = ctx.freshMetaTau(hole);
         Type type = Type.ofVal(ctx.eval(tau));
         return Pair.of(alpha, type);
     }
 
-    public static @NotNull Pair<Term, Type> inferLit(Context ctx, Expr.Lit lit)
+    public static @NotNull Pair<Term, Type> inferLit(TypeContext ctx, Expr.Lit lit)
         throws TypeCheckException
     {
         throw new UnsupportedOperationException("字面量类型推导尚未实现");
@@ -118,11 +118,11 @@ public final class InferCheck {
 
     @FunctionalInterface
     private interface InferFn<E extends Expr> {
-        @NotNull Pair<Term, Type> apply(Context ctx, E e) throws TypeCheckException;
+        @NotNull Pair<Term, Type> apply(TypeContext ctx, E e) throws TypeCheckException;
     }
 
     private static <E extends Expr>
-    @NotNull Pair<Term, Type> withDepthTracking(Context ctx, InferFn<E> fn, E expr)
+    @NotNull Pair<Term, Type> withDepthTracking(TypeContext ctx, InferFn<E> fn, E expr)
         throws TypeCheckException
     {
         int depth = ctx.depth();
@@ -133,7 +133,7 @@ public final class InferCheck {
         }
     }
 
-    private static @NotNull Pair<Term, Type> inferArrowImpl(Context ctx, Expr.Arrow arrow)
+    private static @NotNull Pair<Term, Type> inferArrowImpl(TypeContext ctx, Expr.Arrow arrow)
         throws TypeCheckException
     {
         List<Expr> typeExprs = new ArrayList<>();
@@ -159,7 +159,7 @@ public final class InferCheck {
         return Pair.of(resultType, Type.UNIV);
     }
 
-    private static @NotNull Pair<Term, Type> inferPiImpl(Context ctx, Expr.Pi pi)
+    private static @NotNull Pair<Term, Type> inferPiImpl(TypeContext ctx, Expr.Pi pi)
         throws TypeCheckException
     {
         ParamGroup group = pi.paramGroup();

@@ -1,5 +1,6 @@
 package club.doki7.pl12.util;
 
+import club.doki7.pl12.ann.PreferStaticMethod;
 import org.jetbrains.annotations.NotNull;
 
 /// ## UV: Universal Vertex
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 /// uv1.value.equals(uv2.value);
 /// }
 @SuppressWarnings("ClassCanBeRecord")
+@PreferStaticMethod("of")
 public final class UV<T> {
     public final @NotNull T value;
 

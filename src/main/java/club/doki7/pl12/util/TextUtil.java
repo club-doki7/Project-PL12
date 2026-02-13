@@ -54,4 +54,6 @@ public final class TextUtil {
     public static final String EMPTY_STRING = "";
 
     public static final ImmSeq<String> EMPTY_STRING_SEQ = ImmSeq.of(EMPTY_STRING);
+
+    private TextUtil() {}
 }

@@ -1,6 +1,7 @@
 package club.doki7.pl12.util;
 
 import club.doki7.pl12.ann.ObjectIdentity;
+import club.doki7.pl12.ann.PreferStaticMethod;
 import org.jetbrains.annotations.NotNull;
 
 /// A mutable container for a value of type T.
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 /// to be immutable (e.g., as fields in `record`s), it uses object identity for
 /// equality and hash code calculations.
 @ObjectIdentity
+@PreferStaticMethod("of")
 public final class Cell<T> {
     public T value;
 

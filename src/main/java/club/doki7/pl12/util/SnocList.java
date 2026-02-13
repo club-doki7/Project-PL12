@@ -1,11 +1,13 @@
 package club.doki7.pl12.util;
 
+import club.doki7.pl12.ann.PreferStaticMethod;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+@PreferStaticMethod({"snoc", "nil", "of", "from"})
 public sealed interface SnocList<T> {
     @NotNull
     T revGet(int index);

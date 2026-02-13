@@ -101,8 +101,8 @@ public record ParseContext(char[] buf,
                                   ctx.clone(pos + 2, line, col + 2));
                 } else {
                     throw new LexicalException(SourceRange.of(ctx.file, pos, line, col),
-                                               "变量名不能以问号 '?' 开头。"
-                                               + "若要输入 Hole，请使用 '??'。");
+                                               "变量名不能以问号 '?' 开头，"
+                                               + "若要输入 Hole，请使用 '??'");
                 }
             }
             default -> nextIdent(ctx, pos, line, col);
@@ -134,7 +134,7 @@ public record ParseContext(char[] buf,
                            ctx.clone(pos, line, col));
         }
 
-        if (ctx.mode == Mode.DOGFIGHT) {
+        if (ctx.mode == Mode.BVR) {
             kwKind = Token.Kind.BVR_KEYWORDS_MAP.get(lexeme);
             if (kwKind != null) {
                 return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
