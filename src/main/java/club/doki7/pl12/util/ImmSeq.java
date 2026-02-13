@@ -1,9 +1,12 @@
 package club.doki7.pl12.util;
 
+import club.doki7.pl12.ann.PreferStaticMethod;
+import club.doki7.pl12.ann.Unsafe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+@PreferStaticMethod({"of", "ofUnsafe", "nil", "concat"})
 public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, RandomAccess {
     private final T @NotNull[] array;
     private final int start;
@@ -15,6 +18,7 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
         this.end = end;
     }
 
+    @Unsafe
     public static <T> @NotNull ImmSeq<T> ofUnsafe(T @NotNull[] elements) {
         if (elements.length == 0) {
             //noinspection unchecked
@@ -147,7 +151,8 @@ public final class ImmSeq<T> extends AbstractImmSeq<T> implements List<T>, Rando
     @Override
     public @NotNull ImmSeq<T> subList(int fromIndex, int toIndex) {
         if (fromIndex < 0 || toIndex > size() || fromIndex > toIndex) {
-            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + ", toIndex: " + toIndex);
+            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex
+                                                + ", toIndex: " + toIndex);
         } else if (fromIndex == toIndex) {
             //noinspection unchecked
             return (ImmSeq<T>) EMPTY;

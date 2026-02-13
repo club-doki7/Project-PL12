@@ -1,5 +1,6 @@
 package club.doki7.pl12.elab;
 
+import club.doki7.pl12.ann.PreferStaticMethod;
 import club.doki7.pl12.core.Term;
 import club.doki7.pl12.core.Type;
 import club.doki7.pl12.core.Value;
@@ -13,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class Context {
+@PreferStaticMethod("make")
+public final class TypeContext {
     public int depth() {
         return localEnv.size();
     }
@@ -127,8 +129,8 @@ public final class Context {
         return freshMeta(source, "τ");
     }
 
-    public static @NotNull Context make(@NotNull Env env) {
-        return new Context(env);
+    public static @NotNull TypeContext make(@NotNull Env env) {
+        return new TypeContext(env);
     }
 
     private Term.Meta freshMeta(@NotNull MetaSource source, @NotNull String name) {
@@ -138,7 +140,7 @@ public final class Context {
         return new Term.Meta(metaId, name);
     }
 
-    private Context(@NotNull Env env) {
+    private TypeContext(@NotNull Env env) {
         this.env = env;
         this.eval = Eval.make(env);
     }

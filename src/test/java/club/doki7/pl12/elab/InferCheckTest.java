@@ -13,7 +13,7 @@ class InferCheckTest {
         ParseContext ctx = ParseContext.of("forall (x y : type), x -> y -> x", "<test>");
         Expr expr = Parser.parseExpr(ctx).first();
         Env env = Env.empty();
-        Context inferCtx = Context.make(env);
+        TypeContext inferCtx = TypeContext.make(env);
 
         System.out.println(InferCheck.infer(inferCtx, expr));
     }
