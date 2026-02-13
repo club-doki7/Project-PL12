@@ -134,7 +134,7 @@ public record ParseContext(char[] buf,
                            ctx.clone(pos, line, col));
         }
 
-        if (ctx.mode == Mode.DOGFIGHT) {
+        if (ctx.mode == Mode.BVR) {
             kwKind = Token.Kind.BVR_KEYWORDS_MAP.get(lexeme);
             if (kwKind != null) {
                 return Pair.of(Token.sym(kwKind, lexeme, ctx.file, startPos, line, startCol),
