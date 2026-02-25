@@ -80,5 +80,5 @@ public sealed interface Term {
 
     record SolvedMeta(int id, @NotNull Term solution) implements Term {}
 
-    public static final @NotNull Univ UNIV = Univ.UNIV;
+    @NotNull Univ UNIV = Univ.UNIV;
 }
