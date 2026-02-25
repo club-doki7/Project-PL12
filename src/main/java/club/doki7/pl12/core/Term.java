@@ -11,7 +11,7 @@ import java.util.Objects;
 public sealed interface Term {
     record Ann(@NotNull Term term, @NotNull Term type) implements Term {}
 
-    record Bound(int index, @NotNull String name) implements Term, Value.RigidHead {
+    record Bound(int index, @NotNull String name) implements Term {
         @Override
         public @NotNull String toString() {
             return TextUtil.subscriptNum(name, index);

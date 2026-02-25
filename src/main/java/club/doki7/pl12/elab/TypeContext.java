@@ -63,8 +63,9 @@ public final class TypeContext {
             return null;
         }
 
+        int level = depth() - 1 - index;
         Type type = Objects.requireNonNull(types.get(index));
-        return new Pair<>(localEnv.size() - 1 - index, type);
+        return Pair.of(level, type);
     }
 
     public @Nullable Env.Entry lookupGlobal(String name) {

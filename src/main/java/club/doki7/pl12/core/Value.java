@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public sealed interface Value {
     record Flex(Term.Meta head, @NotNull ImmSeq<Value> args) implements Value {}
 
-    sealed interface RigidHead permits Term.Bound, Term.Free, Lam {}
+    sealed interface RigidHead permits Term.Free, Lam {}
 
     record Rigid(RigidHead head, @NotNull ImmSeq<Value> args) implements Value {}
 

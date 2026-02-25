@@ -106,7 +106,6 @@ public final class Eval {
                     }
                     yield reifyLam(level, lam);
                 }
-                case Term.Bound bound -> reifySpine(level, bound, spine);
                 case Term.Free free -> reifySpine(level, free, spine);
             };
             case Value.Pi pi -> reifyPi(level, pi);

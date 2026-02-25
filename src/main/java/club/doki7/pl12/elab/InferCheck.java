@@ -57,9 +57,9 @@ public final class InferCheck {
         String varName = var.name().lexeme();
         Pair<Integer, Type> p = ctx.lookupLocal(varName);
         if (p != null) {
-            int index = p.first();
+            int level = p.first();
             Type type = p.second();
-            return Pair.of(new Term.Bound(index, varName), type);
+            return Pair.of(new Term.Free(new Name.Local(level, varName)), type);
         }
 
         Env.Entry entry = ctx.lookupGlobal(varName);
